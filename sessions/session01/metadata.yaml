@@ -11,16 +11,24 @@ lab:
   files:
     - path: lab/lab_spec.md
       display_name: "Lab 01 – Spec.md"
+    - path: lab/lab_spec.pdf
+      display_name: "Lab 01 – Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 01 – Template.Rmd"
     - path: lab/lab_tests.R
       display_name: "Lab 01 – Tests.R"
     - path: lab/lab_rubric.yaml
       display_name: "Lab 01 – Rubric.yaml"
+    - path: lab/lab_rubric.pdf
+      display_name: "Lab 01 – Rubric.pdf"
 homework:
   assignment_key: hw01
   files:
     - path: homework/hw_prompt.md
       display_name: "HW 01 – Prompt.md"
+    - path: homework/hw_prompt.pdf
+      display_name: "HW 01 – Prompt.pdf"
     - path: homework/hw_rubric.yaml
       display_name: "HW 01 – Rubric.yaml"
+    - path: homework/hw_rubric.pdf
+      display_name: "HW 01 – Rubric.pdf"

@@ -26,6 +26,8 @@ grading/
   grade_labs.R
   grade_homework.py
 submissions/        # gitignored cache of Canvas downloads
+scripts/
+  render_handouts.py # Generates PDF copies of prompts/rubrics for Canvas
 course_schedule.yaml # Central control for points/due dates
 ```
 
@@ -56,11 +58,12 @@ Store your Canvas API token as a GitHub Actions secret named `CANVAS_API_TOKEN`.
 
 1. Install [Quarto](https://quarto.org/), R, and Python 3.11+.
 2. Copy `canvas/config.sample.yaml` to `canvas/config.yaml` (already done here with placeholders) and update course details.
-3. Customize the sample session materials, then render slides locally if you want to preview HTML (the workflow also renders before uploading):
+3. Customize the sample session materials, then render slides locally if you want to preview HTML (the workflow also renders before uploading). Run `python scripts/render_handouts.py` if you want to preview the PDF versions of any `.md`/`.yaml` instructions or rubrics locally before pushing.
 
 ```bash
 cd sessions/session00
 quarto render slides.qmd
+python ../../scripts/render_handouts.py
 ```
 
 4. Commit + push to `main` to trigger the Canvas sync workflow.

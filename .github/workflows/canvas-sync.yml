@@ -34,6 +34,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pyyaml
 
+      - name: Render PDF handouts
+        run: |
+          python scripts/render_handouts.py
+
       - name: Sync to Canvas
         env:
           CANVAS_API_TOKEN: ${{ secrets.CANVAS_API_TOKEN }}
