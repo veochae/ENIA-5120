@@ -6,7 +6,8 @@ format:
     toc: true
     incremental: true
     transition: fade
-    footer: "ENIA-5120 · University of Virginia"
+    footer: "ENIA-5120 · Georgetown University"
+    self-contained: true
     theme:
       - simple
       - ../slides-theme.scss
