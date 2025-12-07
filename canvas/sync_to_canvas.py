@@ -53,10 +53,21 @@ def build_links_html(uploaded_files: List[Dict]) -> str:
         return "<p>No resources yet.</p>"
     items = []
     for info in uploaded_files:
-        url = info.get("url") or info.get("preview_url")
+        url = ensure_download_url(info)
         display = info.get("display_name") or info.get("filename")
         items.append(f'<li><a href="{url}">{display}</a></li>')
     return "<ul>" + "".join(items) + "</ul>"
+
+
+def ensure_download_url(info: Dict) -> str:
+    """Canvas' preview strips JS; use forced download links instead."""
+    url = info.get("url") or info.get("preview_url") or info.get("download_url")
+    if not url:
+        return "#"
+    if "download_frd=1" not in url:
+        sep = "&" if "?" in url else "?"
+        url = f"{url}{sep}download_frd=1"
+    return url
 
 
 def load_schedule(schedule_path: pathlib.Path) -> Dict:
@@ -103,7 +114,7 @@ def sync_session(
 <ul>
   <li><a href="{url}">Download / View slides</a></li>
 </ul>
-""".format(title=meta["title"], url=slides_upload.get("url"))
+""".format(title=meta["title"], url=ensure_download_url(slides_upload))
             page_title = slides_meta.get("page_title", meta["title"])
             client.upsert_page(page_title, body)
 
