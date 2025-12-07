@@ -1,0 +1,29 @@
+# R / RStudio
+.Rproj.user/
+*.Rproj
+.Rhistory
+.RData
+.Ruserdata
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv
+
+# Quarto / build artifacts
+*_files/
+*.html
+*.pdf
+*.docx
+
+# Local data / sensitive info
+data/
+secrets/
+
+# Student submissions
+submissions/
+
+# OS files
+.DS_Store

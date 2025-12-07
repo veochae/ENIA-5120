@@ -1,0 +1,11 @@
+total_points: 15
+criteria:
+  - id: load_data
+    description: "Loads dataset and inspects structure"
+    max_points: 5
+  - id: summary_tbl
+    description: "Creates grouped summary table"
+    max_points: 6
+  - id: reflection
+    description: "Provides thoughtful reflection"
+    max_points: 4

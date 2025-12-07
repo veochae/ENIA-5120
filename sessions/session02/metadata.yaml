@@ -1,0 +1,32 @@
+session: 2
+title: "Session 2 – Visualization with ggplot2"
+module:
+  name: "Week 2 – Visualization"
+slides:
+  source: slides.qmd
+  rendered: slides.html
+  page_title: "Session 2 Slides"
+lab:
+  files:
+    - path: lab/lab_spec.md
+      display_name: "Lab 02 – Spec"
+    - path: lab/lab_template.Rmd
+      display_name: "Lab 02 – Template"
+    - path: lab/lab_rubric.yaml
+      display_name: "Lab 02 – Rubric"
+  assignment:
+    name: "Lab 02 – ggplot Practice"
+    points: 20
+    submission_types: ["online_upload"]
+    published: true
+homework:
+  files:
+    - path: homework/hw_prompt.md
+      display_name: "HW 02 – Prompt"
+    - path: homework/hw_rubric.yaml
+      display_name: "HW 02 – Rubric"
+  assignment:
+    name: "Homework 02 – Exploratory Plots"
+    points: 20
+    submission_types: ["online_upload"]
+    published: true

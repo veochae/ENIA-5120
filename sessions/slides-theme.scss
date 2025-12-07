@@ -1,0 +1,157 @@
+/* Shared styling for ENIA-5120 reveal.js slide decks */
+
+/*-- scss:defaults --*/
+:root {
+  --enia-bg: #f5f7fb;
+  --enia-panel: #ffffff;
+  --enia-text: #14213d;
+  --enia-muted: #4c566a;
+  --enia-accent: #0a6ebd;
+  --enia-accent-soft: #8cc3ea;
+  --enia-code-bg: #0f1b2d;
+}
+
+/*-- scss:rules --*/
+.reveal {
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: var(--enia-text);
+  background-color: var(--enia-bg);
+  font-size: 32px;
+  line-height: 1.4;
+}
+
+.reveal .slides {
+  background: transparent;
+  padding: 0 2vw;
+}
+
+.reveal .slides > section,
+.reveal .slides > section > section {
+  background-color: var(--enia-panel);
+  border-radius: 16px;
+  padding: 1.6rem 2.2rem;
+  box-sizing: border-box;
+  max-width: min(1100px, 90vw);
+  margin: 0 auto;
+  box-shadow: 0 12px 45px rgba(10, 25, 47, 0.08);
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4 {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--enia-text);
+}
+
+.reveal p,
+.reveal li {
+  color: var(--enia-text);
+}
+
+.reveal strong {
+  color: var(--enia-accent);
+}
+
+.reveal a {
+  color: var(--enia-accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--enia-accent-soft);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.reveal a:hover {
+  color: #084982;
+  border-bottom-color: #084982;
+}
+
+.reveal blockquote {
+  border-left: 4px solid var(--enia-accent);
+  padding-left: 1rem;
+  color: var(--enia-muted);
+}
+
+.reveal section img {
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(10, 25, 47, 0.2);
+}
+
+.reveal pre code {
+  background-color: var(--enia-code-bg);
+  color: #e6ecfb;
+  font-size: 0.85em;
+  line-height: 1.35;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 16px 30px rgba(4, 15, 30, 0.55);
+}
+
+.reveal code {
+  color: var(--enia-accent);
+  font-size: 0.9em;
+}
+
+.reveal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.reveal table th,
+.reveal table td {
+  border-bottom: 1px solid rgba(20, 33, 61, 0.15);
+  padding: 0.6rem 0.8rem;
+}
+
+.reveal .slide-number {
+  background-color: rgba(10, 25, 47, 0.75);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 0.25rem 0.9rem;
+  font-size: 0.45em;
+}
+
+.diagram {
+  margin-top: 1rem;
+  border: 1px dashed rgba(10, 25, 47, 0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.diagram svg {
+  width: 100% !important;
+}
+
+.title-slide {
+  background: linear-gradient(135deg, #0a6ebd 0%, #09213d 85%);
+  border-radius: 0;
+  color: #ffffff;
+  box-shadow: none;
+  text-align: left;
+}
+
+.title-slide h1,
+.title-slide p {
+  color: #ffffff;
+}
+
+.title-slide::after {
+  content: "";
+  position: absolute;
+  right: 5%;
+  bottom: 12%;
+  width: 180px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.reveal .callout {
+  border-radius: 14px;
+  border-left-width: 8px;
+}
+
+.reveal .callout-note {
+  border-color: var(--enia-accent);
+}

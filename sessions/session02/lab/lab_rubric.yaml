@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: scatter
+    description: "Scatter plot uses aesthetics + theme"
+    max_points: 8
+  - id: bar
+    description: "Bar chart summarizes means correctly"
+    max_points: 8
+  - id: export
+    description: "Plots saved to PNG and referenced"
+    max_points: 4

@@ -1,0 +1,38 @@
+---
+title: "Session 2 – Visualization with ggplot2"
+format:
+  revealjs:
+    slide-number: true
+    incremental: true
+    toc: true
+    transition: fade
+    footer: "ENIA-5120 · University of Virginia"
+    theme:
+      - simple
+---
+
+# Why ggplot2?
+
+- Grammar of Graphics
+- Consistent layering
+- Works great with tidy data
+
+---
+
+# Template
+
+```r
+library(ggplot2)
+
+ggplot(data, aes(x = var_x, y = var_y, color = group)) +
+  geom_point() +
+  labs(title = "", subtitle = "", caption = "")
+```
+
+---
+
+# Tips
+
+- Use `theme_minimal()` for clarity
+- Always label axes
+- Use `scale_color_brewer()` when categories > 3

@@ -1,0 +1,43 @@
+---
+title: "Lab 02 – ggplot Practice"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+sales_df <- read_csv("data/week1_sales.csv")
+```
+
+## Scatter plot
+
+```{r}
+plot_scatter <- ggplot(sales_df, aes(quantity, price, color = category)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Price vs Quantity", x = "Quantity", y = "Price") +
+  theme_minimal()
+plot_scatter
+
+ggsave("plot_scatter.png", plot_scatter, width = 6, height = 4)
+```
+
+## Bar plot
+
+```{r}
+plot_bar <- sales_df %>%
+  group_by(category) %>%
+  summarise(mean_price = mean(price, na.rm = TRUE)) %>%
+  ggplot(aes(category, mean_price, fill = category)) +
+  geom_col() +
+  labs(title = "Average Price by Category", x = NULL, y = "Mean Price") +
+  theme_minimal()
+plot_bar
+
+ggsave("plot_bar.png", plot_bar, width = 6, height = 4)
+```

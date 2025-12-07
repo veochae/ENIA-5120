@@ -1,0 +1,43 @@
+---
+title: "Lab 01 – Intro to R"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(dplyr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Load data
+
+```{r}
+sales_df <- read_csv("data/week1_sales.csv")
+```
+
+## 2. Inspect structure
+
+```{r}
+nrow(sales_df)
+ncol(sales_df)
+names(sales_df)
+str(sales_df)
+```
+
+## 3. Grouped summary
+
+```{r}
+summary_tbl <- sales_df %>%
+  group_by(category) %>%
+  summarise(mean_price = mean(price, na.rm = TRUE))
+summary_tbl
+```
+
+## 4. Reflection
+
+What surprised you about the data types or summary table?
+
+```
+<write a short reflection>
+```

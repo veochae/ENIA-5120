@@ -1,0 +1,23 @@
+---
+title: "Lab 00 – Tooling Warmup"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. System information
+
+```{r}
+sessionInfo()
+```
+
+## 2. Tooling reflection
+
+What pieces of the setup still feel shaky? List concrete next steps.
+
+```
+<write your response here>
+```

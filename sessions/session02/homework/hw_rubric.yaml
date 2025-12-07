@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: plot_quality
+    description: "Two clear ggplot visuals"
+    max_points: 8
+  - id: interpretation
+    description: "Insightful interpretation per plot"
+    max_points: 8
+  - id: design_choices
+    description: "Explains aesthetic decisions"
+    max_points: 4

@@ -1,0 +1,228 @@
+---
+title: "Session 0"
+author: "First Day of Class!"
+format:
+  revealjs:
+    slide-number: true
+    smaller: true
+    scrollable: true    
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
+    theme: serif 
+---
+
+# Topics of the Day
+
+- Meet the instructor and classmates
+- Overview of ENIA-5120
+- Tooling checklist (R, Quarto, Canvas)
+- How familiar are you with Data Science and R?
+- Installing Dependencies
+  
+---
+
+# Meet the Instructor
+**Veo Chae**  
+Course Instructor, ENIA-5120
+
+**Work**     
+- Senior Data Scientist at Nestle (Right across the river!).         
+- MLOPs, Digital Twins, Reinforcement Learning in Supply Chain.  
+
+**Why are you teaching this class?**  
+- Undergraduate Degree: Business Administration.     
+- Gradudate Degree: Data Science and Analytics.    
+
+**Past Course Works**     
+- NLP for Business Students (Babson College).       
+- Computer Vision for Nature Science Students (Georgetown).    
+
+**Office Hours**  
+- Regular Hours: Thursday 7PM - 8:30PM (Zoom Session)  
+- Email: dc1415@georgetown.edu  
+- If you cannot make it to the regular hours, email me!
+  
+---
+
+# Time for Some Introductions!
+
+---
+
+# Course Structure
+- **Total Sessions:** 13
+- **Course Structure:**
+  - **Lecture:** 1HR 15MIN
+  - **Break:** 15MIN
+  - **Labs:** 1HR
+- **Labs:** Weekly
+- **Homeworks:** Bi-Weekly
+- **Final Project?** Yes! And it will be a group project.
+- **Final Exam?** Nope! Not a believer in exams.
+- **Quizzes:** 4, lowest grade will be dropped. 
+  
+---
+
+# Course Structure
+```{mermaid}
+flowchart LR
+  A[Data Gathering] --> B[Data Manipulation]
+  B --> C[Exploratory Data Analysis]
+  C --> D[Data Visualization]
+  D --> E[Data Modeling]
+  E --> F[Result Presentation]
+```
+- This course will follow the general procedure of how Data Science project is done
+- By the end of the course, the goal is for you to be comfortable with completing a Data Scinece project on your own
+
+---
+
+# Labs
+- Each lab will be a series of R coding exercises 
+- We will try to complete most of it during the lab hour
+- If not completed, your task will be to finish what is left, and submit the R Script
+- The point of these labs are to give you a repository of codes that you can reuse for your future work. 
+- So explore, and have fun!
+- **Important Note:** At any given point in time during the lab session, feel free to stop me to ask any questions. If you haven't been able to, office hour will be there too!
+  
+---
+
+# Homeworks
+- Homeworks are submitted on a bi-weekly basis
+- Each week, you will submit a "portion" of a Data Science Report
+- At the end of all the homeworks, you will have a full Data Science Report
+- Goal is to get you a template of a Data Science report to fall back on
+
+---
+
+# Final Project
+- Final Project will be replication of the homeworks
+- With the dataset of your choosing, you will leverage all the DS toolkits you have learned throughout the semester to do a Data Science project
+- **Final Deliverables:** Data Science report and a presentation
+- This will be a group project (pending enrollment)
+
+---
+
+# Some Ground Rules
+- No such thing as "Dumb Question"
+- After each lecture, please don't hesitate to give me feedback
+- Let's try our best to put away our phones during lecture
+- LLMs are your friend, use them! But.. understand what it's doing
+
+---
+
+# Temperature Check
+1. How familiar are you with R?
+2. How familiar are you with Data Manipulation?
+3. How familiar are you with Data Visualization?
+4. How familiar are you with Data Science?
+5. What are some common ways you would be leveraging Data Science/Analytics?
+6. What do you want out of this class?
+
+---
+
+# BREAK
+
+---
+
+# Lab 0
+**Environment Setup + Choosing Your Datasets**
+
+---
+
+# Choose Your Datasets
+- In canvas, you will see that there are 4 different datasets of choice
+- Each of them are themed differently
+```{mermaid}
+flowchart LR
+  A[(Finance)] --- B[(Demography)] --- C[(Marketing)] --- D[(Plants)]
+```
+
+- You will choose one of the datasets, and stick with it for your labs and homeworks
+- This is not your final project dataset
+
+---
+
+# Environment Setup - R
+
+:::{.columns}
+:::{.column}
+**Mac OS**  
+- Go to the CRAN R download page.  
+- Under macOS, download the latest `.pkg` installer   
+- Open the `.pkg` installer and accept defaults.  
+- It will install R under: `/Library/Frameworks/R.framework`. 
+::: 
+
+:::{.column}
+**Windows (Windows 10/11)**  
+  - Go to the R download page (CRAN).  
+  - Download the latest R for Windows (`base`).   
+  - Run the installer and accept all default options.  
+:::
+:::
+
+---
+
+# Environment Setup - R
+
+:::{.columns}
+:::{.column}
+**Mac OS**  
+- Go to the RStudio (Posit) download page.   
+- Download RStudio Desktop (free) for macOS.   
+- Open the .dmg and drag RStudio into Applications.   
+:::
+
+:::{.column}
+**Windows (Windows 10/11)**  
+- Go to the RStudio (Posit) download page.   
+- Download RStudio Desktop (free) for Windows.   
+- Run the installer and accept defaults.   
+:::
+:::
+
+---
+
+
+# Environment Setup - Quarto
+
+:::{.columns}
+:::{.column}
+**Mac OS**  
+- Go to the Quarto download page.   
+- Download the macOS installer (.pkg) and run it.   
+- Restart RStudio if it was open.   
+:::
+
+:::{.column}
+**Windows (Windows 10/11)**   
+- Go to the Quarto download page.   
+- Download the Windows installer (.msi) and run it.   
+- Restart RStudio if it was open.   
+:::
+:::
+
+---
+
+# Environment Setup - Testing
+- Open RStudio.
+- In the console, run:
+```r
+R.version.string
+install.packages("quarto")      
+quarto::quarto_version()
+```
+- Go to: File → New File → Quarto Document → choose HTML → Render.
+
+- If a web preview opens, everything works 🎉
+
+---
+
+# Now let's load your datasets!
+
+---
+
+# Deliverables by next week
+- **Lab 0:** Submission by `Sunday 11:59PM EST`.   
+- If your set up has error, please have it resolved by next session.   
+
+---
