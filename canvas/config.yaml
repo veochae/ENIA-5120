@@ -2,6 +2,6 @@ base_url: "https://georgetown.instructure.com/"
 course_id: 225049
 # Name of the environment variable (e.g., CANVAS_API_TOKEN) holding
 # the Canvas API token. This must be provided to local runs or GitHub Actions.
-token_env_var: "1913~CRJTLVGCaFGtBa9aT8CceMFTeEyUKDe6T4CrJtQV32MMF4fJUG4MJrN3QRr9QNFy"
+token_env_var: "CANVAS_API_TOKEN"
 # Optional: default file folder inside Canvas course files (can be overridden per upload).
 default_folder_path: "Course Files/ENIA-5120"
