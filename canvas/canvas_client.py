@@ -123,6 +123,118 @@ class CanvasClient:
                 return assignment.get("id")
         return None
 
+    # ------------------------------------------------------------------
+    # Modules
+    # ------------------------------------------------------------------
+    def list_modules(self) -> List[Dict[str, Any]]:
+        return list(
+            self._paginate(
+                f"/api/v1/courses/{self.course_id}/modules",
+                params={"per_page": 100},
+            )
+        )
+
+    def find_module(self, name: str) -> Optional[Dict[str, Any]]:
+        for module in self.list_modules():
+            if module.get("name") == name:
+                return module
+        return None
+
+    def ensure_module(
+        self,
+        name: str,
+        position: Optional[int] = None,
+        published: bool = True,
+    ) -> Dict[str, Any]:
+        payload = {
+            "module[name]": name,
+            "module[published]": str(published).lower(),
+        }
+        if position is not None:
+            payload["module[position]"] = position
+        existing = self.find_module(name)
+        if existing:
+            module_id = existing["id"]
+            return self._request(
+                "PUT",
+                f"/api/v1/courses/{self.course_id}/modules/{module_id}",
+                data=payload,
+            )
+        return self._request(
+            "POST",
+            f"/api/v1/courses/{self.course_id}/modules",
+            data=payload,
+        )
+
+    def list_module_items(self, module_id: int) -> List[Dict[str, Any]]:
+        return list(
+            self._paginate(
+                f"/api/v1/courses/{self.course_id}/modules/{module_id}/items",
+                params={"per_page": 100},
+            )
+        )
+
+    def update_module_item(self, module_id: int, item_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request(
+            "PUT",
+            f"/api/v1/courses/{self.course_id}/modules/{module_id}/items/{item_id}",
+            data=data,
+        )
+
+    def create_module_item(self, module_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request(
+            "POST",
+            f"/api/v1/courses/{self.course_id}/modules/{module_id}/items",
+            data=data,
+        )
+
+    def ensure_module_subheader(self, module_id: int, text: str) -> Dict[str, Any]:
+        normalized = " ".join(text.split())
+        items = self.list_module_items(module_id)
+        existing_header = None
+        for item in items:
+            if item.get("type") != "SubHeader":
+                continue
+            existing_header = item
+            current = " ".join((item.get("title") or "").split())
+            if current == normalized:
+                return item
+            break
+        payload = {
+            "module_item[type]": "SubHeader",
+            "module_item[title]": text,
+        }
+        if existing_header:
+            return self.update_module_item(module_id, existing_header["id"], payload)
+        return self.create_module_item(module_id, payload)
+
+    def ensure_module_page_item(
+        self,
+        module_id: int,
+        page_title: str,
+        page_slug: str,
+    ) -> Dict[str, Any]:
+        items = self.list_module_items(module_id)
+        for item in items:
+            if item.get("type") == "Page" and item.get("page_url") == page_slug:
+                if item.get("title") != page_title:
+                    self.update_module_item(
+                        module_id,
+                        item["id"],
+                        {"module_item[title]": page_title},
+                    )
+                return item
+        payload = {
+            "module_item[type]": "Page",
+            "module_item[title]": page_title,
+            "module_item[page_url]": page_slug,
+            "module_item[published]": "true",
+        }
+        return self.create_module_item(module_id, payload)
+
+    # ------------------------------------------------------------------
+    # Assignments
+    # ------------------------------------------------------------------
     def ensure_assignment(
         self,
         name: str,

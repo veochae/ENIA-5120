@@ -2,6 +2,7 @@ session: 2
 title: "Session 2 – Visualization with ggplot2"
 module:
   name: "Week 2 – Visualization"
+  description: "Deep dive into the ggplot2 grammar, layering, themes, and exporting publication-ready plots."
 slides:
   source: slides.qmd
   rendered: slides.html

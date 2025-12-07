@@ -31,7 +31,7 @@ scripts/
 course_schedule.yaml # Central control for points/due dates
 ```
 
-Each session directory is self-contained, which means adding a new session is as simple as copying a folder and updating `metadata.yaml`.
+Each session directory is self-contained, which means adding a new session is as simple as copying a folder and updating `metadata.yaml`. Within each metadata file, the `module` block controls the Canvas module name/description, so every push automatically creates a Canvas module with an overview text header plus the slides link.
 
 ### Central grading schedule
 

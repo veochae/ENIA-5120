@@ -2,6 +2,7 @@ session: 0
 title: "Session 0 – Course Orientation"
 module:
   name: "Week 0 – Orientation"
+  description: "Orientation session covering syllabus highlights, tooling setup, and data-science workflow overview."
 slides:
   source: slides.qmd
   rendered: slides.html

@@ -96,6 +96,22 @@ def sync_session(
 ) -> None:
     meta = load_metadata(session_dir)
     LOGGER.info("Syncing %s", session_dir.name)
+    module_meta = meta.get("module", {})
+    module_name = module_meta.get("name") or meta.get("title")
+    module_position = module_meta.get("position")
+    if module_position is None:
+        try:
+            module_position = int(meta.get("session"))
+        except (TypeError, ValueError):
+            module_position = None
+    module_obj = None
+    if module_name:
+        module_obj = client.ensure_module(module_name, position=module_position)
+        module_description = module_meta.get("description")
+        if module_obj and module_description:
+            desc_text = " ".join(module_description.strip().split())
+            client.ensure_module_subheader(module_obj["id"], desc_text)
+
     # Slides
     slides_meta = meta.get("slides")
     if slides_meta:
@@ -103,6 +119,8 @@ def sync_session(
         if not rendered.exists():
             LOGGER.warning("Skipped slides for %s (missing %s)", session_dir, rendered)
         else:
+            page_title = slides_meta.get("page_title", meta["title"])
+            page_slug = CanvasClient._slugify(page_title)
             slides_upload = client.upload_file(
                 rendered,
                 display_name=slides_meta.get("display_name") or rendered.name,
@@ -115,8 +133,9 @@ def sync_session(
   <li><a href="{url}">Download / View slides</a></li>
 </ul>
 """.format(title=meta["title"], url=ensure_download_url(slides_upload))
-            page_title = slides_meta.get("page_title", meta["title"])
             client.upsert_page(page_title, body)
+            if module_obj:
+                client.ensure_module_page_item(module_obj["id"], page_title, page_slug)
 
     for section_name in ["lab", "homework"]:
         section = meta.get(section_name)
