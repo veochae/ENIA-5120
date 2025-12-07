@@ -6,9 +6,10 @@ format:
     incremental: true
     toc: true
     transition: fade
-    self-contained: true
+    footer: "ENIA-5120 · University of Virginia"
     theme:
       - simple
+    
 ---
 
 # Why ggplot2?

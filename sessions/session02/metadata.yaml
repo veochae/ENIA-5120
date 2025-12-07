@@ -10,15 +10,15 @@ lab:
   assignment_key: lab02
   files:
     - path: lab/lab_spec.md
-      display_name: "Lab 02 – Spec"
+      display_name: "Lab 02 – Spec.md"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 02 – Template"
+      display_name: "Lab 02 – Template.Rmd"
     - path: lab/lab_rubric.yaml
-      display_name: "Lab 02 – Rubric"
+      display_name: "Lab 02 – Rubric.yaml"
 homework:
   assignment_key: hw02
   files:
     - path: homework/hw_prompt.md
-      display_name: "HW 02 – Prompt"
+      display_name: "HW 02 – Prompt.md"
     - path: homework/hw_rubric.yaml
-      display_name: "HW 02 – Rubric"
+      display_name: "HW 02 – Rubric.yaml"

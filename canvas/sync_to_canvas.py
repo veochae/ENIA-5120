@@ -34,7 +34,11 @@ def upload_files(
     uploads = []
     for spec in file_specs:
         rel_path = spec["path"]
-        display = spec.get("display_name") or pathlib.Path(rel_path).name
+        filename = pathlib.Path(rel_path).name
+        display = spec.get("display_name") or filename
+        # Keep the file extension so downloads open in the right app.
+        if pathlib.Path(display).suffix == "" and pathlib.Path(filename).suffix:
+            display = f"{display}{pathlib.Path(filename).suffix}"
         file_path = session_dir / rel_path
         folder = f"{folder_prefix}/{session_dir.name}"
         LOGGER.info("Uploading %s", file_path)

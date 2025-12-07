@@ -1,0 +1,26 @@
+/* Shared Reveal.js tweaks for ENIA-5120 slides */
+:root {
+  --r-main-font-size: 28px;
+  --r-heading1-size: 48px;
+  --r-heading2-size: 40px;
+  --r-heading3-size: 34px;
+  --r-heading4-size: 30px;
+  --r-block-margin: 18px;
+  --r-heading-font: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --r-main-font: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+.reveal section p,
+.reveal section li {
+  line-height: 1.35;
+}
+
+.reveal .title-slide .subtitle,
+.reveal .title-slide .institute,
+.reveal .title-slide .button {
+  font-size: 0.9em;
+}
+
+.reveal pre code {
+  font-size: 0.9em;
+}
