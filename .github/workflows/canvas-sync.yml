@@ -34,6 +34,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pyyaml
 
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
       - name: Render PDF handouts
         run: |
           python scripts/render_handouts.py
