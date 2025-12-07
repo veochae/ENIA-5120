@@ -7,6 +7,7 @@ slides:
   rendered: slides.html
   page_title: "Session 1 Slides"
 lab:
+  assignment_key: lab01
   files:
     - path: lab/lab_spec.md
       display_name: "Lab 01 – Spec"
@@ -16,19 +17,10 @@ lab:
       display_name: "Lab 01 – Tests"
     - path: lab/lab_rubric.yaml
       display_name: "Lab 01 – Rubric"
-  assignment:
-    name: "Lab 01 – Intro to R"
-    points: 15
-    submission_types: ["online_upload"]
-    published: true
 homework:
+  assignment_key: hw01
   files:
     - path: homework/hw_prompt.md
       display_name: "HW 01 – Prompt"
     - path: homework/hw_rubric.yaml
       display_name: "HW 01 – Rubric"
-  assignment:
-    name: "Homework 01 – Data Types"
-    points: 15
-    submission_types: ["online_upload"]
-    published: true

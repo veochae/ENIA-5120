@@ -130,6 +130,7 @@ class CanvasClient:
         submission_types: Optional[List[str]] = None,
         published: bool = True,
         description: Optional[str] = None,
+        due_at: Optional[str] = None,
     ) -> Dict[str, Any]:
         payload = {
             "assignment[name]": name,
@@ -139,6 +140,8 @@ class CanvasClient:
         }
         if description:
             payload["assignment[description]"] = description
+        if due_at:
+            payload["assignment[due_at]"] = due_at
         assignment_id = self.find_assignment_id(name)
         if assignment_id:
             return self._request(

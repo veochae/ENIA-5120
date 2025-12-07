@@ -7,6 +7,7 @@ slides:
   rendered: slides.html
   page_title: "Session 2 Slides"
 lab:
+  assignment_key: lab02
   files:
     - path: lab/lab_spec.md
       display_name: "Lab 02 – Spec"
@@ -14,19 +15,10 @@ lab:
       display_name: "Lab 02 – Template"
     - path: lab/lab_rubric.yaml
       display_name: "Lab 02 – Rubric"
-  assignment:
-    name: "Lab 02 – ggplot Practice"
-    points: 20
-    submission_types: ["online_upload"]
-    published: true
 homework:
+  assignment_key: hw02
   files:
     - path: homework/hw_prompt.md
       display_name: "HW 02 – Prompt"
     - path: homework/hw_rubric.yaml
       display_name: "HW 02 – Rubric"
-  assignment:
-    name: "Homework 02 – Exploratory Plots"
-    points: 20
-    submission_types: ["online_upload"]
-    published: true

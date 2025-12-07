@@ -7,6 +7,7 @@ slides:
   rendered: slides.html
   page_title: "Session 0 Slides"
 lab:
+  assignment_key: lab00
   files:
     - path: lab/lab_spec.md
       display_name: "Lab 00 – Orientation Spec"
@@ -14,19 +15,10 @@ lab:
       display_name: "Lab 00 – Template"
     - path: lab/lab_rubric.yaml
       display_name: "Lab 00 – Rubric"
-  assignment:
-    name: "Lab 00 – Tooling Warmup"
-    points: 5
-    submission_types: ["online_upload"]
-    published: true
 homework:
+  assignment_key: hw00
   files:
     - path: homework/hw_prompt.md
       display_name: "HW 00 – Data Diary"
     - path: homework/hw_rubric.yaml
       display_name: "HW 00 – Rubric"
-  assignment:
-    name: "Homework 00 – Data Diary"
-    points: 10
-    submission_types: ["online_upload"]
-    published: true

@@ -6,6 +6,7 @@ on:
     paths:
       - "sessions/**"
       - "canvas/**"
+      - "course_schedule.yaml"
       - ".github/workflows/canvas-sync.yml"
 
 jobs:

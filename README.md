@@ -26,9 +26,18 @@ grading/
   grade_labs.R
   grade_homework.py
 submissions/        # gitignored cache of Canvas downloads
+course_schedule.yaml # Central control for points/due dates
 ```
 
 Each session directory is self-contained, which means adding a new session is as simple as copying a folder and updating `metadata.yaml`.
+
+### Central grading schedule
+
+`course_schedule.yaml` is the single source of truth for all graded work:
+
+- Update a lab/homework entry there to change Canvas assignment names, points, or due dates.
+- Each session’s metadata simply references an `assignment_key`, so you never have to duplicate the settings.
+- Quiz placeholders also live in the same file; when you know the dates, adjust the `due_at` values (ISO-8601 strings) and the automation will update Canvas on the next push.
 
 ## Automation overview
 
@@ -47,7 +56,7 @@ Store your Canvas API token as a GitHub Actions secret named `CANVAS_API_TOKEN`.
 
 1. Install [Quarto](https://quarto.org/), R, and Python 3.11+.
 2. Copy `canvas/config.sample.yaml` to `canvas/config.yaml` (already done here with placeholders) and update course details.
-3. Customize the sample session materials, then run:
+3. Customize the sample session materials, then render slides locally if you want to preview HTML (the workflow also renders before uploading):
 
 ```bash
 cd sessions/session00
@@ -55,5 +64,7 @@ quarto render slides.qmd
 ```
 
 4. Commit + push to `main` to trigger the Canvas sync workflow.
+
+During CI the rendered `.html` files live only in the workflow run (they remain gitignored locally), but the sync script uploads those HTML artifacts to Canvas so the downloaded files are standard web pages.
 
 See inline comments inside `canvas/*.py` for the Canvas API endpoints used and how to extend them.

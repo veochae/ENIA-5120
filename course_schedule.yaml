@@ -1,0 +1,67 @@
+# Central course schedule for labs, homework, and quizzes.
+# Update this file to change points or due dates without touching individual metadata files.
+labs:
+  - key: lab00
+    session: session00
+    name: "Lab 00 – Tooling Warmup"
+    due_at: "2025-01-13T23:59:00-05:00"
+    points: 20
+    submission_types: ["online_upload"]
+  - key: lab01
+    session: session01
+    name: "Lab 01 – Intro to R"
+    due_at: "2025-01-20T23:59:00-05:00"
+    points: 20
+    submission_types: ["online_upload"]
+  - key: lab02
+    session: session02
+    name: "Lab 02 – ggplot Practice"
+    due_at: "2025-01-27T23:59:00-05:00"
+    points: 20
+    submission_types: ["online_upload"]
+
+homework:
+  - key: hw00
+    session: session00
+    name: "Homework 00 – Data Diary"
+    due_at: "2025-01-15T23:59:00-05:00"
+    points: 30
+    submission_types: ["online_upload"]
+  - key: hw01
+    session: session01
+    name: "Homework 01 – Data Types"
+    due_at: "2025-01-22T23:59:00-05:00"
+    points: 30
+    submission_types: ["online_upload"]
+  - key: hw02
+    session: session02
+    name: "Homework 02 – Exploratory Plots"
+    due_at: "2025-01-29T23:59:00-05:00"
+    points: 30
+    submission_types: ["online_upload"]
+
+quizzes:
+  - key: quiz01
+    name: "Quiz 01"
+    session: TBD
+    due_at: null   # update when scheduled
+    points: 10
+    submission_types: ["online_quiz"]
+  - key: quiz02
+    name: "Quiz 02"
+    session: TBD
+    due_at: null
+    points: 10
+    submission_types: ["online_quiz"]
+  - key: quiz03
+    name: "Quiz 03"
+    session: TBD
+    due_at: null
+    points: 10
+    submission_types: ["online_quiz"]
+  - key: quiz04
+    name: "Quiz 04"
+    session: TBD
+    due_at: null
+    points: 10
+    submission_types: ["online_quiz"]

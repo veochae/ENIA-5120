@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import pathlib
-from typing import Dict
+from typing import Dict, Optional
 
 import yaml
 
@@ -16,11 +16,30 @@ PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SESSIONS_ROOT = PROJECT_ROOT / "sessions"
 SUBMISSIONS_ROOT = PROJECT_ROOT / "submissions"
 CONFIG_PATH = pathlib.Path(__file__).with_name("config.yaml")
+SCHEDULE_PATH = PROJECT_ROOT / "course_schedule.yaml"
 
 
 def load_metadata(session_dir: pathlib.Path) -> Dict:
     meta_path = session_dir / "metadata.yaml"
     return yaml.safe_load(meta_path.read_text())
+
+
+def load_schedule(schedule_path: pathlib.Path) -> Dict:
+    if not schedule_path.exists():
+        LOGGER.warning("Schedule file %s not found; continuing without it", schedule_path)
+        return {}
+    return yaml.safe_load(schedule_path.read_text()) or {}
+
+
+def lookup_assignment_name(schedule: Dict, section: str, assignment_key: Optional[str]) -> Optional[str]:
+    if not assignment_key:
+        return None
+    bucket = "homework" if section == "homework" else f"{section}s"
+    for entry in schedule.get(bucket, []):
+        if entry.get("key") == assignment_key:
+            return entry.get("name")
+    LOGGER.warning("Assignment key '%s' missing from schedule", assignment_key)
+    return None
 
 
 def fetch_for_assignment(client, assignment_name: str, dest_dir: pathlib.Path) -> None:
@@ -41,21 +60,31 @@ def fetch_for_assignment(client, assignment_name: str, dest_dir: pathlib.Path) -
             client.download_attachment(attachment["url"], dest_path)
 
 
-def main(config_path: pathlib.Path = CONFIG_PATH) -> None:
+def main(config_path: pathlib.Path = CONFIG_PATH, schedule_path: pathlib.Path = SCHEDULE_PATH) -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     client = load_client_from_config(config_path)
+    schedule = load_schedule(schedule_path)
     for session_dir in sorted(SESSIONS_ROOT.glob("session*")):
         meta = load_metadata(session_dir)
         for section_name in ["lab", "homework"]:
             section = meta.get(section_name)
             if not section:
                 continue
-            assignment = section.get("assignment")
-            if not assignment:
+            assignment_name = None
+            if section.get("assignment"):
+                assignment_name = section["assignment"].get("name")
+            assignment_key = section.get("assignment_key")
+            if not assignment_name and assignment_key:
+                assignment_name = lookup_assignment_name(schedule, section_name, assignment_key)
+            if not assignment_name:
                 continue
             dest_dir = SUBMISSIONS_ROOT / f"{section_name}s" / session_dir.name
             dest_dir.mkdir(parents=True, exist_ok=True)
-            fetch_for_assignment(client, assignment["name"], dest_dir)
+            fetch_for_assignment(client, assignment_name, dest_dir)
+    for quiz in schedule.get("quizzes", []):
+        dest_dir = SUBMISSIONS_ROOT / "quizzes" / quiz.get("key", quiz["name"])
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        fetch_for_assignment(client, quiz["name"], dest_dir)
 
 
 if __name__ == "__main__":
@@ -66,5 +95,11 @@ if __name__ == "__main__":
         default=CONFIG_PATH,
         help="Path to Canvas config file",
     )
+    parser.add_argument(
+        "--schedule",
+        type=pathlib.Path,
+        default=SCHEDULE_PATH,
+        help="Path to course schedule YAML",
+    )
     args = parser.parse_args()
-    main(args.config)
+    main(args.config, args.schedule)
