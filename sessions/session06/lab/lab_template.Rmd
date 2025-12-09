@@ -1,0 +1,38 @@
+---
+title: "Lab 06 – Hypothesis Testing"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+league_df <- readr::read_csv("data/laser_league_players.csv") %>%
+  mutate(hover_commuter = if_else(commute_mode == "Hover Tram", "Hover", "Other"))
+```
+
+```{r}
+league_df %>%
+  ggplot(aes(tag_accuracy_pct, fill = hover_commuter)) +
+  geom_histogram(alpha = 0.6, position = "identity", bins = 20) +
+  facet_wrap(~ hover_commuter) +
+  labs(title = "Accuracy distribution by commute mode", x = "Tag accuracy (%)")
+```
+
+```{r}
+ttest_result <- t.test(tag_accuracy_pct ~ hover_commuter, data = league_df)
+ttest_result
+```
+
+```{r}
+contingency <- table(league_df$preferred_channel, league_df$favorite_drink)
+chi_result <- chisq.test(contingency)
+chi_result
+```
+
+## Notes
+Briefly explain what the p-values tell you.

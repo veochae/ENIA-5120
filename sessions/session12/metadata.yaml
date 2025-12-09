@@ -1,0 +1,20 @@
+session: 12
+title: "Session 12 – Storytelling & Dashboards"
+module:
+  name: "Week 12 – Storytelling"
+  description: "Bringing models, visuals, and narratives together with Quarto dashboards."
+slides:
+  source: slides.qmd
+  rendered: slides.html
+  page_title: "Session 12 Slides"
+lab:
+  assignment_key: lab12
+  files:
+    - path: lab/lab_spec.md
+      display_name: "Lab 12 – Storytelling Spec.md"
+    - path: lab/lab_template.Rmd
+      display_name: "Lab 12 – Storytelling Template.Rmd"
+    - path: lab/lab_tests.R
+      display_name: "Lab 12 – Storytelling Tests.R"
+    - path: lab/lab_rubric.yaml
+      display_name: "Lab 12 – Rubric.yaml"

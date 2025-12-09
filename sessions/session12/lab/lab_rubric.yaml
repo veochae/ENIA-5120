@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: layout
+    description: "Includes overview, metrics, visualization, and next steps"
+    max_points: 10
+  - id: clarity
+    description: "Narrative ties visuals to insights"
+    max_points: 6
+  - id: finishing
+    description: "Document knits without errors"
+    max_points: 4

@@ -1,0 +1,28 @@
+---
+title: "Session 9 – Clustering"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- Unsupervised learning basics
+- k-means walkthrough
+- Choosing k & visualizing clusters
+
+---
+
+# k-means Steps
+1. Scale features
+2. Choose k
+3. Iterate: assign/update
+4. Evaluate WSS
+
+---
+
+# Hierarchical Clustering
+- `dist()` matrix
+- `hclust(method = "ward.D2")`
+- Dendrogram interpretation

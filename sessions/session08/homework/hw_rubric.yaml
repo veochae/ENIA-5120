@@ -1,0 +1,14 @@
+total_points: 30
+criteria:
+  - id: model_construction
+    description: "Appropriate variable selection and correct use of lm()/glm() with necessary transformations"
+    max_points: 9
+  - id: interpretation_quality
+    description: "Explains coefficients/significance in plain language"
+    max_points: 9
+  - id: evaluation_metrics
+    description: "Uses RMSE/MAE for linear and accuracy/recall or ROC/AUC for logistic with sound reasoning"
+    max_points: 7.5
+  - id: communication
+    description: "Report is well-structured with visuals integrated into the narrative"
+    max_points: 4.5

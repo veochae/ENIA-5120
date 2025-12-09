@@ -20,14 +20,3 @@ lab:
       display_name: "Lab 02 – Rubric.yaml"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 02 – Rubric.pdf"
-homework:
-  assignment_key: hw02
-  files:
-    - path: homework/hw_prompt.md
-      display_name: "HW 02 – Prompt.md"
-    - path: homework/hw_prompt.pdf
-      display_name: "HW 02 – Prompt.pdf"
-    - path: homework/hw_rubric.yaml
-      display_name: "HW 02 – Rubric.yaml"
-    - path: homework/hw_rubric.pdf
-      display_name: "HW 02 – Rubric.pdf"

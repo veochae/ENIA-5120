@@ -1,0 +1,14 @@
+total_points: 30
+criteria:
+  - id: eda_quality
+    description: "Uses appropriate summaries and visuals for key variables"
+    max_points: 9
+  - id: hypothesis_test
+    description: "Chooses a valid test, checks assumptions, interprets results"
+    max_points: 10.5
+  - id: visualization_clarity
+    description: "Plots have clear labels/titles and support the story"
+    max_points: 6
+  - id: writing_quality
+    description: "Conclusions are concise and free of unnecessary jargon"
+    max_points: 4.5

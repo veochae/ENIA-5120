@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: model
+    description: "Fits logistic model and reports coefficients"
+    max_points: 8
+  - id: evaluation
+    description: "Builds confusion matrix + accuracy"
+    max_points: 8
+  - id: interpretation
+    description: "Explains odds/probabilities"
+    max_points: 4

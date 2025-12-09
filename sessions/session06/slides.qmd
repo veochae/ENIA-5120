@@ -1,0 +1,36 @@
+---
+title: "Session 6 – Distributions & Hypothesis Testing"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- Distribution families
+- Central Limit Theorem demo
+- Hypothesis testing workflow
+
+---
+
+# Distributions
+- Normal vs skewed
+- Binomial, Poisson
+- Why shape matters
+
+---
+
+# Hypothesis Tests
+1. Define H0 / H1
+2. Choose test statistic
+3. Compute p-value
+4. Interpret in context
+
+---
+
+# R Functions
+```r
+t.test(metric ~ group, data = df)
+chisq.test(table(segment, converted))
+```

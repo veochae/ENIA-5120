@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: cleaning
+    description: "Removes duplicates and standardizes columns"
+    max_points: 8
+  - id: missing
+    description: "Handles missing values appropriately"
+    max_points: 6
+  - id: summary
+    description: "Produces summary table with commentary"
+    max_points: 6

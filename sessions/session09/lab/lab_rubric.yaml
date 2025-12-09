@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: scaling
+    description: "Correctly scales numeric features"
+    max_points: 6
+  - id: clustering
+    description: "Runs k-means with rationale for k"
+    max_points: 8
+  - id: interpretation
+    description: "Describes resulting clusters"
+    max_points: 6

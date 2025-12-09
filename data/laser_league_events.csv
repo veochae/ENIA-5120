@@ -1,0 +1,201 @@
+event_id,squad_code,program_name,mentor,training_hours,bonus_tokens,event_date,event_location,satisfaction_rating
+EVT0001,squad-004,Night Siege,Mentor Halo,1.1,313.9,2025-08-20,Arena Alpha,2
+EVT0002,sq007,Nebula Workshop,Guide Nova,5.8,292.6,2025-08-12,Dock Lab,2
+EVT0003,squad-010,Nebula Workshop,Captain Pulse,1.5,70.32,2025-05-26,Sky Deck,1
+EVT0004,squad-013,night siege,Mentor Halo,1.0,211.15,2025-05-14,Dock Lab,3
+EVT0005,SQ016,Solar Circuit,Captain Pulse,3.1,353.59,2025-07-17,City Annex,1
+EVT0006,SQ019,Night Siege,Coach Ion,2.4,259.04,2025-07-27,Arena Alpha,4
+EVT0007,sq022,Quantum Relay,Coach Ion,4.8,285.91,2025-05-21,Dock Lab,5
+EVT0008,squad-025,Solar Circuit,Guide Nova,1.8,365.15,2025-08-04,Arena Alpha,2
+EVT0009,SQ028,Night Siege,Guide Nova,5.3,217.52,2025-05-29,Dock Lab,3
+EVT0010,sq031,Nebula Workshop,Captain Pulse,2.0,215.93,2025-05-28,City Annex,4
+EVT0011,SQ034,Nebula Workshop,Captain Pulse,4.9,262.89,2025-07-13,Arena Alpha,3
+EVT0012,squad-037,Quantum Relay,Mentor Halo,3.3,107.56,2025-08-05,Sky Deck,1
+EVT0013,squad-040,Phantom Trials,Guide Nova,1.2,383.42,2025-06-19,Arena Alpha,2
+EVT0014,sq043,Solar Circuit,Captain Pulse,2.5,191.36,2025-08-27,Arena Alpha,2
+EVT0015,SQ046,Night Siege,Captain Pulse,2.2,246.26,2025-06-08,City Annex,2
+EVT0016,sq049,Phantom Trials,Guide Nova,1.4,250.18,2025-06-30,Arena Alpha,3
+EVT0017,squad-052,Night Siege,Guide Nova,3.4,221.57,2025-07-03,Sky Deck,4
+EVT0018,squad-055,Nebula Workshop,Mentor Halo,2.1,300.04,2025-06-18,City Annex,1
+EVT0019,squad-058,Solar Circuit,Mentor Halo,3.3,334.74,2025-08-03,Arena Alpha,4
+EVT0020,SQ061,Night Siege,Mentor Halo,3.3,192.02,2025-05-25,Dock Lab,2
+EVT0021,SQ064,Quantum Relay,Captain Pulse,4.3,207.58,2025-07-03,Dock Lab,1
+EVT0022,squad-067,Quantum Relay,Coach Ion,5.9,181.67,2025-08-18,City Annex,5
+EVT0023,SQ070,Night Siege,Guide Nova,5.3,290.81,2025-08-12,City Annex,4
+EVT0024,SQ073,Solar Circuit,Mentor Halo,1.1,169.89,2025-07-18,Dock Lab,4
+EVT0025,sq076,Phantom Trials,Coach Ion,4.6,353.15,2025-08-13,Arena Alpha,3
+EVT0026,SQ079,Night Siege,Guide Nova,2.5,394.39,2025-07-26,Sky Deck,4
+EVT0027,sq082,night siege,Guide Nova,5.9,137.81,2025-08-27,Sky Deck,1
+EVT0028,squad-085,Night Siege,Captain Pulse,2.2,121.45,2025-08-18,Dock Lab,2
+EVT0029,squad-088,Quantum Relay,Guide Nova,3.1,268.68,2025-07-30,Sky Deck,5
+EVT0030,sq001,Night Siege,Guide Nova,5.5,96.18,2025-08-02,Arena Alpha,2
+EVT0031,squad-004,Night Siege,Coach Ion,1.1,336.61,2025-08-19,,1
+EVT0032,squad-007,nebula workshop,Captain Pulse,1.6,145.04,2025-05-29,Arena Alpha,3
+EVT0033,sq010,Quantum Relay,Captain Pulse,4.5,103.05,2025-06-19,,3
+EVT0034,SQ013,Night Siege,Guide Nova,1.6,175.28,2025-05-07,Sky Deck,4
+EVT0035,sq016,Night Siege,Guide Nova,3.0,373.75,2025-06-13,City Annex,2
+EVT0036,SQ019,Night Siege,Captain Pulse,4.3,334.06,2025-07-21,,2
+EVT0037,SQ022,Solar Circuit,Guide Nova,1.9,368.82,2025-07-20,Arena Alpha,1
+EVT0038,SQ025,Solar Circuit,Captain Pulse,4.3,62.15,2025-05-06,Arena Alpha,4
+EVT0039,squad-028,Quantum Relay,Coach Ion,5.8,56.51,2025-05-18,Arena Alpha,4
+EVT0040,sq031,Night Siege,Guide Nova,5.5,124.51,2025-05-18,City Annex,3
+EVT0041,sq034,Nebula Workshop,Captain Pulse,4.2,372.44,2025-08-10,Sky Deck,5
+EVT0042,squad-037,Phantom Trials,Mentor Halo,2.3,91.27,2025-07-04,Dock Lab,5
+EVT0043,squad-040,Solar Circuit,Captain Pulse,4.1,267.56,2025-05-03,City Annex,3
+EVT0044,sq043,Phantom Trials,Mentor Halo,5.6,227.62,2025-05-19,City Annex,1
+EVT0045,SQ046,Nebula Workshop,Captain Pulse,4.5,97.75,2025-06-06,Arena Alpha,1
+EVT0046,squad-049,Nebula Workshop,Captain Pulse,4.7,139.96,2025-06-10,Arena Alpha,2
+EVT0047,sq052,Quantum Relay,Coach Ion,5.3,303.71,2025-08-17,Dock Lab,4
+EVT0048,SQ055,Quantum Relay,Coach Ion,3.4,169.98,2025-05-19,Arena Alpha,3
+EVT0049,SQ058,Nebula Workshop,Mentor Halo,4.8,359.39,2025-07-12,Dock Lab,2
+EVT0050,SQ061,Quantum Relay,Captain Pulse,1.5,98.4,2025-06-03,City Annex,1
+EVT0051,squad-064,Quantum Relay,Coach Ion,3.2,168.63,2025-05-27,Arena Alpha,1
+EVT0052,sq067,nebula workshop,Mentor Halo,4.0,366.24,2025-06-29,Sky Deck,3
+EVT0053,squad-070,Night Siege,Coach Ion,4.5,89.07,2025-06-02,Arena Alpha,5
+EVT0054,squad-073,Phantom Trials,Mentor Halo,1.1,58.07,2025-08-16,City Annex,1
+EVT0055,SQ076,Quantum Relay,Mentor Halo,4.2,56.99,2025-08-26,,3
+EVT0056,SQ079,solar circuit,Captain Pulse,3.8,120.1,2025-07-05,Arena Alpha,3
+EVT0057,SQ082,Solar Circuit,Captain Pulse,2.8,331.53,2025-07-23,City Annex,5
+EVT0058,squad-085,nebula workshop,Captain Pulse,2.1,254.03,2025-06-30,Arena Alpha,4
+EVT0059,sq088,Solar Circuit,Mentor Halo,4.4,171.21,2025-06-06,Dock Lab,2
+EVT0060,squad-001,Solar Circuit,Captain Pulse,1.8,266.88,2025-08-18,,2
+EVT0061,SQ004,Phantom Trials,Guide Nova,4.9,76.1,2025-08-05,Dock Lab,3
+EVT0062,SQ007,solar circuit,Captain Pulse,1.7,195.99,2025-08-09,Dock Lab,4
+EVT0063,squad-010,Solar Circuit,Captain Pulse,2.9,96.89,2025-05-03,City Annex,2
+EVT0064,sq013,nebula workshop,Captain Pulse,2.7,296.73,2025-06-16,Sky Deck,3
+EVT0065,sq016,night siege,Captain Pulse,3.4,372.81,2025-05-03,Arena Alpha,4
+EVT0066,sq019,Phantom Trials,Guide Nova,4.1,160.9,2025-05-20,Sky Deck,2
+EVT0067,sq022,night siege,Captain Pulse,4.5,306.88,2025-05-13,,3
+EVT0068,squad-025,Quantum Relay,Guide Nova,4.7,177.18,2025-06-20,Arena Alpha,2
+EVT0069,squad-028,Nebula Workshop,Mentor Halo,3.5,56.18,2025-07-21,City Annex,3
+EVT0070,squad-031,Solar Circuit,Coach Ion,2.3,137.69,2025-07-20,Sky Deck,4
+EVT0071,squad-034,Phantom Trials,Mentor Halo,4.5,108.72,2025-07-14,Arena Alpha,5
+EVT0072,SQ037,Nebula Workshop,Coach Ion,4.4,152.45,2025-06-13,City Annex,5
+EVT0073,sq040,Night Siege,Mentor Halo,5.2,383.35,2025-08-13,City Annex,1
+EVT0074,squad-043,Solar Circuit,Guide Nova,2.2,231.4,2025-07-21,Dock Lab,1
+EVT0075,SQ046,night siege,Captain Pulse,2.0,143.28,2025-08-16,City Annex,4
+EVT0076,sq049,quantum relay,Guide Nova,3.1,185.92,2025-05-08,Arena Alpha,1
+EVT0077,squad-052,Solar Circuit,Mentor Halo,2.4,136.12,2025-05-01,,4
+EVT0078,squad-055,Phantom Trials,Captain Pulse,5.4,288.71,2025-07-04,Sky Deck,3
+EVT0079,squad-058,Quantum Relay,Mentor Halo,3.6,249.24,2025-06-08,Dock Lab,4
+EVT0080,sq061,Solar Circuit,Captain Pulse,1.4,347.06,2025-06-24,,1
+EVT0081,sq064,Nebula Workshop,Captain Pulse,1.7,366.95,2025-08-04,Sky Deck,3
+EVT0082,sq067,Phantom Trials,Guide Nova,4.3,75.02,2025-07-13,Arena Alpha,4
+EVT0083,SQ070,Solar Circuit,Guide Nova,1.2,361.84,2025-05-05,City Annex,5
+EVT0084,sq073,quantum relay,Mentor Halo,5.8,213.46,2025-06-01,,4
+EVT0085,squad-076,Solar Circuit,Captain Pulse,5.8,283.81,2025-08-05,Arena Alpha,2
+EVT0086,SQ079,Nebula Workshop,Captain Pulse,5.7,262.37,2025-07-07,Arena Alpha,2
+EVT0087,sq082,Quantum Relay,Guide Nova,2.4,331.35,2025-06-30,Sky Deck,5
+EVT0088,squad-085,Night Siege,Captain Pulse,2.5,265.98,2025-07-09,Dock Lab,2
+EVT0089,SQ088,Solar Circuit,Guide Nova,3.0,307.64,2025-06-24,Sky Deck,1
+EVT0090,SQ001,Nebula Workshop,Coach Ion,4.5,332.7,2025-06-18,Arena Alpha,3
+EVT0091,squad-004,Quantum Relay,Captain Pulse,5.1,352.15,2025-05-20,Sky Deck,5
+EVT0092,squad-007,Nebula Workshop,Mentor Halo,2.4,269.42,2025-07-22,City Annex,3
+EVT0093,SQ010,Quantum Relay,Captain Pulse,5.6,221.62,2025-08-01,Arena Alpha,4
+EVT0094,SQ013,Night Siege,Mentor Halo,5.9,104.41,2025-06-10,Arena Alpha,2
+EVT0095,SQ016,Phantom Trials,Captain Pulse,4.9,328.95,2025-05-14,Arena Alpha,4
+EVT0096,squad-019,Night Siege,Captain Pulse,2.6,312.72,2025-08-07,Dock Lab,5
+EVT0097,sq022,Solar Circuit,Guide Nova,3.4,336.48,2025-08-18,Arena Alpha,1
+EVT0098,sq025,Solar Circuit,Coach Ion,4.3,264.36,2025-08-24,Dock Lab,5
+EVT0099,SQ028,Nebula Workshop,Captain Pulse,2.5,333.12,2025-08-26,Dock Lab,5
+EVT0100,SQ031,Quantum Relay,Coach Ion,4.6,187.47,2025-08-07,Arena Alpha,4
+EVT0101,sq034,Solar Circuit,Captain Pulse,5.3,72.53,2025-07-03,Sky Deck,2
+EVT0102,SQ037,phantom trials,Guide Nova,1.1,378.25,2025-06-01,Arena Alpha,1
+EVT0103,squad-040,Solar Circuit,Mentor Halo,5.4,122.34,2025-07-04,,2
+EVT0104,SQ043,Phantom Trials,Guide Nova,1.6,77.1,2025-06-15,Arena Alpha,1
+EVT0105,squad-046,Nebula Workshop,Mentor Halo,2.2,248.19,2025-06-16,Sky Deck,3
+EVT0106,squad-049,Phantom Trials,Captain Pulse,4.3,108.3,2025-05-15,Sky Deck,4
+EVT0107,SQ052,Solar Circuit,Guide Nova,4.8,271.29,2025-08-10,,5
+EVT0108,SQ055,Night Siege,Captain Pulse,5.3,381.99,2025-07-24,Sky Deck,2
+EVT0109,squad-058,Phantom Trials,Coach Ion,4.3,346.48,2025-06-07,City Annex,4
+EVT0110,sq061,nebula workshop,Mentor Halo,3.9,390.47,2025-08-14,Arena Alpha,4
+EVT0111,squad-064,Night Siege,Captain Pulse,4.6,110.93,2025-05-24,Arena Alpha,3
+EVT0112,sq067,Solar Circuit,Guide Nova,5.3,374.03,2025-08-01,Dock Lab,1
+EVT0113,SQ070,Quantum Relay,Captain Pulse,1.8,261.77,2025-07-05,City Annex,3
+EVT0114,sq073,Solar Circuit,Mentor Halo,5.1,371.45,2025-06-29,Arena Alpha,5
+EVT0115,squad-076,Phantom Trials,Coach Ion,3.9,73.55,2025-08-13,Sky Deck,5
+EVT0116,SQ079,Phantom Trials,Mentor Halo,3.9,254.91,2025-05-11,Dock Lab,5
+EVT0117,squad-082,solar circuit,Coach Ion,4.9,308.19,2025-08-19,City Annex,3
+EVT0118,squad-085,Night Siege,Mentor Halo,3.2,292.92,2025-06-30,Sky Deck,5
+EVT0119,SQ088,Quantum Relay,Guide Nova,1.4,204.24,2025-08-03,Dock Lab,2
+EVT0120,SQ001,Phantom Trials,Mentor Halo,3.9,50.67,2025-06-20,City Annex,4
+EVT0121,SQ004,Night Siege,Mentor Halo,4.3,355.75,2025-08-06,City Annex,4
+EVT0122,sq007,Phantom Trials,Coach Ion,5.4,325.84,2025-06-05,Sky Deck,2
+EVT0123,SQ010,Quantum Relay,Coach Ion,4.2,266.67,2025-05-24,Sky Deck,5
+EVT0124,SQ013,Nebula Workshop,Coach Ion,3.3,338.84,2025-08-07,Arena Alpha,3
+EVT0125,sq016,Nebula Workshop,Coach Ion,3.5,381.9,2025-05-28,Sky Deck,5
+EVT0126,squad-019,Solar Circuit,Captain Pulse,4.6,304.02,2025-06-23,,5
+EVT0127,sq022,Solar Circuit,Mentor Halo,3.0,92.04,2025-05-30,Sky Deck,4
+EVT0128,sq025,Night Siege,Captain Pulse,3.6,106.81,2025-06-13,Arena Alpha,4
+EVT0129,squad-028,Solar Circuit,Captain Pulse,2.0,121.85,2025-08-18,Sky Deck,2
+EVT0130,sq031,Phantom Trials,Guide Nova,1.2,252.65,2025-08-28,Dock Lab,4
+EVT0131,squad-034,Solar Circuit,Guide Nova,2.5,335.3,2025-05-06,,1
+EVT0132,sq037,Solar Circuit,Coach Ion,3.5,241.58,2025-08-11,Arena Alpha,2
+EVT0133,squad-040,Night Siege,Captain Pulse,4.6,271.28,2025-05-30,Sky Deck,5
+EVT0134,SQ043,Nebula Workshop,Mentor Halo,1.0,326.15,2025-05-23,Arena Alpha,3
+EVT0135,sq046,Solar Circuit,Guide Nova,4.4,357.31,2025-08-23,Sky Deck,2
+EVT0136,SQ049,solar circuit,Coach Ion,3.3,333.04,2025-08-07,City Annex,3
+EVT0137,sq052,Night Siege,Mentor Halo,2.5,397.2,2025-05-22,Sky Deck,3
+EVT0138,sq055,Phantom Trials,Mentor Halo,4.1,217.63,2025-05-06,City Annex,3
+EVT0139,squad-058,Solar Circuit,Coach Ion,5.1,269.55,2025-05-15,City Annex,3
+EVT0140,squad-061,Quantum Relay,Mentor Halo,3.7,80.2,2025-08-29,Arena Alpha,2
+EVT0141,squad-064,Phantom Trials,Coach Ion,5.0,122.22,2025-06-10,Dock Lab,1
+EVT0142,SQ067,Nebula Workshop,Captain Pulse,5.9,71.53,2025-07-21,,2
+EVT0143,squad-070,Solar Circuit,Guide Nova,2.5,257.18,2025-08-14,Arena Alpha,5
+EVT0144,sq073,Night Siege,Coach Ion,3.2,164.5,2025-05-27,Sky Deck,2
+EVT0145,SQ076,solar circuit,Mentor Halo,2.6,399.22,2025-07-21,Sky Deck,3
+EVT0146,SQ079,Phantom Trials,Coach Ion,4.5,242.35,2025-05-14,City Annex,1
+EVT0147,squad-082,night siege,Captain Pulse,5.1,193.59,2025-07-04,City Annex,4
+EVT0148,squad-085,Solar Circuit,Coach Ion,2.9,58.04,2025-06-25,Sky Deck,5
+EVT0149,squad-088,Nebula Workshop,Guide Nova,1.4,300.71,2025-06-30,Arena Alpha,2
+EVT0150,SQ001,Night Siege,Mentor Halo,3.3,164.49,2025-07-04,Arena Alpha,4
+EVT0151,squad-004,Nebula Workshop,Guide Nova,6.0,261.88,2025-08-27,City Annex,3
+EVT0152,squad-007,Night Siege,Captain Pulse,5.3,333.44,2025-08-07,City Annex,1
+EVT0153,sq010,Nebula Workshop,Mentor Halo,3.0,389.48,2025-07-14,City Annex,1
+EVT0154,squad-013,Night Siege,Captain Pulse,4.7,275.55,2025-08-08,Arena Alpha,3
+EVT0155,sq016,Phantom Trials,Mentor Halo,5.4,307.22,2025-07-03,,3
+EVT0156,squad-019,Night Siege,Coach Ion,5.8,80.17,2025-07-08,Sky Deck,3
+EVT0157,SQ022,Phantom Trials,Guide Nova,3.2,308.81,2025-05-17,City Annex,1
+EVT0158,SQ025,Solar Circuit,Coach Ion,1.7,113.87,2025-06-19,Dock Lab,3
+EVT0159,squad-028,Nebula Workshop,Coach Ion,2.5,264.99,2025-05-26,Arena Alpha,3
+EVT0160,SQ031,Quantum Relay,Mentor Halo,5.6,111.21,2025-05-11,City Annex,5
+EVT0161,sq034,phantom trials,Guide Nova,4.7,68.37,2025-08-18,Sky Deck,4
+EVT0162,squad-037,Solar Circuit,Captain Pulse,5.3,284.79,2025-06-25,Arena Alpha,2
+EVT0163,sq040,Phantom Trials,Coach Ion,3.3,264.44,2025-08-15,Sky Deck,5
+EVT0164,squad-043,Night Siege,Coach Ion,1.0,362.8,2025-07-11,Dock Lab,1
+EVT0165,squad-046,Quantum Relay,Guide Nova,5.3,373.85,2025-07-24,Sky Deck,4
+EVT0166,SQ049,Solar Circuit,Guide Nova,1.1,301.28,2025-07-15,City Annex,3
+EVT0167,squad-052,Solar Circuit,Guide Nova,3.6,184.3,2025-06-20,Sky Deck,2
+EVT0168,squad-055,Quantum Relay,Guide Nova,5.6,160.68,2025-06-19,,3
+EVT0169,squad-058,Phantom Trials,Guide Nova,4.7,261.02,2025-07-04,Dock Lab,5
+EVT0170,SQ061,Night Siege,Guide Nova,1.1,81.98,2025-07-15,City Annex,4
+EVT0171,SQ064,Solar Circuit,Coach Ion,3.6,71.89,2025-05-12,Arena Alpha,2
+EVT0172,squad-067,quantum relay,Guide Nova,4.9,229.33,2025-08-29,Arena Alpha,2
+EVT0173,squad-070,Solar Circuit,Mentor Halo,4.3,167.41,2025-05-15,Sky Deck,1
+EVT0174,squad-073,Quantum Relay,Guide Nova,2.0,370.72,2025-08-06,Sky Deck,5
+EVT0175,squad-076,Quantum Relay,Guide Nova,2.6,166.32,2025-07-29,Sky Deck,3
+EVT0176,sq079,Night Siege,Mentor Halo,2.8,210.41,2025-07-09,Dock Lab,1
+EVT0177,SQ082,Phantom Trials,Coach Ion,4.7,255.55,2025-08-05,Dock Lab,2
+EVT0178,sq085,Quantum Relay,Mentor Halo,1.3,265.86,2025-08-28,,1
+EVT0179,SQ088,Nebula Workshop,Captain Pulse,1.3,246.29,2025-06-29,Arena Alpha,1
+EVT0180,squad-001,Phantom Trials,Coach Ion,4.3,242.42,2025-07-03,,3
+EVT0181,sq004,Solar Circuit,Coach Ion,4.8,328.66,2025-08-16,Arena Alpha,3
+EVT0182,sq007,Nebula Workshop,Coach Ion,1.0,193.7,2025-08-11,Sky Deck,3
+EVT0183,sq010,Quantum Relay,Captain Pulse,2.8,390.08,2025-08-03,City Annex,5
+EVT0184,SQ013,solar circuit,Mentor Halo,2.5,141.12,2025-08-06,City Annex,2
+EVT0185,squad-016,Nebula Workshop,Mentor Halo,5.3,125.59,2025-05-11,Arena Alpha,1
+EVT0186,squad-019,Phantom Trials,Mentor Halo,2.3,396.57,2025-06-26,,3
+EVT0187,squad-022,Nebula Workshop,Guide Nova,4.3,274.63,2025-06-11,,1
+EVT0188,SQ025,Nebula Workshop,Mentor Halo,4.1,194.16,2025-08-28,City Annex,4
+EVT0189,sq028,Quantum Relay,Guide Nova,1.7,223.54,2025-06-28,Sky Deck,5
+EVT0190,squad-031,Solar Circuit,Guide Nova,3.5,318.7,2025-05-01,City Annex,3
+EVT0191,sq034,Nebula Workshop,Coach Ion,3.6,160.52,2025-07-25,,5
+EVT0192,squad-037,Night Siege,Coach Ion,2.8,149.07,2025-08-28,City Annex,2
+EVT0193,SQ040,night siege,Coach Ion,2.2,73.67,2025-05-24,Dock Lab,5
+EVT0194,sq043,Night Siege,Guide Nova,4.1,72.8,2025-05-31,Sky Deck,3
+EVT0195,squad-046,Phantom Trials,Coach Ion,2.6,312.51,2025-07-13,Sky Deck,5
+EVT0196,sq049,Quantum Relay,Coach Ion,2.5,97.74,2025-05-31,Arena Alpha,3
+EVT0197,sq052,Night Siege,Guide Nova,2.4,225.81,2025-05-09,Sky Deck,4
+EVT0198,SQ055,Solar Circuit,Guide Nova,4.4,354.52,2025-06-03,Sky Deck,3
+EVT0199,squad-058,phantom trials,Guide Nova,3.0,356.6,2025-06-21,City Annex,4
+EVT0200,sq061,Solar Circuit,Captain Pulse,1.3,234.73,2025-07-12,Arena Alpha,3

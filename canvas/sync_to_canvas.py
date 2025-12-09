@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import pathlib
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import yaml
@@ -77,6 +78,16 @@ def load_schedule(schedule_path: pathlib.Path) -> Dict:
     return yaml.safe_load(schedule_path.read_text()) or {}
 
 
+def build_session_date_map(schedule: Dict) -> Dict[str, str]:
+    dates = {}
+    for entry in schedule.get("sessions", []):
+        sid = entry.get("id")
+        date = entry.get("date")
+        if sid and date:
+            dates[sid] = date
+    return dates
+
+
 def lookup_assignment(schedule: Dict, section: str, key: Optional[str]) -> Optional[Dict]:
     if not key:
         return None
@@ -88,11 +99,31 @@ def lookup_assignment(schedule: Dict, section: str, key: Optional[str]) -> Optio
     return None
 
 
+def compute_unlock_at(session_id: str, session_dates: Dict[str, str]) -> Optional[str]:
+    date_str = session_dates.get(session_id)
+    if not date_str:
+        return None
+    try:
+        session_dt = datetime.fromisoformat(date_str)
+    except ValueError:
+        try:
+            session_dt = datetime.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            LOGGER.warning("Could not parse date '%s' for %s", date_str, session_id)
+            return None
+    unlock_dt = session_dt - timedelta(days=7)
+    # Ensure ISO 8601 string (assume UTC if naive)
+    if unlock_dt.tzinfo is None:
+        return unlock_dt.isoformat() + "Z"
+    return unlock_dt.isoformat()
+
+
 def sync_session(
     client: CanvasClient,
     session_dir: pathlib.Path,
     default_folder: str,
     schedule: Dict,
+    session_dates: Dict[str, str],
 ) -> None:
     meta = load_metadata(session_dir)
     LOGGER.info("Syncing %s", session_dir.name)
@@ -105,8 +136,9 @@ def sync_session(
         except (TypeError, ValueError):
             module_position = None
     module_obj = None
+    unlock_at = compute_unlock_at(session_dir.name, session_dates)
     if module_name:
-        module_obj = client.ensure_module(module_name, position=module_position)
+        module_obj = client.ensure_module(module_name, position=module_position, unlock_at=unlock_at)
         module_description = module_meta.get("description")
         if module_obj and module_description:
             desc_text = " ".join(module_description.strip().split())
@@ -189,9 +221,10 @@ def main(config_path: pathlib.Path = CONFIG_PATH, schedule_path: pathlib.Path = 
     client = load_client_from_config(config_path)
     config = yaml.safe_load(config_path.read_text())
     schedule = load_schedule(schedule_path)
+    session_dates = build_session_date_map(schedule)
     default_folder = config.get("default_folder_path", "Course Files")
     for session_dir in sorted(SESSIONS_ROOT.glob("session*")):
-        sync_session(client, session_dir, default_folder, schedule)
+        sync_session(client, session_dir, default_folder, schedule, session_dates)
     sync_quizzes(client, schedule)
 
 

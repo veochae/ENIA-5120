@@ -1,0 +1,35 @@
+---
+title: "Session 3 – Data Wrangling"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+
+- Review tidy data rules
+- dplyr verbs refresher
+- Practical cleaning patterns
+
+---
+
+# Key Verbs
+
+- `select`, `filter`, `mutate`, `arrange`
+- `pivot_longer`, `pivot_wider`
+- `separate`, `unite`
+
+---
+
+# Demo Plan
+
+```r
+library(dplyr)
+library(tidyr)
+
+clean_df <- raw_df %>%
+  rename_with(tolower) %>%
+  mutate(across(where(is.character), trimws))
+```

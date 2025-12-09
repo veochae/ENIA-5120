@@ -1,0 +1,29 @@
+---
+title: "Session 5 – Data Visualization Deep Dive"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- Recap of grammar of graphics
+- Exploring common geoms
+- Faceting and themes best practices
+
+---
+
+# Geoms Refresher
+- `geom_histogram`
+- `geom_boxplot`
+- `geom_point`
+- `geom_bar`
+
+---
+
+# Styling Tips
+- Titles & subtitles
+- Axis labels & scales
+- Theme selection
+- Legend placement

@@ -1,0 +1,28 @@
+---
+title: "Session 7 – Linear Regression"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- Intuition for line of best fit
+- Coefficients & interpretation
+- Diagnostics
+
+---
+
+# Model Setup
+```r
+model <- lm(y ~ x1 + x2, data = df)
+summary(model)
+```
+
+---
+
+# Diagnostics
+- Residual plots
+- R² vs adjusted R²
+- Outliers & leverage

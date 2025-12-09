@@ -1,0 +1,34 @@
+---
+title: "Lab 12 – Storytelling"
+author: "Your Name"
+output:
+  html_document:
+    toc: true
+---
+
+## Overview
+Provide context for the analysis and who the audience is.
+
+## Key Metrics
+```{r}
+metric_table <- tibble::tibble(metric = c("Accuracy", "RMSE"),
+                               value = c(0.85, 12.4))
+metric_table
+```
+
+## Visualization
+```{r}
+library(ggplot2)
+plot_story <- ggplot(mtcars, aes(mpg, hp)) + geom_point()
+plot_story
+```
+
+## Next Steps
+```{r}
+key_takeaways <- c(
+  "Clarify data limitations",
+  "Highlight customer impact",
+  "Plan A/B test"
+)
+key_takeaways
+```

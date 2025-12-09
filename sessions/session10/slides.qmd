@@ -1,0 +1,28 @@
+---
+title: "Session 10 – Model Evaluation & Validation"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- Train/test split refresh
+- Regression metrics
+- Classification metrics
+- Ethics & bias
+
+---
+
+# Metrics Cheat Sheet
+- RMSE / MAE
+- Precision / Recall / F1
+- ROC / AUC (concept)
+
+---
+
+# Avoiding Pitfalls
+- Data leakage examples
+- Overfitting vs underfitting
+- Documentation checklist

@@ -25,13 +25,23 @@ canvas/
 grading/
   grade_labs.R
   grade_homework.py
+data/
+  laser_league_players.csv  # Neon Laser League player log (180 rows)
+  laser_league_events.csv   # Event/training ledger with messy squad IDs
 submissions/        # gitignored cache of Canvas downloads
 scripts/
   render_handouts.py # Generates PDF copies of prompts/rubrics for Canvas
 course_schedule.yaml # Central control for points/due dates
 ```
 
-Each session directory is self-contained, which means adding a new session is as simple as copying a folder and updating `metadata.yaml`. Within each metadata file, the `module` block controls the Canvas module name/description, so every push automatically creates a Canvas module with an overview text header plus the slides link.
+Each session directory is self-contained, which means adding a new session is as simple as copying a folder and updating `metadata.yaml`. Sessions without a homework due simply omit the `homework/` subfolder and metadata block; the five homework-bearing weeks (Sessions 3,4,6,8,10) include that directory so the workflow uploads the prompts/rubrics only where needed. Within each metadata file, the `module` block controls the Canvas module name/description, so every push automatically creates a Canvas module with an overview text header plus the slides link.
+
+### Sample datasets
+
+The `data/` folder now chronicles the **Neon Laser League**:
+
+- `laser_league_players.csv` is the main player log—180 athletes with squad affiliations, arenas, roles, matches, assists, accuracy, shield uptime, reaction times, favorite energy drinks, glow ratings, and messy squad IDs. Purposeful blanks (e.g., missing loadouts, season scores) and free-form notes make it ideal for hypothesis generation, cleaning, normalization, clustering, and regression/GLM practice right away.
+- `laser_league_events.csv` captures off-cycle training events (Night Siege, Quantum Relay, Phantom Trials, etc.) with messy `squad_code` formats, lowercase program names, bonus tokens, and satisfaction ratings. Joining it with the player log unlocks second-wave questions the base dataset can’t answer alone (Do certain workshops lift accuracy? Which mentors boost wellbeing?).
 
 ### Central grading schedule
 
@@ -40,6 +50,8 @@ Each session directory is self-contained, which means adding a new session is as
 - Update a lab/homework entry there to change Canvas assignment names, points, or due dates.
 - Each session’s metadata simply references an `assignment_key`, so you never have to duplicate the settings.
 - Quiz placeholders also live in the same file; when you know the dates, adjust the `due_at` values (ISO-8601 strings) and the automation will update Canvas on the next push.
+- Session dates live under `sessions:`; the sync script automatically locks each Canvas module until one week before its session date.
+- Homework entries also note `release_session`, which documents when each assignment is unlocked relative to the weekly sessions.
 
 ## Automation overview
 

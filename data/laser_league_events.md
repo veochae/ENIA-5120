@@ -1,0 +1,3 @@
+# Laser League Event Ledger
+
+`laser_league_events.csv` logs off-cycle training runs, workshops, and surprise quests (Night Siege, Quantum Relay, Phantom Trials, etc.) that squads attend. Each entry carries a messy `squad_code`, mentor name, hours trained, bonus tokens issued, event date, and satisfaction rating—often with lowercase program names or missing locations. When students join this ledger with the player log, they unlock second-wave questions like “Do squads attending Nebula Workshops improve tag accuracy?” or “Which events correlate with wellbeing boosts?” while wrestling with real-world ID inconsistencies.

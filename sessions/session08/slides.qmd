@@ -1,0 +1,28 @@
+---
+title: "Session 8 – Logistic Regression"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- Odds & probabilities
+- Fitting logistic models
+- Evaluating classification
+
+---
+
+# Model Syntax
+```r
+model <- glm(churn ~ tenure + usage, data = df, family = binomial())
+predict(model, type = "response")
+```
+
+---
+
+# Evaluation
+- Confusion matrix
+- Accuracy vs recall
+- ROC / AUC preview

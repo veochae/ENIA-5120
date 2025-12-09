@@ -145,6 +145,7 @@ class CanvasClient:
         name: str,
         position: Optional[int] = None,
         published: bool = True,
+        unlock_at: Optional[str] = None,
     ) -> Dict[str, Any]:
         payload = {
             "module[name]": name,
@@ -152,6 +153,8 @@ class CanvasClient:
         }
         if position is not None:
             payload["module[position]"] = position
+        if unlock_at:
+            payload["module[unlock_at]"] = unlock_at
         existing = self.find_module(name)
         if existing:
             module_id = existing["id"]

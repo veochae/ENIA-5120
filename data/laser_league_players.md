@@ -1,0 +1,3 @@
+# Laser League Player Log
+
+`laser_league_players.csv` tracks 180 athletes in the **Neon Laser League**, complete with squad affiliations, arenas, roles (Scout, Sniper, Engineer, etc.), matches played, assists, season scores, tag accuracy, shield uptime, reaction times, energy gains, commute modes, and the glow rating fans care about. Purposeful messiness—blank loadouts, missing scores, mixed-case squad IDs, and free-form scout notes—forces students to hypothesize about what drives performance, clean the columns, normalize features, and model wellbeing before any auxiliary data enters the picture.

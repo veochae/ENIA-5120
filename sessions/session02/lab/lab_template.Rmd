@@ -8,19 +8,21 @@ output: html_document
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(forcats)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-sales_df <- read_csv("data/week1_sales.csv")
+league_df <- read_csv("data/laser_league_players.csv")
 ```
 
 ## Scatter plot
 
 ```{r}
-plot_scatter <- ggplot(sales_df, aes(quantity, price, color = category)) +
+plot_scatter <- ggplot(league_df, aes(matches_played, tag_accuracy_pct, color = role)) +
   geom_point(alpha = 0.7) +
-  labs(title = "Price vs Quantity", x = "Quantity", y = "Price") +
+  geom_smooth(se = FALSE) +
+  labs(title = "Matches vs Tag Accuracy", x = "Matches played", y = "Tag accuracy (%)") +
   theme_minimal()
 plot_scatter
 
@@ -30,12 +32,13 @@ ggsave("plot_scatter.png", plot_scatter, width = 6, height = 4)
 ## Bar plot
 
 ```{r}
-plot_bar <- sales_df %>%
-  group_by(category) %>%
-  summarise(mean_price = mean(price, na.rm = TRUE)) %>%
-  ggplot(aes(category, mean_price, fill = category)) +
-  geom_col() +
-  labs(title = "Average Price by Category", x = NULL, y = "Mean Price") +
+plot_bar <- league_df %>%
+  group_by(home_arena) %>%
+  summarise(avg_score = mean(season_score, na.rm = TRUE)) %>%
+  ggplot(aes(fct_reorder(home_arena, avg_score), avg_score, fill = home_arena)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = round(avg_score, 0)), vjust = -0.2) +
+  labs(title = "Average Season Score by Arena", x = "Home arena", y = "Avg season score") +
   theme_minimal()
 plot_bar
 

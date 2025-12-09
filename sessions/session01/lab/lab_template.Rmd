@@ -13,30 +13,33 @@ knitr::opts_chunk$set(echo = TRUE)
 ## 1. Load data
 
 ```{r}
-sales_df <- read_csv("data/week1_sales.csv")
+league_df <- read_csv("data/laser_league_players.csv")
 ```
 
 ## 2. Inspect structure
 
 ```{r}
-nrow(sales_df)
-ncol(sales_df)
-names(sales_df)
-str(sales_df)
+nrow(league_df)
+ncol(league_df)
+names(league_df)
+str(league_df)
 ```
 
 ## 3. Grouped summary
 
 ```{r}
-summary_tbl <- sales_df %>%
-  group_by(category) %>%
-  summarise(mean_price = mean(price, na.rm = TRUE))
+summary_tbl <- league_df %>%
+  group_by(home_arena) %>%
+  summarise(
+    avg_wellbeing = mean(wellbeing_index, na.rm = TRUE),
+    avg_matches = mean(matches_played, na.rm = TRUE)
+  )
 summary_tbl
 ```
 
 ## 4. Reflection
 
-What surprised you about the data types or summary table?
+What surprised you about the player stats or arena averages?
 
 ```
 <write a short reflection>

@@ -1,0 +1,57 @@
+---
+title: "Lab 10 – Model Evaluation"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(rsample)
+library(yardstick)
+
+league_df <- read_csv("data/laser_league_players.csv") %>%
+  mutate(
+    high_glow = if_else(glow_rating >= 8, 1, 0)
+  )
+
+set.seed(123)
+split <- initial_split(league_df, prop = 0.75)
+train_df <- training(split)
+test_df <- testing(split)
+```
+
+```{r}
+reg_model <- lm(
+  season_score ~ matches_played + assists + tag_accuracy_pct + shield_uptime_pct,
+  data = train_df
+)
+reg_predictions <- predict(reg_model, newdata = test_df)
+rmse_value <- rmse_vec(test_df$season_score, reg_predictions)
+rmse_value
+```
+
+```{r}
+log_model <- glm(
+  high_glow ~ matches_played + tag_accuracy_pct + shield_uptime_pct,
+  data = train_df,
+  family = binomial()
+)
+class_probs <- predict(log_model, newdata = test_df, type = "response")
+predicted_class <- if_else(class_probs > 0.5, "Yes", "No")
+actual_class <- if_else(test_df$high_glow == 1, "Yes", "No")
+
+eval_confusion <- table(Predicted = predicted_class, Actual = actual_class)
+eval_confusion
+precision_val <- eval_confusion["Yes", "Yes"] / sum(eval_confusion["Yes", ])
+recall_val <- eval_confusion["Yes", "Yes"] / sum(eval_confusion[, "Yes"])
+precision_val
+recall_val
+```
+
+## Notes
+Discuss any biases you notice.

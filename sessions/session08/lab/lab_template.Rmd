@@ -1,0 +1,39 @@
+---
+title: "Lab 08 – Logistic Regression"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+
+league_df <- read_csv("data/laser_league_players.csv") %>%
+  mutate(high_glow = if_else(glow_rating >= 8, 1, 0))
+
+glow_model <- glm(
+  high_glow ~ matches_played + tag_accuracy_pct + shield_uptime_pct,
+  data = league_df,
+  family = binomial()
+)
+summary(glow_model)
+```
+
+```{r}
+glow_pred <- predict(glow_model, type = "response")
+head(glow_pred)
+```
+
+```{r}
+conf_mat <- table(
+  Predicted = glow_pred > 0.5,
+  Actual = league_df$high_glow == 1
+)
+conf_mat
+conf_accuracy <- sum(diag(conf_mat)) / sum(conf_mat)
+conf_accuracy
+```

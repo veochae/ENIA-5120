@@ -1,0 +1,33 @@
+---
+title: "Lab 09 – Clustering"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(purrr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+cust_df <- readr::read_csv("data/laser_league_players.csv")
+num_cols <- cust_df %>%
+  dplyr::select(age, volunteer_hours, energy_reduction_pct, wellbeing_index, monthly_water_usage_l)
+cust_scaled <- scale(num_cols)
+```
+
+```{r}
+wss_values <- map_dbl(2:6, ~kmeans(cust_scaled, centers = .x, nstart = 10)$tot.withinss)
+wss_values
+```
+
+```{r}
+kmeans_model <- kmeans(cust_scaled, centers = 3, nstart = 20)
+summary(kmeans_model)
+```
+
+```{r}
+cust_clustered <- cust_df %>%
+  dplyr::mutate(cluster = factor(kmeans_model$cluster))
+head(cust_clustered)
+```

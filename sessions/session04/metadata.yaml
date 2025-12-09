@@ -1,0 +1,31 @@
+session: 4
+title: "Session 4 – Joining & Reshaping Data"
+module:
+  name: "Week 4 – Joining & Reshaping"
+  description: "Combining multiple tables and pivoting between wide and long tidy formats."
+slides:
+  source: slides.qmd
+  rendered: slides.html
+  page_title: "Session 4 Slides"
+lab:
+  assignment_key: lab04
+  files:
+    - path: lab/lab_spec.md
+      display_name: "Lab 04 – Spec.md"
+    - path: lab/lab_template.Rmd
+      display_name: "Lab 04 – Template.Rmd"
+    - path: lab/lab_tests.R
+      display_name: "Lab 04 – Tests.R"
+    - path: lab/lab_rubric.yaml
+      display_name: "Lab 04 – Rubric.yaml"
+homework:
+  assignment_key: hw02
+  files:
+    - path: homework/hw_prompt.md
+      display_name: "HW 02 – EDA & Hypothesis Testing.md"
+    - path: homework/hw_prompt.pdf
+      display_name: "HW 02 – EDA & Hypothesis Testing.pdf"
+    - path: homework/hw_rubric.yaml
+      display_name: "HW 02 – Rubric.yaml"
+    - path: homework/hw_rubric.pdf
+      display_name: "HW 02 – Rubric.pdf"

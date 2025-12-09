@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: model
+    description: "Fits and interprets multi-variable regression"
+    max_points: 8
+  - id: diagnostics
+    description: "Evaluates residual plots"
+    max_points: 6
+  - id: prediction
+    description: "Generates predictions for new data"
+    max_points: 6

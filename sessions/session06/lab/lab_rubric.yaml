@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: viz
+    description: "Visualizes distributions by group"
+    max_points: 6
+  - id: tests
+    description: "Runs and interprets t-test and chi-square"
+    max_points: 10
+  - id: reflection
+    description: "Explains findings clearly"
+    max_points: 4

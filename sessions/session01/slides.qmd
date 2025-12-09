@@ -36,8 +36,8 @@ format:
 library(readr)
 library(dplyr)
 
-df <- read_csv("data/week1_sales.csv")
+df <- read_csv("data/laser_league_players.csv")
 df %>%
-  group_by(category) %>%
-  summarise(mean_price = mean(price, na.rm = TRUE))
+  group_by(home_arena) %>%
+  summarise(avg_wellbeing = mean(wellbeing_index, na.rm = TRUE))
 ```

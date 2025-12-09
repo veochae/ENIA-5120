@@ -1,0 +1,14 @@
+total_points: 30
+criteria:
+  - id: insight_clarity
+    description: "Main findings and takeaways are obvious, well-organized, and avoid jargon"
+    max_points: 10.5
+  - id: storytelling
+    description: "Narrative flows logically with smooth integration of visuals and findings"
+    max_points: 7.5
+  - id: professional_tone
+    description: "Writing, formatting, and tone are appropriate for an executive audience"
+    max_points: 6
+  - id: evidence_and_limits
+    description: "Claims are supported by visuals/metrics and limitations are acknowledged"
+    max_points: 6

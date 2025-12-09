@@ -1,0 +1,32 @@
+---
+title: "Session 4 – Joining & Reshaping Data"
+format:
+  revealjs:
+    slide-number: true
+    self-contained: true
+    toc: true
+---
+
+# Agenda
+- Review key join types
+- Handling duplicate keys
+- Pivoting between wide and long
+
+---
+
+# Join Cheatsheet
+- `inner_join`
+- `left_join`
+- `full_join`
+- `anti_join`
+
+Remember to check key uniqueness first!
+
+---
+
+# Reshaping
+```r
+wide %>% pivot_longer(starts_with("sales_"), names_to = "month", values_to = "sales")
+```
+- When to use `pivot_wider`
+- Naming conflicts & values

@@ -1,0 +1,14 @@
+total_points: 30
+criteria:
+  - id: wrangling_accuracy
+    description: "Correct joins/reshapes with clear explanation and no unexplained duplicates"
+    max_points: 12
+  - id: visualization_quality
+    description: "Visuals are purposeful, well-labeled, and drive the story"
+    max_points: 7.5
+  - id: narrative_insight
+    description: "Explains what the wrangled data reveals and which factors might matter later"
+    max_points: 6
+  - id: technical_cleanliness
+    description: "Code runs without errors, steps are commented and organized"
+    max_points: 4.5

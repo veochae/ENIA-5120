@@ -1,0 +1,40 @@
+---
+title: "Lab 05 – Visualization"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+league_df <- readr::read_csv("data/laser_league_players.csv")
+```
+
+```{r}
+hist_plot <- ggplot(league_df, aes(monthly_income)) +
+  geom_histogram(bins = 25, fill = "steelblue", color = "white") +
+  geom_vline(aes(xintercept = median(monthly_income, na.rm = TRUE)), linetype = "dashed", color = "red") +
+  labs(title = "Monthly Income Distribution", x = "Monthly income", y = "Count")
+hist_plot
+```
+
+```{r}
+box_plot <- ggplot(league_df, aes(region, wellbeing_index)) +
+  geom_boxplot(fill = "gray85") +
+  labs(title = "Wellbeing by Region", x = "Region", y = "Wellbeing index") +
+  theme_minimal()
+box_plot
+```
+
+```{r}
+scatter_plot <- ggplot(league_df, aes(volunteer_hours, energy_reduction_pct, color = commute_mode)) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~ internet_access) +
+  labs(title = "Volunteer Hours vs Energy Reduction", x = "Volunteer hours", y = "Energy reduction (%)") +
+  theme_minimal()
+scatter_plot
+```

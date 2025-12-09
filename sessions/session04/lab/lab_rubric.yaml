@@ -1,0 +1,11 @@
+total_points: 20
+criteria:
+  - id: joins
+    description: "Correctly joins tables and documents duplicates"
+    max_points: 8
+  - id: reshape
+    description: "Reshapes data into tidy long format"
+    max_points: 6
+  - id: interpretation
+    description: "Explains why join/reshape decisions were made"
+    max_points: 6

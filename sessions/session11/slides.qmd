@@ -1,0 +1,30 @@
+---
+title: "Session 11 – APIs & Web Scraping"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- API basics (endpoints, auth, JSON)
+- Calling APIs with `httr`
+- Scraping HTML with `rvest`
+
+---
+
+# API Flow
+```r
+resp <- httr::GET(url, query = list(q = "laser tag"))
+json <- httr::content(resp, as = "text")
+data <- jsonlite::fromJSON(json)
+```
+
+---
+
+# Scraping Checklist
+- Respect robots.txt
+- Inspect DOM / CSS selectors
+- Clean parsed tables
+- Document data provenance

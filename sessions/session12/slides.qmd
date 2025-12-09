@@ -1,0 +1,28 @@
+---
+title: "Session 12 – Storytelling & Dashboards"
+format:
+  revealjs:
+    slide-number: true
+    toc: true
+    self-contained: true
+---
+
+# Agenda
+- Narrative structure
+- Dashboard layout principles
+- Demo: Quarto dashboard
+
+---
+
+# Narrative Arc
+1. Context
+2. Conflict
+3. Insight
+4. Recommendation
+
+---
+
+# Dashboard Tips
+- Keep grids simple
+- Align color with branding
+- Surface key KPIs first
