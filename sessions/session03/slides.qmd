@@ -1,35 +1,133 @@
----
-title: "Session 3 – Data Wrangling"
+title: "Session 3 – Data Visualization with ggplot2"
 format:
   revealjs:
     slide-number: true
     toc: true
+    incremental: true
     self-contained: true
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
+    smaller: true
+    theme: serif
 ---
 
 # Agenda
 
-- Review tidy data rules
-- dplyr verbs refresher
-- Practical cleaning patterns
+- Principles for telling stories visually
+- Grammar of Graphics refresher
+- Hands-on plots with Laser League players
+- Styling tricks (themes, annotations, facetting)
 
 ---
 
-# Key Verbs
+# Visualization Goals
 
-- `select`, `filter`, `mutate`, `arrange`
-- `pivot_longer`, `pivot_wider`
-- `separate`, `unite`
+- Reveal distribution, comparison, relationship, composition
+- Use the right geom for the question
+- Keep text + context on the slide (titles, captions!)
+- Build plots that we can reuse in homework + final report
 
 ---
 
-# Demo Plan
+# Grammar of Graphics
+
+1. **Data** – tidy tibble (e.g., `league_clean`)
+2. **Aesthetics** – map variables to `x`, `y`, `color`, `size`
+3. **Geoms** – bars, lines, points, boxplots…
+4. **Stats** – aggregates (binning, smoothing)
+5. **Facets** – small multiples
+6. **Theme** – polish + branding
 
 ```r
-library(dplyr)
-library(tidyr)
-
-clean_df <- raw_df %>%
-  rename_with(tolower) %>%
-  mutate(across(where(is.character), trimws))
+ggplot(data, aes(x = season_score, fill = role)) +
+  geom_histogram(binwidth = 50, color = "white") +
+  facet_wrap(~ home_arena)
 ```
+
+---
+
+# Distribution: Histograms + Density
+
+```r
+hist_plot <- league_clean %>%
+  ggplot(aes(x = season_score)) +
+  geom_histogram(
+    binwidth = 40,
+    fill = "#0ef0ff",
+    color = "black"
+  ) +
+  geom_vline(
+    xintercept = median(league_clean$season_score, na.rm = TRUE),
+    linetype = "dashed",
+    color = "#ff5ef0"
+  ) +
+  labs(
+    title = "Season score distribution",
+    x = "Score",
+    y = "Players"
+  ) +
+  theme_minimal()
+```
+
+- Pair histograms with density curves when helpful
+- Always include bin size or reason for the shape
+
+---
+
+# Comparing Groups
+
+```r
+box_plot <- league_clean %>%
+  ggplot(aes(x = role, y = tag_accuracy_pct, fill = role)) +
+  geom_boxplot(alpha = 0.65) +
+  labs(
+    title = "Tag accuracy by role",
+    x = "Role",
+    y = "Tag accuracy (%)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+- Boxplots highlight spread + outliers quickly
+- Consider reordering factors (`fct_reorder`) to story-tell
+
+---
+
+# Relationships + Facets
+
+```r
+scatter_plot <- league_clean %>%
+  ggplot(aes(x = assists, y = season_score, color = preferred_loadout)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, color = "#ff5ef0") +
+  facet_wrap(~ home_arena) +
+  labs(
+    title = "Assists vs score by arena",
+    x = "Assists",
+    y = "Season score",
+    color = "Loadout"
+  ) +
+  theme_minimal()
+```
+
+- Facets surface location effects
+- Add trend lines to guide the eye (but mention assumptions)
+
+---
+
+# Styling + Accessibility
+
+- Use `scale_fill_manual()` or `scale_color_brewer()` for palettes
+- Large fonts for lecture slides; smaller for handouts
+- Add captions describing sample + timeframe
+- Use `theme_minimal(base_size = 14)` + `theme(legend.position = "bottom")`
+- Export plots as objects for reuse in Quarto/PDF
+
+---
+
+# Lab 03 Expectations
+
+- Deliver at least three polished plots: distribution, comparison, relationship
+- Save ggplot objects with descriptive names (`hist_plot`, `box_plot`, `scatter_plot`)
+- Mention insight(s) below each plot in the R Markdown narrative
+- Knit to HTML/PDF for clarity before uploading to Canvas

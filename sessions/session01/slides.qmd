@@ -1,43 +1,348 @@
 ---
-title: "Session 1 – Working with Data Frames"
-format:
+title: "Session 1 — Understanding Data, Data Types, and Dataframes"
+subtitle: "Introduction to Data Science & Analytics"
+format: 
   revealjs:
     slide-number: true
-    toc: true
-    incremental: true
-    transition: fade
-    footer: "ENIA-5120 · Georgetown University"
+    smaller: true
+    scrollable: true    
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
-    theme:
-      - simple
-      - ../slides-theme.scss
+    theme: serif     
 ---
 
-# Agenda
+# 👋 Today’s Goals
 
-- Review syllabus highlights
-- RStudio walkthrough
-- Data frames and tibbles
-- Live coding demo
+By the end of today, you will be able to:
 
----
-
-# Data Frames vs. Tibbles
-
-- `data.frame` is base R
-- `tibble` (tidyverse) keeps column types, friendly printing
-- Converting: `as_tibble(df)`
+- Explain what “data” means in analytics  
+- Identify different forms of data (structured, unstructured, semi-structured)  
+- Understand what tables, rows, columns, observations, and variables are  
+- Describe what a **dataframe** is in R  
+- Distinguish numerical, categorical, **nominal vs. ordinal**, date, and factor types  
+- Recognize common data quality issues  
+- Begin inspecting data in R  
 
 ---
 
-# Live Demo Outline
+# 🔍 Warm-Up: What data did you interact with today?
+
+- Phone step counter  
+- Weather app  
+- Spotify / YouTube recommendations  
+- Canvas assignment status  
+- Google search history  
+- Bank transactions  
+- Social media posts  
+- Uber / Lyft GPS  
+
+> Data is everywhere — and constantly being collected.
+
+---
+
+# 🔄 The Data Science Workflow
+
+```{mermaid}
+flowchart LR
+  A[Acquire / Collect] --> B[Clean / Wrangle]
+  B --> C[Explore / EDA]
+  C --> D[Visualize Findings]
+  D --> E[Model & Validate]
+  E --> F[Communicate & Deploy]
+  style B fill:#ffe08a,stroke:#000
+  classDef active fill:#ffe08a,stroke:#000,color:#000,font-weight:bold;
+```
+
+- We live in the yellow **Clean/Wrangle** box today.
+- Good cleaning enables every downstream step: EDA, visualization, modeling.
+
+---
+
+# 📦 What Is Data?
+
+**Simple definition:** Data = recorded information.
+
+Data comes in many forms:
+
+- Numbers  
+- Text  
+- Images  
+- Video  
+- Audio  
+- Clicks  
+- Sensors  
+- Transactions  
+- Social interactions  
+
+---
+
+# 🧭 Types of Data in the Real World
+
+| Type | Structure | Examples | Where you see it |
+| --- | --- | --- | --- |
+| **Structured** | Rows + columns | Spreadsheets, CSVs, SQL tables | Finance reports, gradebooks |
+| **Semi-Structured** | Tagged but irregular | JSON, XML, API payloads | Web services, mobile apps |
+| **Unstructured** | No fixed schema | Images, text, video, audio | Social media, sensors |
+
+> We will live primarily in the **structured** column this semester, but you will see hints of the others in APIs/shiny dashboards later.
+
+---
+
+# 📊 Why Focus on Tabular Data?
+
+- Most analytics → spreadsheets, reporting tables, dashboards  
+- Easiest way to learn logic of data manipulation  
+- R and tidyverse are built around tabular workflows  
+- Models require clean, clearly defined variables  
+- Visualization becomes easier and more useful  
+
+---
+
+# 🧱 What Is a Dataset?
+
+A dataset is a **collection of observations**.
+
+Each dataset contains:   
+- **Rows** → individual observations     
+- **Columns** → variables or attributes     
+- **Cells** → values  
+
+---
+
+# 📐 Anatomy of a Table
+
+```text
+| player_id | home_arena | season_score | role    |
+|-----------|------------|--------------|---------|
+| P-0041    | Neon Yard  | 780          | Striker |
+| P-0199    | Glow Hall  | 655          | Anchor  |
+| P-0112    | Glow Hall  | NA           | Scout   |
+```
+
+- **Rows** = single player
+- **Columns** = attributes we measure
+- **Cells** = individual facts (may be missing!)
+
+---
+
+# 📁 What Is a “Dataframe” in R?
+
+A **dataframe** is R’s way of storing tabular data.
+
+- Each column = one variable  
+- Each column has **one type**  
+- Rows represent observations  
+- Foundation for almost all analysis  
 
 ```r
-library(readr)
-library(dplyr)
+ENIA_ROOT <- "~/ENIA-5120"
+players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
 
-df <- read_csv("data/laser_league_players.csv")
-df %>%
-  group_by(home_arena) %>%
-  summarise(avg_wellbeing = mean(wellbeing_index, na.rm = TRUE))
+class(players)
+dplyr::glimpse(players)
+summary(players$season_score)
 ```
+
+```text
+[1] "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
+Rows: 100
+Columns: 11
+$ player_id        <chr> "P-0001", "P-0002", ...
+$ role             <chr> "Striker", "Anchor", ...
+$ season_score     <dbl> 720, 655, NA, 590, ...
+$ tag_accuracy_pct <dbl> 78.2, 70.5, 65.1, ...
+$ assists          <dbl> 120, 98, 88, 73, ...
+   Min. 1st Qu. Median Mean 3rd Qu. Max.
+  320     520     610   612    705   890
+```
+
+- Internally, a dataframe is a **list of equal-length vectors**.
+- Keeping types consistent (character vs numeric) prevents silent bugs later.
+
+---
+
+# 🧩 Common Variable Types (Laser League examples)
+
+| Type | What it looks like | Example column |
+| --- | --- | --- |
+| **Numeric (continuous)** | Counts, rates | `season_score`, `assists`, `tag_accuracy_pct` |
+| **Numeric (discrete)** | Whole numbers | `matches_played` |
+| **Categorical (nominal)** | Names/labels | `home_arena`, `preferred_loadout` |
+| **Categorical (ordinal)** | Ordered labels | `skill_tier` (Bronze < Silver < Gold) |
+| **Logical** | TRUE/FALSE flags | `injured_flag` |
+| **Date / time** | Calendar stamps | `last_match_date` |
+| **Factor** | Encoded categorical (R) | `role` as factor for modeling |
+
+---
+
+# 🔠 Nominal vs. Ordinal (Important!)
+
+| Type | Example | Visual cue |
+| --- | --- | --- |
+| **Nominal** (unordered) | `home_arena` = {Neon Yard, Glow Hall, Photon Dome} | 🔹 Neon | 🔸 Glow | 🔺 Photon (reorder any way) |
+| **Ordinal** (ordered) | `skill_tier` = {Rookie < Veteran < Elite} | Rookie → Veteran → Elite |
+
+- Nominal categories are labels; order never matters.
+- Ordinal categories imply ranking; keep sequences when encoding factors.
+- Be precise: mixing these up causes broken summaries and misleading models.
+
+---
+
+# ⚠️ Data Quality Issues to Watch
+
+- Missing values (e.g., some players have no `season_score`)
+- Duplicated IDs after data entry
+- Weird casing (`neon yard` vs `Neon Yard`)
+- Impossible numbers (negative assists?)  
+- Inconsistent categories (`Anchor` vs `anchor`)
+- Timestamps saved as text
+
+We will practice spotting these issues in Lab 01 and fix them systematically in later sessions.
+
+---
+
+# 👀 Quick R Demo (Live)
+
+```r
+library(dplyr)
+library(ggplot2)
+
+ENIA_ROOT <- "~/ENIA-5120"
+players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
+
+players %>%
+  count(role) %>%
+  ggplot(aes(x = role, y = n, fill = role)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "Players by role", x = NULL, y = "Count") +
+  theme_minimal()
+```
+
+- We preview the data, build a quick count plot, and save it as `role_plot`
+- This pattern is key for initial data analysis (read → inspect → visualize)
+
+```text
+# A tibble: 4 × 2
+  role     n
+  <chr> <int>
+1 Anchor   27
+2 Scout    25
+3 Striker  24
+4 Support  24
+```
+---
+
+- Visualize it immediately to reinforce the habit.
+
+```{r role-plot, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Example role distribution (Laser League data)", fig.width=6.5, fig.height=3.5}
+library(ggplot2)
+library(tibble)
+role_counts <- tibble(
+  role = c("Anchor", "Scout", "Striker", "Support"),
+  n = c(27, 25, 24, 24)
+)
+
+ggplot(role_counts, aes(x = role, y = n, fill = role)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "Players by role (example)", x = NULL, y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+- The column chart mirrors this summary; we can talk through which roles dominate.
+
+---
+
+# 🧠 Why Variable Types Matter
+
+- Encodes how R treats the column (math vs. grouping vs. dates)
+- Drives visualization defaults (continuous vs. discrete scales)
+- Impacts modeling formulas (factors vs. numeric)
+- Avoids silent bugs like “ZIP codes minus ZIP codes”
+
+Use `glimpse()` or `dplyr::count(where(is.character))` to sanity check types the moment you read in data.
+
+---
+
+# 🧹 Understanding Common Data Problems
+
+Data gets messy because of:
+
+- Manual entry & typos  
+- Multiple systems exporting data differently  
+- Missing context (optional survey fields)  
+- Copy/paste casing differences  
+- Merge errors that duplicate IDs  
+- Sensors or loggers dropping packets  
+
+We will turn these into learning opportunities in labs.
+
+---
+
+# ⚠️ Typical Problems You Will Encounter
+
+| Issue | Laser League example | Quick check |
+| --- | --- | --- |
+| **Missing values** | `season_score` empty for new recruits | `colSums(is.na(players))` |
+| **Outliers** | Accuracy = 150% (impossible) | `summary(players$tag_accuracy_pct)` |
+| **Wrong type** | `last_match_date` stored as text | `lubridate::ymd(last_match_date)` |
+| **Inconsistent labels** | `neon yard` vs `Neon Yard` | `count(players, home_arena)` |
+| **Duplicates** | Same `player_id` twice after merge | `duplicated(players$player_id)` |
+
+---
+
+# 🔍 Detecting Problems in R
+
+```r
+players %>%
+  summarise(
+    missing_score = sum(is.na(season_score)),
+    bad_accuracy = sum(tag_accuracy_pct > 100 | tag_accuracy_pct < 0),
+    unique_arenas = dplyr::n_distinct(home_arena)
+  )
+
+players %>%
+  count(home_arena) %>%
+  arrange(desc(n))
+```
+
+- Quick summaries expose anomalies immediately
+- Save these checks in your labs → earns rubric points for reproducibility
+
+---
+
+# 🧠 Mini Exercise: Spot the Issues
+
+```text
+| player_id | home_arena  | season_score | preferred_loadout |
+|-----------|-------------|--------------|-------------------|
+| P-0220    | neon yard   | 905          | Hyper Beam        |
+| P-0455    | Glow Hall   | NA           | Pulse Shield      |
+| P-0220    | Neon Yard   | 905          | Hyper Beam        |
+| P-0512    | Photon Dome | -10          | " "               |
+```
+
+- Which rows worry you?
+- What functions could you run to confirm?
+- How would you document the fixes in your R Markdown?
+
+---
+
+# 📝 Summary
+
+- Data comes in many forms  
+- Structured/tabular data is our focus  
+- Dataframes store tables in R  
+- Variable types matter for analysis  
+- Nominal vs. Ordinal is a key distinction  
+- Real data is messy — understanding problems is step #1  
+- Next: **EDA and summary statistics**  
+
+---
+
+# 👉 Next Session
+
+- Summary statistics     
+- Exploratory Data Analysis 101  
+- Visualization 101.       
+
+---

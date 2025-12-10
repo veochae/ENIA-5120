@@ -1,11 +1,11 @@
 total_points: 20
 criteria:
-  - id: variety
-    description: "Creates required plots with correct data"
+  - id: engineered_features
+    description: "Implements all required engineered columns with correct logic and NA handling."
     max_points: 10
-  - id: styling
-    description: "Applies clear labels/themes and facets"
+  - id: squad_context
+    description: "Creates meaningful squad-level summaries and correctly joins them back to players."
     max_points: 6
-  - id: reflection
-    description: "Includes short interpretation in notebook"
+  - id: documentation
+    description: "Completes feature_glossary and narrative explaining why the engineered fields matter."
     max_points: 4

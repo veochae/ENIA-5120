@@ -1,6 +1,6 @@
 ---
 title: "Session 0"
-author: "First Day of Class!"
+subtitle: "First Day of Class!"
 format:
   revealjs:
     slide-number: true
@@ -87,26 +87,35 @@ flowchart LR
 ---
 
 # Homeworks
-- Homeworks are submitted on a bi-weekly basis
-- Each week, you will submit a "portion" of a Data Science Report
-- At the end of all the homeworks, you will have a full Data Science Report
-- Goal is to get you a template of a Data Science report to fall back on
+- For each homework, you will submit a "portion" of a Data Science Report.   
+- At the end of all the homeworks, you will have a full Data Science Report.   
+- Goal is to get you a template of a Data Science report to fall back on.   
+- This can be done as a group up to 3 students in a team.
 
 ---
 
+# Submission Formats
+- All submissions should follow:   
+- `lab00` _ `<GUID>` . `<FILE_FORMAT>`.  
+- `hw00` _ `<GUID>` _ `<GUID>` . `<FILE_FORMAT>`.  
+- `fp` _ `<GUID>` _ `<GUID>` . `<FILE_FORMAT>`.  
+- Failure to do so may experience delay in grading.  
+  
+---
+
 # Final Project
-- Final Project will be replication of the homeworks
-- With the dataset of your choosing, you will leverage all the DS toolkits you have learned throughout the semester to do a Data Science project
-- **Final Deliverables:** Data Science report and a presentation
-- This will be a group project (pending enrollment)
+- Final Project will be replication of the homeworks.  
+- With the dataset of your choosing, you will leverage all the DS toolkits you have learned throughout the semester to do a Data Science project.  
+- **Final Deliverables:** Data Science report and a presentation.  
+- This will be a group project (pending enrollment).  
 
 ---
 
 # Some Ground Rules
-- No such thing as "Dumb Question"
-- After each lecture, please don't hesitate to give me feedback
-- Let's try our best to put away our phones during lecture
-- LLMs are your friend, use them! But.. understand what it's doing
+- No such thing as "Dumb Question".  
+- After each lecture, please don't hesitate to give me feedback.  
+- Let's try our best to put away our phones during lecture.  
+- LLMs are your friend, use them! But.. understand what it's doing.  
 
 ---
 
@@ -129,16 +138,21 @@ flowchart LR
 
 ---
 
-# Choose Your Datasets
-- In canvas, you will see that there are 4 different datasets of choice
-- Each of them are themed differently
-```{mermaid}
-flowchart LR
-  A[(Finance)] --- B[(Demography)] --- C[(Marketing)] --- D[(Plants)]
-```
+# Repository Creation
+- On `Desktop` or folder of your choosing, create a folder called `ENIA-5120`.  
+- Inside, create 3 folders: `data`,`labs`,`homeworks`.  
+- Go to canvas, `Assignments/Lab 00` download the files.   
+- Create a folder `labs/lab0`.  
+- Place the files in the folder.   
 
-- You will choose one of the datasets, and stick with it for your labs and homeworks
-- This is not your final project dataset
+---
+
+# Your Dataset for the Course
+- In canvas, you will see 2 different Datasets.  
+- `laser_league_event.csv` and `laser_league_players.csv`.  
+- Download both files and save in `ENIA-5120/data`.  
+- We will first start using `laser_league_players.csv`.  
+- The datasets are not your final project datasets
 
 ---
 

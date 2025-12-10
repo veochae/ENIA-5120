@@ -1,8 +1,8 @@
 session: 3
-title: "Session 3 – Data Wrangling"
+title: "Session 3 – Data Visualization"
 module:
-  name: "Week 3 – Data Wrangling"
-  description: "Focus on tidy data principles and transforming messy sources into analysis-ready tables."
+  name: "Week 3 – Visualization Foundations"
+  description: "Explore ggplot2, practice multiple geoms, and communicate insights with polished visuals."
 slides:
   source: slides.qmd
   rendered: slides.html

@@ -1,11 +1,11 @@
 total_points: 20
 criteria:
-  - id: cleaning
-    description: "Removes duplicates and standardizes columns"
-    max_points: 8
-  - id: missing
-    description: "Handles missing values appropriately"
+  - id: variety
+    description: "Creates required plots with correct data"
+    max_points: 10
+  - id: styling
+    description: "Applies clear labels/themes and facets"
     max_points: 6
-  - id: summary
-    description: "Produces summary table with commentary"
-    max_points: 6
+  - id: reflection
+    description: "Includes short interpretation in notebook"
+    max_points: 4

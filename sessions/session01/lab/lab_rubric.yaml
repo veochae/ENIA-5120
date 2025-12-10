@@ -1,11 +1,11 @@
 total_points: 15
 criteria:
-  - id: load_data
-    description: "Loads dataset and inspects structure"
+  - id: setup_preview
+    description: "Loads players via ENIA_ROOT, captures table preview, and records row/column counts."
     max_points: 5
-  - id: summary_tbl
-    description: "Creates grouped summary table"
+  - id: type_and_missing
+    description: "Saves column names/types, runs summary() for season_score, and creates missing_totals + missing_checks."
     max_points: 6
-  - id: reflection
-    description: "Provides thoughtful reflection"
+  - id: quality_checks
+    description: "Reports home_arena counts, duplicate IDs, and answers reflection questions thoughtfully."
     max_points: 4

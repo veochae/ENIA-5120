@@ -5,13 +5,14 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+ENIA_ROOT <- "~/ENIA-5120"
 library(broom)
 library(tibble)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-league_df <- readr::read_csv("data/laser_league_players.csv")
+league_df <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
 model_lm <- lm(season_score ~ matches_played + assists + tag_accuracy_pct + shield_uptime_pct, data = league_df)
 summary(model_lm)
 ```

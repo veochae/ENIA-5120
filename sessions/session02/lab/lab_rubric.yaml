@@ -1,11 +1,11 @@
 total_points: 20
 criteria:
-  - id: scatter
-    description: "Scatter plot uses aesthetics + theme"
+  - id: cleaning
+    description: "Removes duplicates and standardizes columns"
     max_points: 8
-  - id: bar
-    description: "Bar chart summarizes means correctly"
-    max_points: 8
-  - id: export
-    description: "Plots saved to PNG and referenced"
-    max_points: 4
+  - id: missing
+    description: "Handles missing values appropriately"
+    max_points: 6
+  - id: summary_viz
+    description: "Produces summary table and simple visualization with commentary"
+    max_points: 6

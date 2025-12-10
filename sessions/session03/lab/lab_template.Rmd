@@ -1,60 +1,41 @@
 ---
-title: "Lab 03 – Data Cleaning"
+title: "Lab 03 – Visualization"
 author: "Your Name"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-library(dplyr)
-library(janitor)
-library(stringr)
+ENIA_ROOT <- "~/ENIA-5120"
+library(readr)
+library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Load data
-# Load data
 ```{r}
-league_raw <- readr::read_csv("data/laser_league_players.csv")
+league_df <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
 ```
 
-## Remove duplicates
 ```{r}
-league_dedup <- league_raw %>% distinct(player_id, .keep_all = TRUE)
+hist_plot <- ggplot(league_df, aes(season_score)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "white") +
+  geom_vline(aes(xintercept = median(season_score, na.rm = TRUE)), linetype = "dashed", color = "red") +
+  labs(title = "Season Score Distribution", x = "Season score", y = "Count")
+hist_plot
 ```
 
-## Clean columns & missing values
 ```{r}
-league_clean <- league_dedup %>%
-  clean_names() %>%
-  mutate(
-    squad_id = stringr::str_trim(stringr::str_to_upper(squad_id)),
-    preferred_loadout = if_else(is.na(preferred_loadout) | preferred_loadout == "", "Unknown Loadout", preferred_loadout),
-    favorite_drink = stringr::str_to_title(favorite_drink)
-  )
+box_plot <- ggplot(league_df, aes(role, tag_accuracy_pct)) +
+  geom_boxplot(fill = "gray85") +
+  labs(title = "Tag Accuracy by Role", x = "Role", y = "Tag accuracy (%)") +
+  theme_minimal()
+box_plot
 ```
 
-## Impute scores
 ```{r}
-score_imputed <- league_clean %>%
-  group_by(squad_name) %>%
-  mutate(season_score = if_else(
-    is.na(season_score),
-    median(season_score, na.rm = TRUE),
-    season_score
-  )) %>%
-  ungroup()
+scatter_plot <- ggplot(league_df, aes(assists, season_score, color = preferred_loadout)) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~ home_arena) +
+  labs(title = "Assists vs Season Score", x = "Assists", y = "Season score") +
+  theme_minimal()
+scatter_plot
 ```
-
-## Summary
-```{r}
-arena_summary <- score_imputed %>%
-  group_by(home_arena) %>%
-  summarise(
-    players = n(),
-    avg_accuracy = mean(tag_accuracy_pct, na.rm = TRUE)
-  )
-arena_summary
-```
-
-## Reflection
-Describe one challenge you faced while cleaning the data.

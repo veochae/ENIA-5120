@@ -1,8 +1,8 @@
 session: 5
-title: "Session 5 – Data Visualization Deep Dive"
+title: "Session 5 – Feature Engineering & Transformation"
 module:
-  name: "Week 5 – Visualization"
-  description: "Applying grammar of graphics, exploring geoms, and polishing plots."
+  name: "Week 5 – Transformation & Features"
+  description: "Transform variables, engineer new predictors, and document feature logic."
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -11,10 +11,10 @@ lab:
   assignment_key: lab05
   files:
     - path: lab/lab_spec.md
-      display_name: "Lab 05 – Visualization Spec.md"
+      display_name: "Lab 05 – Feature Engineering Spec.md"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 05 – Visualization Template.Rmd"
+      display_name: "Lab 05 – Feature Engineering Template.Rmd"
     - path: lab/lab_tests.R
-      display_name: "Lab 05 – Visualization Tests.R"
+      display_name: "Lab 05 – Feature Engineering Tests.R"
     - path: lab/lab_rubric.yaml
       display_name: "Lab 05 – Rubric.yaml"

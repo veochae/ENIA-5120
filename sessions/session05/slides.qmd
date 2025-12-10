@@ -1,29 +1,147 @@
----
-title: "Session 5 – Data Visualization Deep Dive"
+title: "Session 5 – Feature Engineering & Transformation"
 format:
   revealjs:
     slide-number: true
     toc: true
+    incremental: true
     self-contained: true
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
 ---
 
 # Agenda
-- Recap of grammar of graphics
-- Exploring common geoms
-- Faceting and themes best practices
+
+- Why feature engineering matters
+- Review of handy transformation verbs (`mutate`, `across`, `case_when`)
+- Building new predictors from Laser League data
+- Documenting assumptions + storing engineered tables for modeling
 
 ---
 
-# Geoms Refresher
-- `geom_histogram`
-- `geom_boxplot`
-- `geom_point`
-- `geom_bar`
+# Why Feature Engineering?
+
+- Raw data rarely captures the true signal
+- Transformations expose relationships models can learn
+- Helps normalize scale, reduce skew, encode categories
+- Often the highest-leverage step between “EDA” and “Modeling”
+
+> “Better data beats better algorithms” — Andrew Ng
 
 ---
 
-# Styling Tips
-- Titles & subtitles
-- Axis labels & scales
-- Theme selection
-- Legend placement
+# Feature Workflow
+
+```{mermaid}
+flowchart LR
+  A[Raw columns] --> B[Transform / clean]
+  B --> C[Engineer new features]
+  C --> D[Validate + document]
+  D --> E[Model-ready table]
+```
+
+- Keep transformations reproducible in R scripts/Rmd
+- Version engineered tables or rebuild from scratch each run
+
+---
+
+# Laser League Ingredients
+
+```r
+ENIA_ROOT <- "~/ENIA-5120"
+players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
+```
+
+Key columns for features:
+
+- Volumetrics: `season_score`, `assists`, `matches_played`
+- Rates: `tag_accuracy_pct`, `shield_uptime_pct`, `energy_delta_pct`
+- Physical/mental: `stamina_score`, `reflex_score`, `reaction_time_sec`
+- Context: `role`, `home_arena`, `preferred_loadout`, `favorite_drink`
+
+---
+
+# Mutate + Across
+
+```r
+players_transformed <- players %>%
+  mutate(
+    score_per_match = season_score / matches_played,
+    assist_rate = assists / matches_played,
+    high_accuracy = tag_accuracy_pct >= 80
+  ) %>%
+  mutate(across(
+    c(season_score, assists, stamina_score),
+    ~ replace_na(., median(., na.rm = TRUE))
+  )) %>%
+  mutate(
+    stamina_adjusted_score = score_per_match * (stamina_score / 100)
+  )
+```
+
+- Use `mutate()` for ratios + boolean flags
+- `across()` lets you treat multiple numeric columns similarly
+- Always guard against divide-by-zero and missing values
+
+---
+
+# Binning & Buckets
+
+```r
+players_binned <- players_transformed %>%
+  mutate(
+    score_bucket = case_when(
+      score_per_match >= 80 ~ "Elite",
+      score_per_match >= 60 ~ "Competitive",
+      TRUE ~ "Needs Coaching"
+    ),
+    accuracy_bucket = cut(tag_accuracy_pct,
+      breaks = c(0, 60, 75, 90, 100),
+      labels = c("Low", "Medium", "High", "Pro")
+    )
+  )
+```
+
+- Bucketing helps with interpretability + logistic models
+- Store bucket definitions in one place so homework writeups stay consistent
+
+---
+
+# Interactions + Aggregations
+
+```r
+players_features <- players_binned %>%
+  group_by(squad_id) %>%
+  mutate(
+    squad_avg_score = mean(season_score, na.rm = TRUE),
+    squad_rank = dense_rank(desc(squad_avg_score))
+  ) %>%
+  ungroup() %>%
+  mutate(
+    score_gap_vs_squad = season_score - squad_avg_score,
+    assist_x_accuracy = assist_rate * tag_accuracy_pct,
+    energy_balance = energy_delta_pct - shield_uptime_pct
+  )
+```
+
+- Interaction terms capture combined effects (assists * accuracy)
+- Group-level aggregates provide context (player vs squad average)
+
+---
+
+# Feature Checklist
+
+- [ ] Every new column has a clear name + definition
+- [ ] No engineered column introduces NAs accidentally
+- [ ] Ratios protect against divide-by-zero
+- [ ] Buckets include all edge cases (>= vs >)
+- [ ] Save engineered tibble (e.g., `players_features`) for future labs/homework
+
+---
+
+# Lab 05 Preview
+
+- Build a reusable transformation pipeline
+- Produce engineered columns: `score_per_match`, `assist_rate`, `high_glow`, `accuracy_bucket`
+- Create at least one interaction or group-level feature
+- Write 2–3 sentences describing how these features could help modeling
+
+Submit the `.Rmd` with code + short reflections on Canvas.

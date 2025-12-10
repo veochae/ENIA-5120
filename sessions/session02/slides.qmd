@@ -1,39 +1,124 @@
----
-title: "Session 2 – Visualization with ggplot2"
+title: "Session 2 – Wrangling & Quick Summaries"
 format:
   revealjs:
     slide-number: true
-    incremental: true
     toc: true
+    incremental: true
     transition: fade
-    footer: "ENIA-5120 · University of Virginia"
-    theme:
-      - simple
-    
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
+    smaller: true
+    theme: serif
 ---
 
-# Why ggplot2?
+# Agenda
 
-- Grammar of Graphics
-- Consistent layering
-- Works great with tidy data
+- Laser League data tour (columns that matter this week)
+- Build reproducible wrangling pipelines
+- Standardize text + handle missing values
+- Summaries + quick visuals to describe a cleaned dataset
 
 ---
 
-# Template
+# Laser League Players (Recap)
+
+- Path we will use in labs:  
+  `ENIA_ROOT <- "~/ENIA-5120"`  
+  `players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))`
+- Core columns for wrangling
+  - `player_id`, `squad_id`, `role`, `preferred_loadout`
+  - Numeric performance fields: `season_score`, `tag_accuracy_pct`, `assists`
+  - Text columns with inconsistent casing: `home_arena`, `favorite_drink`
+
+---
+
+# Tidyverse Wrangling Workflow
+
+```r
+library(dplyr)
+library(janitor)
+
+league_clean <- players %>%
+  clean_names() %>%                # snake_case column names
+  distinct(player_id, .keep_all = TRUE) %>%  # remove duplicates
+  mutate(
+    squad_id = toupper(trimws(squad_id)),
+    home_arena = stringr::str_to_title(home_arena),
+    preferred_loadout = tidyr::replace_na(preferred_loadout, "Unknown Loadout")
+  )
+```
+
+- Keep verbs in a logical order so it reads like a story
+- Store intermediate versions when testing (e.g., `league_raw`, `league_dedup`)
+
+---
+
+# Handling Missing Values
+
+- Numeric fields → decide between dropping, imputing, or flagging
+- For Lab 02 we will use **group-wise medians** for `season_score`
+
+```r
+score_imputed <- league_clean %>%
+  group_by(squad_name) %>%
+  mutate(
+    season_score = if_else(
+      is.na(season_score),
+      median(season_score, na.rm = TRUE),
+      season_score
+    )
+  ) %>%
+  ungroup()
+```
+
+- Always explain *why* a choice was made (Canvas submission comment or knit text)
+
+---
+
+# Summary Tables
+
+```r
+arena_summary <- score_imputed %>%
+  group_by(home_arena) %>%
+  summarise(
+    players = n(),
+    avg_accuracy = mean(tag_accuracy_pct, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(avg_accuracy))
+```
+
+- Use `summarise()` for aggregate metrics
+- Remember `na.rm = TRUE`
+- Keep resulting table for future joins/visualizations
+
+---
+
+# Quick Visuals from Summaries
 
 ```r
 library(ggplot2)
 
-ggplot(data, aes(x = var_x, y = var_y, color = group)) +
-  geom_point() +
-  labs(title = "", subtitle = "", caption = "")
+arena_plot <- arena_summary %>%
+  ggplot(aes(x = reorder(home_arena, avg_accuracy), y = avg_accuracy)) +
+  geom_col(fill = "#ff5ef0") +
+  coord_flip() +
+  labs(
+    x = "Home Arena",
+    y = "Avg Tag Accuracy (%)",
+    title = "Laser League accuracy by arena"
+  ) +
+  theme_minimal()
 ```
+
+- Even simple bar charts help validate that summaries make sense
+- Save ggplot objects so graders (and future you) can inspect them
 
 ---
 
-# Tips
+# Checklist for Lab 02
 
-- Use `theme_minimal()` for clarity
-- Always label axes
-- Use `scale_color_brewer()` when categories > 3
+- [ ] Read players data via `ENIA_ROOT`
+- [ ] Deduplicate + clean column names
+- [ ] Standardize text fields + impute median `season_score`
+- [ ] Produce `arena_summary` + `arena_plot`
+- [ ] Knit, double-check warnings, submit to Canvas

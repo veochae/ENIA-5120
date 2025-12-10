@@ -1,46 +1,71 @@
 ---
-title: "Lab 02 – ggplot Practice"
+title: "Lab 02 – Data Wrangling & Summary"
 author: "Your Name"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-library(readr)
+ENIA_ROOT <- "~/ENIA-5120"
 library(dplyr)
+library(janitor)
+library(stringr)
 library(ggplot2)
-library(forcats)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Load data
+# Load data
 ```{r}
-league_df <- read_csv("data/laser_league_players.csv")
+league_raw <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
 ```
 
-## Scatter plot
-
+## Remove duplicates
 ```{r}
-plot_scatter <- ggplot(league_df, aes(matches_played, tag_accuracy_pct, color = role)) +
-  geom_point(alpha = 0.7) +
-  geom_smooth(se = FALSE) +
-  labs(title = "Matches vs Tag Accuracy", x = "Matches played", y = "Tag accuracy (%)") +
-  theme_minimal()
-plot_scatter
-
-ggsave("plot_scatter.png", plot_scatter, width = 6, height = 4)
+league_dedup <- league_raw %>% distinct(player_id, .keep_all = TRUE)
 ```
 
-## Bar plot
-
+## Clean columns & missing values
 ```{r}
-plot_bar <- league_df %>%
+league_clean <- league_dedup %>%
+  clean_names() %>%
+  mutate(
+    squad_id = stringr::str_trim(stringr::str_to_upper(squad_id)),
+    preferred_loadout = if_else(is.na(preferred_loadout) | preferred_loadout == "", "Unknown Loadout", preferred_loadout),
+    favorite_drink = stringr::str_to_title(favorite_drink)
+  )
+```
+
+## Impute scores
+```{r}
+score_imputed <- league_clean %>%
+  group_by(squad_name) %>%
+  mutate(season_score = if_else(
+    is.na(season_score),
+    median(season_score, na.rm = TRUE),
+    season_score
+  )) %>%
+  ungroup()
+```
+
+## Summary
+```{r}
+arena_summary <- score_imputed %>%
   group_by(home_arena) %>%
-  summarise(avg_score = mean(season_score, na.rm = TRUE)) %>%
-  ggplot(aes(fct_reorder(home_arena, avg_score), avg_score, fill = home_arena)) +
-  geom_col(show.legend = FALSE) +
-  geom_text(aes(label = round(avg_score, 0)), vjust = -0.2) +
-  labs(title = "Average Season Score by Arena", x = "Home arena", y = "Avg season score") +
-  theme_minimal()
-plot_bar
-
-ggsave("plot_bar.png", plot_bar, width = 6, height = 4)
+  summarise(
+    players = n(),
+    avg_accuracy = mean(tag_accuracy_pct, na.rm = TRUE)
+  )
+arena_summary
 ```
+
+## Visualization
+```{r}
+arena_plot <- ggplot(arena_summary, aes(home_arena, avg_accuracy, fill = home_arena)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "Average Tag Accuracy by Arena", x = "Home arena", y = "Avg tag accuracy (%)") +
+  theme_minimal()
+arena_plot
+```
+
+## Reflection
+Describe one challenge you faced while cleaning or summarizing the data.

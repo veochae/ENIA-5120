@@ -42,13 +42,13 @@ labs:
     submission_types: ["online_upload"]
   - key: lab02
     session: session02
-    name: "Lab 02 – Exploratory Data Analysis"
+    name: "Lab 02 – Wrangling & Summary"
     due_at: "2026-02-01T23:59:00-05:00"
     points: 15
     submission_types: ["online_upload"]
   - key: lab03
     session: session03
-    name: "Lab 03 – Data Cleaning"
+    name: "Lab 03 – Visualization Foundations"
     due_at: "2026-02-08T23:59:00-05:00"
     points: 20
     submission_types: ["online_upload"]
@@ -60,7 +60,7 @@ labs:
     submission_types: ["online_upload"]
   - key: lab05
     session: session05
-    name: "Lab 05 – Visualization"
+    name: "Lab 05 – Feature Engineering & Transformation"
     due_at: "2026-02-22T23:59:00-05:00"
     points: 20
     submission_types: ["online_upload"]
@@ -116,7 +116,7 @@ homework:
     points: 30
     submission_types: ["online_upload"]
   - key: hw02
-    session: session04
+    session: session05
     release_session: session05
     name: "Homework 02 – EDA & Hypothesis Testing"
     due_at: "2026-02-24T23:59:00-05:00"

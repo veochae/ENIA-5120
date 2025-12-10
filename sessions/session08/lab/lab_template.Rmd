@@ -5,6 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+ENIA_ROOT <- "~/ENIA-5120"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -12,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(dplyr)
 
-league_df <- read_csv("data/laser_league_players.csv") %>%
+league_df <- read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv")) %>%
   mutate(high_glow = if_else(glow_rating >= 8, 1, 0))
 
 glow_model <- glm(

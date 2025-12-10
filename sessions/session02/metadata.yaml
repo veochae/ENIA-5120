@@ -1,8 +1,8 @@
 session: 2
-title: "Session 2 – Visualization with ggplot2"
+title: "Session 2 – Wrangling & Quick Summaries"
 module:
-  name: "Week 2 – Visualization"
-  description: "Deep dive into the ggplot2 grammar, layering, themes, and exporting publication-ready plots."
+  name: "Week 2 – Wrangling & Summary"
+  description: "Data Cleaning, Exploratory Data Analysis, and Simple Visuals"
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -11,9 +11,9 @@ lab:
   assignment_key: lab02
   files:
     - path: lab/lab_spec.md
-      display_name: "Lab 02 – Spec.md"
+      display_name: "Lab 02 – Wrangling Spec.md"
     - path: lab/lab_spec.pdf
-      display_name: "Lab 02 – Spec.pdf"
+      display_name: "Lab 02 – Wrangling Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 02 – Template.Rmd"
     - path: lab/lab_rubric.yaml

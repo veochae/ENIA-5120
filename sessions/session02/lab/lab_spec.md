@@ -1,13 +1,19 @@
-# Lab 02 – ggplot Practice
+# Lab 02 – Data Wrangling & Summary
 
 ## Goals
-
-- Build multiple plots from the Laser League dataset
-- Apply themes, annotations, and exports
+- Practice select/filter/mutate pipelines
+- Handle missing values and inconsistent casing
+- Produce a cleaned dataset ready for analysis and a simple summary visualization
 
 ## Tasks
-
-1. Reuse `league_df` from Lab 01 (or reload `data/laser_league_players.csv`).
-2. Create `plot_scatter`: `matches_played` vs `tag_accuracy_pct`, colored by `role`, with a smooth trend line.
-3. Create `plot_bar`: mean `season_score` by `home_arena` (bar chart with labels).
-4. Save each plot as `plot_scatter.png` and `plot_bar.png` in the working directory.
+1. Load `~/ENIA-5120/data/laser_league_players.csv` as `league_raw`.
+2. Remove duplicate rows based on `player_id` to create `league_dedup`.
+3. Build `league_clean` that:
+   - Uses `janitor::clean_names()`
+   - Trims whitespace and uppercases `squad_id`
+   - Replaces missing `preferred_loadout` with "Unknown Loadout"
+   - Standardizes `favorite_drink` to title case
+4. Create `score_imputed` by replacing missing `season_score` with the median score for each `squad_name`.
+5. Summarize the cleaned data as `arena_summary` with player counts and average `tag_accuracy_pct` per `home_arena`.
+6. Build a simple visualization (e.g., bar chart stored as `arena_plot`) showing the average `tag_accuracy_pct` by `home_arena`.
+7. Knit the template and submit the `.Rmd` to Canvas.

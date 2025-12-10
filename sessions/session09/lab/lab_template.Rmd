@@ -5,12 +5,13 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+ENIA_ROOT <- "~/ENIA-5120"
 library(purrr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-cust_df <- readr::read_csv("data/laser_league_players.csv")
+cust_df <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
 num_cols <- cust_df %>%
   dplyr::select(age, volunteer_hours, energy_reduction_pct, wellbeing_index, monthly_water_usage_l)
 cust_scaled <- scale(num_cols)

@@ -2,7 +2,7 @@ session: 1
 title: "Session 1 – Working with Data Frames"
 module:
   name: "Week 1 – Intro to R"
-  description: "Hands-on walkthrough of RStudio, data frames vs. tibbles, and grouped summaries."
+  description: "Hands-on walkthrough of RStudio and understanding fundamentals of data."
 slides:
   source: slides.qmd
   rendered: slides.html

@@ -1,46 +1,133 @@
 ---
-title: "Lab 01 – Intro to R"
+title: "Lab 01 – Data Anatomy & Type Checks"
 author: "Your Name"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: readable
 ---
 
 ```{r setup, include=FALSE}
+# Load necessary libraries (we're focusing on base R + readr/dplyr today)
 library(readr)
 library(dplyr)
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+# Define the root path (students should adjust if their ENIA folder lives elsewhere)
+ENIA_ROOT <- "~/ENIA-5120"
 ```
 
-## 1. Load data
+## 1. Loading and Inspecting the Data
+In Session 1 we learned that the first step is always to bring the data into R and check its shape.
+
+### 1.1 Load Laser League Data
 
 ```{r}
-league_df <- read_csv("data/laser_league_players.csv")
+league_path <- file.path("../../../data/laser_league_players.csv")
+players <- read_csv(league_path)
+table_preview <- head(players, 5)
+table_preview
 ```
 
-## 2. Inspect structure
+### 1.2 Identify the Data Structure
 
 ```{r}
-nrow(league_df)
-ncol(league_df)
-names(league_df)
-str(league_df)
+players_class <- class(players)
+players_class
+
+players_glimpse <- glimpse(players)
+
+row_count <- nrow(players)
+col_count <- ncol(players)
+
+column_names <- names(players)
+column_names
 ```
 
-## 3. Grouped summary
+**Question 1.1:** What R class is `players`? How does R internally store this table?  
+**Question 1.2:** Based on `glimpse()`, how many rows/columns are present?
+
+## 2. Understanding Data Types
+Variable types determine what analysis we can perform (math vs grouping).
+
+### 2.1 Inspect Individual Columns
 
 ```{r}
-summary_tbl <- league_df %>%
-  group_by(home_arena) %>%
-  summarise(
-    avg_wellbeing = mean(wellbeing_index, na.rm = TRUE),
-    avg_matches = mean(matches_played, na.rm = TRUE)
-  )
-summary_tbl
+player_id_type <- class(players$player_id)[1]
+season_score_type <- class(players$season_score)[1]
+reaction_time_type <- class(players$reaction_time_sec)[1]
+
+player_id_type
+season_score_type
+reaction_time_type
 ```
 
-## 4. Reflection
+**Question 2.1:** `assists` shows up as `<dbl>` in `glimpse()`. Is this Nominal, Ordinal, or Numeric? Why?  
+**Question 2.2:** `role` is stored as character. Given there's no ranking among roles, is this Nominal or Ordinal? Why does that matter?
 
-What surprised you about the player stats or arena averages?
+### 2.2 Numerical Summaries
+
+```{r}
+season_score_summary <- summary(players$season_score)
+season_score_summary
+```
+
+**Question 2.3:** What is the median and maximum `season_score`? Could a huge max indicate a data quality issue?
+
+## 3. Initial Data Quality Checks
+
+### 3.1 Missing Values
+
+```{r}
+missing_totals <- colSums(is.na(players))
+missing_totals
+
+missing_checks <- data.frame(
+  column = c("season_score", "favorite_drink", "glow_rating"),
+  missing_n = c(
+    sum(is.na(players$season_score)),
+    sum(is.na(players$favorite_drink)),
+    sum(is.na(players$glow_rating))
+  ),
+  row.names = NULL
+)
+missing_checks
+```
+
+**Question 3.1:** Which variable has the most missing values? If it were critical for analysis, why is that a problem?
+
+### 3.2 Inconsistent Categories
+
+```{r}
+home_arena_counts <- players %>%
+  count(home_arena) %>%
+  arrange(desc(n))
+home_arena_counts
+```
+
+**Question 3.2:** Do you notice inconsistent casing/spelling among `home_arena` values? If so, what kind of data issue is that?
+
+### 3.3 Duplicate IDs
+
+```{r}
+duplicate_ids <- sum(duplicated(players$player_id))
+duplicate_ids
+```
+
+**Question 3.3:** If duplicates exist, what does that mean for analysis (e.g., double-counting policy events)?
+
+## 4. Challenge: Spot the Issues
 
 ```
-<write a short reflection>
+| player_id | home_arena  | season_score | preferred_loadout |
+|-----------|-------------|--------------|-------------------|
+| P-0220    | neon yard   | 905          | Hyper Beam        |
+| P-0455    | Glow Hall   | NA           | Pulse Shield      |
+| P-0220    | Neon Yard   | 905          | Hyper Beam        |
+| P-0512    | Photon Dome | -10          | " "               |
 ```
+
+**Question 4.1:** List three data quality issues from this snippet.  
+**Question 4.2:** Which R functions from this lab could you use to confirm each issue if it appeared in the full dataset?

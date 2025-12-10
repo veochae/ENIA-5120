@@ -5,6 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+ENIA_ROOT <- "~/ENIA-5120"
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -13,8 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Load data
 ```{r}
-players <- readr::read_csv("data/laser_league_players.csv")
-events <- readr::read_csv("data/laser_league_events.csv")
+players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
+events <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_events.csv"))
 ```
 
 ## Duplicate keys
