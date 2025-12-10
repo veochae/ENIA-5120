@@ -20,6 +20,11 @@ jobs:
         with:
           version: '1.2.313'        
 
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.3.2"
+
       - name: Render slides
         run: |
           find sessions -name "slides.qmd" -print0 | xargs -0 -n1 quarto render
