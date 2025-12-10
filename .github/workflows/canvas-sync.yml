@@ -25,6 +25,10 @@ jobs:
         with:
           r-version: "4.3.2"
 
+      - name: Install R package dependencies
+        run: |
+          Rscript -e 'install.packages(c("jsonlite","dplyr","readr","ggplot2","tidyr","httr","stringr","purrr","lubridate"), repos = "https://cloud.r-project.org")'
+
       - name: Render slides
         run: |
           find sessions -name "slides.qmd" -print0 | xargs -0 -n1 quarto render
