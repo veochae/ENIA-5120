@@ -25,8 +25,8 @@ Remember to check key uniqueness first!
 ---
 
 # Reshaping
-```r
+<!-- ```r
 wide %>% pivot_longer(starts_with("sales_"), names_to = "month", values_to = "sales")
 ```
 - When to use `pivot_wider`
-- Naming conflicts & values
+- Naming conflicts & values -->
