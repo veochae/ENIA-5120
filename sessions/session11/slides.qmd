@@ -15,11 +15,11 @@ format:
 ---
 
 # API Flow
-```r
+<!-- ```r
 resp <- httr::GET(url, query = list(q = "laser tag"))
 json <- httr::content(resp, as = "text")
 data <- jsonlite::fromJSON(json)
-```
+``` -->
 
 ---
 
