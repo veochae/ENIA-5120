@@ -1,19 +1,16 @@
-# Lab 02 – Data Wrangling & Summary
+# Lab 02 – Tidy Data Cleaning and Foundational EDA
 
 ## Goals
-- Practice select/filter/mutate pipelines
-- Handle missing values and inconsistent casing
-- Produce a cleaned dataset ready for analysis and a simple summary visualization
+- Practice core tidyverse verbs (`filter`, `arrange`, `mutate`, `group_by`, `summarise`)
+- Diagnose and repair simple data-quality issues (missing categorical values)
+- Produce foundational summaries + visuals that echo the lecture content
 
 ## Tasks
-1. Load `~/ENIA-5120/data/laser_league_players.csv` as `league_raw`.
-2. Remove duplicate rows based on `player_id` to create `league_dedup`.
-3. Build `league_clean` that:
-   - Uses `janitor::clean_names()`
-   - Trims whitespace and uppercases `squad_id`
-   - Replaces missing `preferred_loadout` with "Unknown Loadout"
-   - Standardizes `favorite_drink` to title case
-4. Create `score_imputed` by replacing missing `season_score` with the median score for each `squad_name`.
-5. Summarize the cleaned data as `arena_summary` with player counts and average `tag_accuracy_pct` per `home_arena`.
-6. Build a simple visualization (e.g., bar chart stored as `arena_plot`) showing the average `tag_accuracy_pct` by `home_arena`.
-7. Knit the template and submit the `.Rmd` to Canvas.
+1. Load `~/ENIA-5120/data/laser_league_players.csv` as `players` (remember to prep `ENIA_ROOT`). Store a `glimpse()` and preview of the first 5 rows.
+2. Use at least one pipe (`%>%`) to filter on `role == "Sniper"` and order players by `season_score`. Keep the result visible in the knitted output.
+3. Count missing values with `colSums(is.na(players))`. Compute `mode_loadout` (the most common `preferred_loadout`) and create `players_clean` that replaces `NA` loadouts via `coalesce()`.
+4. Summarize scores:
+   - `role_summary`: total players, average score, and score variability (SD) per `role`, sorted by average score.
+   - `squad_summary`: total players and average stamina per `squad_name`, sorted by average stamina.
+5. Produce the box plot (season_score by `squad_name`) and bar chart (counts by `home_arena`) exactly as described, and answer the reflection questions in the template.
+6. Knit to HTML and submit both `.Rmd` and HTML to Canvas.

@@ -1,124 +1,247 @@
-title: "Session 2 – Wrangling & Quick Summaries"
-format:
+---
+title: "Session 2 – Cleaning, EDA, and Simple Visuals"
+format: 
   revealjs:
     slide-number: true
-    toc: true
-    incremental: true
-    transition: fade
-    footer: "ENIA-5120 · Veo Chae · Georgetown University"
     smaller: true
-    theme: serif
+    scrollable: true    
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
+    self-contained: true
+    theme: serif     
 ---
 
-# Agenda
+## Goals for Today:
 
-- Laser League data tour (columns that matter this week)
-- Build reproducible wrangling pipelines
-- Standardize text + handle missing values
-- Summaries + quick visuals to describe a cleaned dataset
-
----
-
-# Laser League Players (Recap)
-
-- Path we will use in labs:  
-  `ENIA_ROOT <- "~/ENIA-5120"`  
-  `players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))`
-- Core columns for wrangling
-  - `player_id`, `squad_id`, `role`, `preferred_loadout`
-  - Numeric performance fields: `season_score`, `tag_accuracy_pct`, `assists`
-  - Text columns with inconsistent casing: `home_arena`, `favorite_drink`
+1.  Understand the pros and cons of basic **Data Cleaning Strategies** (Imputation vs. Deletion).
+2.  Define **Exploratory Data Analysis (EDA)** and its role in policy.
+3.  Master the **Tidyverse Philosophy** and the **Pipe (`%>%`)** operator.
+4.  Learn the core **Tidyverse Verbs** needed for analysis.
 
 ---
 
-# Tidyverse Wrangling Workflow
+## 📉 Recap: Real Data is Messy
+
+**From Last Time:** We learned that real-world data is inherently flawed.
+
+The **Three Major Flaws** we face right away:
+
+1.  **Missing Values (NA):** Data that simply isn't there (e.g., unreported emissions).
+2.  **Outliers:** Extreme or impossible values (e.g., a country reporting negative spending).
+3.  **Inconsistent Categories:** Spelling/casing variations (e.g., "U.S.A." vs. "USA").
+
+**Today's Focus:** How do we deal with the most common and complex flaw: **Missing Values**?
+
+---
+
+## 🗑️ Strategy 1: Deletion (When to Drop Data)
+
+When facing missing data, our first choice is always: **Drop the row or keep it?**
+
+---
+
+### When is Deletion Appropriate?
+
+* **Case A: Very Low Missingness:** If only **less than 5%** of the rows in a critical column have an NA, dropping them might be the simplest solution.
+* **Case B: Critical Missingness:** If a row is missing data on a key variable (like the final outcome score), you might have to drop it because you cannot analyze the result.
+
+---
+
+### The Trade-Off: Bias Risk
+
+* **Pro:** Simple, maintains the integrity of the remaining, complete observations.
+* **Con:** If the data is missing *systematically* (e.g., only sensitive data is left blank), dropping it introduces **bias** into your sample.
+
+---
+
+## 🔢 Strategy 2: Imputation for Numerical Data
+
+**Goal:** Replace the missing NA value with a reasonable estimate.
+
+---
+
+### The Choice: Mean vs. Median
+
+| Method | Best Used When... | Risk/Trade-Off |
+| :--- | :--- | :--- |
+| **Mean (Average)** | Data is **symmetrical** (evenly balanced). | **Sensitive to Outliers!** A single extreme value can badly inflate or deflate the average. |
+| **Median (Middle Value)** | Data is **highly skewed** (common for income, spending, or pollution counts). | Less sensitive to outliers, providing a more **robust** estimate of the center. |
+
+**Rule of Thumb:** Always use the **Median** for imputation in policy/environmental data unless you are certain the data is perfectly symmetrical.
+
+---
+
+## 🗂️ Strategy 3: Imputation for Categorical Data
+
+**Goal:** Replace a missing text label with the most likely category.
+
+* **Method:** Use the **Mode** (the most frequent category).
+* **Example:** If 90% of your known policies are 'Regulation,' you might replace a missing policy type with 'Regulation.'
+
+---
+
+### Why Be Cautious?
+
+* Imputation **artificially reduces variability** in your data. It makes the data "look" cleaner than it actually is.
+* It's generally better to use imputation for quick EDA than for final, sensitive model training, where accuracy is paramount.
+
+---
+
+## 🔍 What is EDA?
+
+**EDA: Exploratory Data Analysis**
+
+* **Definition:** The initial investigation to discover patterns, spot anomalies, test assumptions, and see what the data is trying to tell you.
+* **Analogy:** You are a detective. You are not trying to prove something; you are trying to **understand the landscape** of the data.
+
+### EDA Answers Simple, Critical Questions:
+
+* What is the **average funding** for Environmental programs?
+* Are there **major differences** between regions?
+* Do our key variables appear to be **related**?
+
+---
+
+## 📊 Summary Statistics Overview
+
+Summary statistics are the foundation of EDA. They give us quick, single-number answers.
+
+| Category | Statistic | What it Tells Us | Why it Matters |
+| :--- | :--- | :--- | :--- |
+| **Central Tendency** | **Mean** & **Median** | Where is the **typical** value clustered? | If the Mean and Median are far apart, your data is **Skewed**, confirming your cleaning decision (Median over Mean imputation) was correct. |
+| **Dispersion** | **Range** & **Standard Deviation** | How **spread out** are the values? | A very large spread means your predictions will be less certain. High variability in outcomes suggests unstable policy effectiveness. |
+| **Frequency** | **Counts** | How many observations fall into each **group** or **category**? | Ensures your groups are balanced. If 90% of your data is from one region, your analysis is biased towards that region. |
+
+**The Hidden Danger:** If you skip checking these simple stats, your model might be using a **Mean** that is totally distorted by outliers, leading to skewed predictions!
+
+---
+
+## 👥 Conceptual Grouping 
+
+The most powerful EDA is comparing statistics **between groups**.
+
+**The Question:** "What is the average environmental score for countries that *did* sign the treaty versus those that *did not*?"
+
+* This requires **Grouping** by the categorical variable (`Signed_Treaty`).
+* And then **Summarizing** the numerical variable (`Env_Score`).
+
+*Conceptual Steps:*
+
+1.  Take the full data.
+2.  Split it into stacks (Signed / Not Signed).
+3.  Calculate the mean of the score *within* each stack.
+4.  Return the final comparison table.
+
+---
+
+## 📈 Why Visuals Help EDA
+
+It is extremely difficult to spot flaws or patterns just by looking at lists of numbers.
+
+### The Problem with Printouts:
+
+When you run a command like `summary()`, you see a few numbers.
+
+* *Is the max value a typo?*
+* *Is the data clustered in two separate groups?*
+
+It's impossible to tell from a simple table!
+
+---
+
+### The Visual Solution: Diagnostics
+
+| Visual Tool | What it Tells You Instantly |
+| :--- | :--- |
+| **Box Plot** | Clearly shows points outside the normal range (**Outliers**). Tells you which values might be typos or errors. |
+| **Histogram** | Shows the full **shape** of the data. If the bulk is on one side, you know it's skewed, validating your imputation choice (Median). |
+
+Visuals are essential **diagnostic tools** that prevent you from building models on top of flawed assumptions.
+
+
+
+---
+
+## 🛠️ Shifting Gears to Tooling
+
+We know **WHAT** to do (Clean, Summarize, Visualize).
+
+Now, we learn the **HOW**—the R language designed specifically for these tasks.
+
+---
+
+## ⚙️ Tidyverse Philosophy (The Solution)
+
+**The Tidyverse: A Cohesive Language**
+
+* It is a collection of R packages (`dplyr`, `ggplot2`, etc.) designed to make the transition from **analytical thought** to **code** seamless.
+* **Goal:** Your code should read like a clear data analysis **recipe**.
+
+---
+
+## ➡️ The Pipe Operator (`%>%`)
+
+**The Pipe (`%>%`): The Analytical Connector**
+
+* **Function:** Takes the object (data) on the left and passes it as the first argument to the function on the right.
+* **Read as:** "AND THEN..."
+
+**Piped Code Example:**
+
+1.  `df`
+2.  `%>%` Filter the data to the latest year.
+3.  `%>%` Group by region.
+4.  `%>%` Summarize the mean score.
+
+**Key Habit:** Always start with your data frame name, followed by the pipe.
+
+---
+
+## 📏 The Six Core Verbs (Part 1)
+
+These six functions do 90% of data manipulation work and are the core of the `dplyr` package:
+
+| Verb | Action | English Question |
+| :--- | :--- | :--- |
+| **`filter()`** | **Rows:** Keeps observations based on a condition. | *Which countries are below the poverty line?* |
+| **`select()`** | **Columns:** Keeps or drops variables by name. | *I only need the GDP and Population columns.* |
+| **`mutate()`** | **New Columns:** Creates a new variable or modifies an existing one. | *Let's calculate GDP per capita.* |
+
+---
+
+## 🔢 The Six Core Verbs (Part 2)
+
+| Verb | Action | English Question |
+| :--- | :--- | :--- |
+| **`group_by()`** | **Grouping:** Prepares data for calculations by group. | *Set up the data to analyze by continent.* |
+| **`summarise()`** | **Aggregate:** Reduces groups into a single summary row. | *Calculate the mean score for each continent.* |
+| **`arrange()`** | **Sorting:** Orders the rows of the final table. | *Show me the results from highest to lowest.* |
+
+---
+
+## 📝 The Golden Tidyverse Rule
+
+**Rule:** Any function that changes the structure of your data must be followed by a pipe (`%>%`) if you intend to do another operation.
+
+**Example: Chaining Verbs**
 
 ```r
-library(dplyr)
-library(janitor)
-
-league_clean <- players %>%
-  clean_names() %>%                # snake_case column names
-  distinct(player_id, .keep_all = TRUE) %>%  # remove duplicates
-  mutate(
-    squad_id = toupper(trimws(squad_id)),
-    home_arena = stringr::str_to_title(home_arena),
-    preferred_loadout = tidyr::replace_na(preferred_loadout, "Unknown Loadout")
-  )
-```
-
-- Keep verbs in a logical order so it reads like a story
-- Store intermediate versions when testing (e.g., `league_raw`, `league_dedup`)
-
----
-
-# Handling Missing Values
-
-- Numeric fields → decide between dropping, imputing, or flagging
-- For Lab 02 we will use **group-wise medians** for `season_score`
-
-```r
-score_imputed <- league_clean %>%
-  group_by(squad_name) %>%
-  mutate(
-    season_score = if_else(
-      is.na(season_score),
-      median(season_score, na.rm = TRUE),
-      season_score
-    )
-  ) %>%
-  ungroup()
-```
-
-- Always explain *why* a choice was made (Canvas submission comment or knit text)
-
----
-
-# Summary Tables
-
-```r
-arena_summary <- score_imputed %>%
-  group_by(home_arena) %>%
+data_frame %>%
+  filter(year > 2020) %>%          # 1. Look only at data after 2020
+  group_by(region) %>%             # 2. Group those years by region
   summarise(
-    players = n(),
-    avg_accuracy = mean(tag_accuracy_pct, na.rm = TRUE),
-    .groups = "drop"
+    avg_score = mean(env_score, na.rm = TRUE),
+    n_count = n()                  # 3. Calculate the average score and count
   ) %>%
-  arrange(desc(avg_accuracy))
+  arrange(desc(avg_score))         # 4. Show the results from highest score first
 ```
 
-- Use `summarise()` for aggregate metrics
-- Remember `na.rm = TRUE`
-- Keep resulting table for future joins/visualizations
+## 🚀 Transition to Lab
+Today's Lab Goal:
 
----
+ - Use Imputation logic to clean a numerical column.
 
-# Quick Visuals from Summaries
+ - Use the Pipe to chain group_by() and summarise().
 
-```r
-library(ggplot2)
+ - Generate the first Summary Statistics Table and Box Plot to check for outliers.
 
-arena_plot <- arena_summary %>%
-  ggplot(aes(x = reorder(home_arena, avg_accuracy), y = avg_accuracy)) +
-  geom_col(fill = "#ff5ef0") +
-  coord_flip() +
-  labs(
-    x = "Home Arena",
-    y = "Avg Tag Accuracy (%)",
-    title = "Laser League accuracy by arena"
-  ) +
-  theme_minimal()
-```
-
-- Even simple bar charts help validate that summaries make sense
-- Save ggplot objects so graders (and future you) can inspect them
-
----
-
-# Checklist for Lab 02
-
-- [ ] Read players data via `ENIA_ROOT`
-- [ ] Deduplicate + clean column names
-- [ ] Standardize text fields + impute median `season_score`
-- [ ] Produce `arena_summary` + `arena_plot`
-- [ ] Knit, double-check warnings, submit to Canvas
+Let's start coding!

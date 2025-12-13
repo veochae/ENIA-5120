@@ -1,71 +1,234 @@
 ---
-title: "Lab 02 – Data Wrangling & Summary"
+title: "Lab 02 – Tidy Data Cleaning and Foundational EDA"
 author: "Your Name"
-output: html_document
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: cosmo
+    code_folding: hide # This tells the engine to hide the code by default
+    toc_float: true
 ---
 
-```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
+## 💻 Environment Setup
+
+If you do not have these packages installed, please uncomment and run the following commands:
+
+```{r install-packages, eval=FALSE}
+# install.packages("readr")
+# install.packages("dplyr")
+# install.packages("ggplot2")
+# install.packages("tidyr") # We will use this in later labs
+```
+
+```{r}
+# Load the essential Tidyverse libraries for data manipulation and visualization
+library(readr)
 library(dplyr)
-library(janitor)
-library(stringr)
 library(ggplot2)
-knitr::opts_chunk$set(echo = TRUE)
+
+# Set global options for the code chunks
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+# Define the root path (Students must ensure this path points to their data directory)
+ENIA_ROOT <- "~/ENIA-5120"
+league_path <- file.path("../../../data", "laser_league_players.csv")
 ```
 
-## Load data
-# Load data
+## 1. Load Data and Pipe Practice
+
+### 1.1 Essential Load Functions
+`read_csv()`: Loads data much faster and smarter than base R's `read.csv()`.
+
+`glimpse()`: Provides a clean, vertical overview of data structure and variable types.
+
+`paste()`: A base R function that concatenates strings and variables together.
+
 ```{r}
-league_raw <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
+players <- read_csv(league_path)
+glimpse(players)
 ```
 
-## Remove duplicates
+### 1.2 First Pipe Practice (`%>%`)
+`%>%` (The Pipe): Takes the output of the code on the left and passes it as the first argument to the code on the right ("AND THEN...").
+
+`filter()`: Selects rows based on a logical condition (e.g., role is 'Sniper').
+
+`arrange()`: Sorts the rows of the data frame.
+
+`desc()`: Used inside `arrange()` to specify descending order (high to low).
+
+Tidyverse Steps:
+
+1. Start with the `players` data frame.
+2. Filter for players whose role is `'Sniper'`.
+3. Arrange the results by `season_score` from highest to lowest.
+
 ```{r}
-league_dedup <- league_raw %>% distinct(player_id, .keep_all = TRUE)
+players %>%
+  filter(role == "Sniper") %>%
+  arrange(desc(season_score))
 ```
 
-## Clean columns & missing values
+## 2. Diagnosing and Cleaning Missing Data (NA)
+
+### 2.1 Diagnose Missing Values
+`is.na()`: Returns TRUE for every missing value in the data frame.
+
+`colSums()`: Sums the TRUE values (which R treats as 1s) for each column.
+
 ```{r}
-league_clean <- league_dedup %>%
-  clean_names() %>%
+colSums(is.na(players))
+```
+
+### 2.2 Mode Imputation (Categorical Data: preferred_loadout)
+We will focus on the `preferred_loadout` column and fill its NAs using the Mode.
+
+`count()`: A powerful dplyr function that counts the occurrences of a categorical variable.
+
+`slice(1)`: Selects the first row of the data frame (which, after sorting, will contain the mode).
+
+`pull()`: Extracts a single column as a vector (simple list of values) for assignment.
+
+`coalesce()`: Replaces NA values in the first argument with the corresponding value from the second argument (our mode).
+
+**Tidyverse Steps (Finding Mode):**
+
+1. Start with `players`.
+2. Count the occurrences of each unique `preferred_loadout`.
+3. Arrange the results in descending order (n is the count column).
+4. Slice the top row to isolate the mode.
+5. Pull the `preferred_loadout` name from that row.
+
+```{r}
+mode_loadout <- players %>%
+  count(preferred_loadout) %>%
+  arrange(desc(n)) %>%
+  slice(1) %>%
+  pull(preferred_loadout)
+
+paste("The Mode is:", mode_loadout)
+```
+
+**Tidyverse Steps (Applying Mode):**
+
+1. Start with `players`.
+2. Mutate (modify) the `preferred_loadout` column.
+3. Use `coalesce()` to fill any NA with the calculated `mode_loadout`.
+4. Store the result in `players_clean`.
+5. Check the NA count again to confirm the fix.
+
+```{r}
+players_clean <- players %>%
   mutate(
-    squad_id = stringr::str_trim(stringr::str_to_upper(squad_id)),
-    preferred_loadout = if_else(is.na(preferred_loadout) | preferred_loadout == "", "Unknown Loadout", preferred_loadout),
-    favorite_drink = stringr::str_to_title(favorite_drink)
+    preferred_loadout = coalesce(preferred_loadout, mode_loadout)
   )
+
+colSums(is.na(players_clean))
 ```
 
-## Impute scores
-```{r}
-score_imputed <- league_clean %>%
-  group_by(squad_name) %>%
-  mutate(season_score = if_else(
-    is.na(season_score),
-    median(season_score, na.rm = TRUE),
-    season_score
-  )) %>%
-  ungroup()
-```
+## 3. Foundational EDA: Summarizing Data
 
-## Summary
+### 3.1 Summarize Scores by Role
+`group_by()`: Prepares the data for calculations on groups (e.g., 'Captain', 'Scout'). Must be used before `summarise()`.
+
+`summarise()`: Calculates aggregate statistics for each group (e.g., mean, count, sum).
+
+`n()`: Used inside `summarise()` to count the number of observations.
+
+`mean()`: Calculates the average score.
+
+`sd()`: Calculates the standard deviation (measure of spread/variability).
+
+`na.rm = TRUE`: An argument used in `mean`/`sd`/`sum` to ignore any remaining NA values.
+
+Tidyverse Steps:
+
+1. Start with the `players_clean` data.
+2. Group the data by `role`.
+3. Summarise the following for each role: total count (n), average score, score variability (standard deviation).
+4. Arrange the final table by average score.
+
 ```{r}
-arena_summary <- score_imputed %>%
-  group_by(home_arena) %>%
+role_summary <- players_clean %>%
+  group_by(role) %>%
   summarise(
-    players = n(),
-    avg_accuracy = mean(tag_accuracy_pct, na.rm = TRUE)
-  )
-arena_summary
+    total_players = n(), 
+    avg_score = mean(season_score, na.rm = TRUE),
+    score_variability = sd(season_score, na.rm = TRUE)
+  ) %>%
+  arrange(desc(avg_score))
+
+role_summary
 ```
 
-## Visualization
+*Question 3.1:* Based on the table, which player role has the highest average score? Which role has the most variability?
+
+### 3.2 Summarize Stamina by Squad
+Tidyverse Steps:
+
+1. Start with the clean data.
+2. Group the data by `squad_name`.
+3. Summarise the count and average `stamina_score` for each squad.
+4. Arrange the table by average stamina score.
+
 ```{r}
-arena_plot <- ggplot(arena_summary, aes(home_arena, avg_accuracy, fill = home_arena)) +
-  geom_col(show.legend = FALSE) +
-  labs(title = "Average Tag Accuracy by Arena", x = "Home arena", y = "Avg tag accuracy (%)") +
-  theme_minimal()
-arena_plot
+squad_summary <- players_clean %>%
+  group_by(squad_name) %>%
+  summarise(
+    total_players = n(),
+    avg_stamina = mean(stamina_score, na.rm = TRUE)
+  ) %>%
+  arrange(desc(avg_stamina))
+
+squad_summary
 ```
 
-## Reflection
-Describe one challenge you faced while cleaning or summarizing the data.
+## 4. Simple Visual Diagnostics
+
+### 4.1 Checking Distribution and Outliers (Box Plot)
+We will use a box plot to visually diagnose outliers and compare the median scores across the different `squad_name`s.
+
+- `ggplot()`: Initializes the plot.
+- `aes()`: Defines the aesthetics.
+- `geom_boxplot()`: Creates a box-and-whisker plot.
+- `labs()`: Sets the plot labels.
+- `theme(axis.text.x = ...)`: Rotates labels to prevent overlap.
+
+```{r}
+players_clean %>%
+  ggplot(aes(x = squad_name, y = season_score)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.6) +
+  labs(
+    title = "Season Score Distribution by Squad",
+    y = "Season Score",
+    x = "Squad Name"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+*Question 4.1:* Identify the squad(s) that appear to have the highest number of outliers. What might that signal?
+
+### 4.2 Checking Frequencies for Inconsistencies (Bar Chart)
+We will use a bar chart to look for inconsistencies in the `home_arena` data (e.g., different capitalization).
+
+```{r}
+players_clean %>%
+  ggplot(aes(x = home_arena)) +
+  geom_bar(fill = "darkgreen", alpha = 0.7) +
+  labs(
+    title = "Player Counts by Home Arena",
+    y = "Number of Players (Frequency)",
+    x = "Home Arena"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+*Question 4.2:* Based on the bar chart, do you see potential inconsistencies in `home_arena` (like capitalization differences)? If yes, which tidyverse verb would you use to fix them?
+
+## 5. Lab Conclusion
+
+You have successfully loaded, diagnosed, cleaned a categorical variable, generated core summary statistics, and created simple visual diagnostics using the tidyverse framework. This is the foundation for your analysis!

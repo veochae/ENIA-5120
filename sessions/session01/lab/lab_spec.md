@@ -9,6 +9,7 @@
 
 ## Tasks
 
+0. (Optional) If this is your first R session on a new machine, run `install.packages(c("readr","dplyr"))` once.
 1. Load `~/ENIA-5120/data/laser_league_players.csv` as `players`, and save `table_preview <- head(players, 5)` so you can see the first few rows.
 2. Store `row_count <- nrow(players)` and `col_count <- ncol(players)` for reference.
 3. Save all column names in `column_names <- names(players)`. Record example data types with `player_id_type`, `season_score_type`, and `reaction_time_type <- class(players$reaction_time_sec)[1]`. (If you want, create `type_summary` to list every column/type.)

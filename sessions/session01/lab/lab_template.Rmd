@@ -11,8 +11,9 @@ output:
 
 ```{r setup, include=FALSE}
 # Load necessary libraries (we're focusing on base R + readr/dplyr today)
-library(readr)
-library(dplyr)
+# install.packages(c("readr","dplyr"), repos = "https://cloud.r-project.org")  # Uncomment + run once if needed
+library(readr)   # read_csv() reads data into tibbles quickly
+library(dplyr)   # glimpse(), count(), and pipes for light wrangling
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 # Define the root path (students should adjust if their ENIA folder lives elsewhere)
@@ -34,15 +35,15 @@ table_preview
 ### 1.2 Identify the Data Structure
 
 ```{r}
-players_class <- class(players)
+players_class <- class(players)    # Shows the top-level object type (tibble/data.frame)
 players_class
 
-players_glimpse <- glimpse(players)
+players_glimpse <- glimpse(players)  # Glance at each column name + type
 
-row_count <- nrow(players)
-col_count <- ncol(players)
+row_count <- nrow(players)          # Count how many observations (rows) we have
+col_count <- ncol(players)          # Count how many fields (columns) we have
 
-column_names <- names(players)
+column_names <- names(players)      # Store column names for later reference
 column_names
 ```
 
@@ -55,9 +56,9 @@ Variable types determine what analysis we can perform (math vs grouping).
 ### 2.1 Inspect Individual Columns
 
 ```{r}
-player_id_type <- class(players$player_id)[1]
-season_score_type <- class(players$season_score)[1]
-reaction_time_type <- class(players$reaction_time_sec)[1]
+player_id_type <- class(players$player_id)[1]          # text identifier
+season_score_type <- class(players$season_score)[1]    # numeric score
+reaction_time_type <- class(players$reaction_time_sec)[1]  # numeric timing
 
 player_id_type
 season_score_type
@@ -70,7 +71,7 @@ reaction_time_type
 ### 2.2 Numerical Summaries
 
 ```{r}
-season_score_summary <- summary(players$season_score)
+season_score_summary <- summary(players$season_score)  # min, median, max, etc.
 season_score_summary
 ```
 
@@ -81,7 +82,7 @@ season_score_summary
 ### 3.1 Missing Values
 
 ```{r}
-missing_totals <- colSums(is.na(players))
+missing_totals <- colSums(is.na(players))  # totals NA count for every column at once
 missing_totals
 
 missing_checks <- data.frame(
@@ -102,8 +103,8 @@ missing_checks
 
 ```{r}
 home_arena_counts <- players %>%
-  count(home_arena) %>%
-  arrange(desc(n))
+  count(home_arena) %>%             # how many rows per arena label
+  arrange(desc(n))                  # sort to scan for casing/spelling problems
 home_arena_counts
 ```
 
@@ -112,7 +113,7 @@ home_arena_counts
 ### 3.3 Duplicate IDs
 
 ```{r}
-duplicate_ids <- sum(duplicated(players$player_id))
+duplicate_ids <- sum(duplicated(players$player_id))   # >0 means the same player_id appears twice
 duplicate_ids
 ```
 

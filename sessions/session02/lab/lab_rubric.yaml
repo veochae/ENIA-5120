@@ -1,11 +1,11 @@
 total_points: 20
 criteria:
-  - id: cleaning
-    description: "Removes duplicates and standardizes columns"
+  - id: setup_pipe
+    description: "Loads players dataset via ENIA_ROOT, uses pipes to filter/order, and clearly explains the steps."
+    max_points: 6
+  - id: missing_impute
+    description: "Counts missing values, computes mode, and creates players_clean with preferred_loadout imputed."
+    max_points: 6
+  - id: summaries_plots
+    description: "Builds both summaries (role_summary, squad_summary) plus the requested boxplot and bar chart with reflections."
     max_points: 8
-  - id: missing
-    description: "Handles missing values appropriately"
-    max_points: 6
-  - id: summary_viz
-    description: "Produces summary table and simple visualization with commentary"
-    max_points: 6
