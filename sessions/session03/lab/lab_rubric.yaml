@@ -1,11 +1,11 @@
 total_points: 20
 criteria:
-  - id: variety
-    description: "Creates required plots with correct data"
-    max_points: 10
-  - id: styling
-    description: "Applies clear labels/themes and facets"
-    max_points: 6
-  - id: reflection
-    description: "Includes short interpretation in notebook"
-    max_points: 4
+  - id: completion
+    description: "Completes all six missions with correct variables and layers"
+    max_points: 12
+  - id: annotations
+    description: "Uses reference lines, highlights, and annotations effectively"
+    max_points: 5
+  - id: clarity
+    description: "Titles, labels, and themes support an executive briefing"
+    max_points: 3

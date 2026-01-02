@@ -1,41 +1,158 @@
 ---
-title: "Lab 03 – Visualization"
-author: "Your Name"
-output: html_document
+title: "Lab 03: The Commissioner's Visual Briefing"
+subtitle: "Advanced Storytelling with ggplot2"
+author: "Data Analytics Student"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
 ---
 
 ```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
-library(readr)
-library(ggplot2)
-knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+players <- read_csv("../../../data/laser_league_players.csv")
 ```
 
-```{r}
-league_df <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-```
+# 🏁 Overview
+In this lab, you will transform raw Laser League data into "Executive Briefs." You will learn to use auxiliary layers—like reference lines, rectangles, and text annotations—to make your plots more than just dots on a screen.
+
+## 🧪 Mission 1: The "Fatigue" Threshold (Density + VLine)
+The Memo: "Flag any areas where Wellbeing drops below 55. We need a visual marker for the 'Danger Zone'."
+
+Logic Breakdown:
+
+`ggplot()`: Initializes the plot and connects it to the dataset.
+
+`aes()`: Maps variables to visual properties (Aesthetics).
+
+`geom_density()`: Calculates and draws a kernel density estimate.
+
+`geom_vline()`: Draws a vertical line at a specific numeric intercept on the X-axis.
+
+`annotate()`: Manually adds custom text or shapes that are not tied to a specific data column.
+
 
 ```{r}
-hist_plot <- ggplot(league_df, aes(season_score)) +
-  geom_histogram(bins = 30, fill = "steelblue", color = "white") +
-  geom_vline(aes(xintercept = median(season_score, na.rm = TRUE)), linetype = "dashed", color = "red") +
-  labs(title = "Season Score Distribution", x = "Season score", y = "Count")
-hist_plot
+ggplot(players, aes(x = wellbeing_index)) +
+  geom_density(fill = "cyan", alpha = 0.4) +
+  geom_vline(xintercept = 55, color = "red", linetype = "dashed", size = 1) +
+  annotate("text", x = 45, y = 0.02, label = "DANGER ZONE", color = "red", fontface = "bold") +
+  theme_minimal() +
+  labs(title = "Player Wellbeing Distribution", x = "Wellbeing Index", y = "Density")
 ```
 
-```{r}
-box_plot <- ggplot(league_df, aes(role, tag_accuracy_pct)) +
-  geom_boxplot(fill = "gray85") +
-  labs(title = "Tag Accuracy by Role", x = "Role", y = "Tag accuracy (%)") +
-  theme_minimal()
-box_plot
-```
+🧪 Mission 2: Benchmarking Talent (Boxplot + HLine)
+The Memo: "Is the Sniper's median reflex actually higher than the league average? I need a baseline."
+
+Logic Breakdown:
+
+`geom_boxplot()`: Displays the distribution (Min, Q1, Median, Q3, Max).
+
+`geom_hline()`: Draws a horizontal line across the entire plot at a specific Y-intercept.
+
+`mean()`: Calculates the mathematical average used for the reference line.
+
 
 ```{r}
-scatter_plot <- ggplot(league_df, aes(assists, season_score, color = preferred_loadout)) +
-  geom_point(alpha = 0.7) +
-  facet_wrap(~ home_arena) +
-  labs(title = "Assists vs Season Score", x = "Assists", y = "Season score") +
-  theme_minimal()
-scatter_plot
+league_avg_reflex <- mean(players$reflex_score, na.rm = TRUE)
+
+ggplot(players, aes(x = role, y = reflex_score, fill = role)) +
+  geom_boxplot(alpha = 0.6, show_legend = FALSE) +
+  geom_hline(yintercept = league_avg_reflex, color = "darkgreen", size = 1) +
+  annotate("label", x = 0.6, y = league_avg_reflex, label = "League Average", fill = "white") +
+  theme_light() +
+  labs(title = "Reflex Scores by Role vs. League Average", y = "Reflex Score")
+```
+
+## 🧪 Mission 3: The Efficiency Target (Ranking + AbLine)
+The Memo: "We expect a 'Target Slope' of 15 points per match. Show me the Season Score vs Experience."
+
+Logic Breakdown:
+
+`geom_point()`: Creates a scatter plot using individual observations.
+
+`geom_abline()`: Draws a line with a specific Slope and Intercept.
+
+`theme_dark()`: Applies a high-contrast dark background.
+
+
+```{r}
+ggplot(players, aes(x = matches_played, y = season_score)) +
+  geom_point(aes(color = role), alpha = 0.6) +
+  geom_abline(slope = 15, intercept = 0, color = "white", linetype = "dotted") +
+  theme_dark() +
+  labs(title = "Match Count vs. Season Score Efficiency", x = "Matches Played", y = "Total Score")
+```
+
+## 🧪 Mission 4: The Human Limit (Scatter + Rect Highlight)
+The Memo: "Reaction times between 0.2s and 0.3s are considered elite. Highlight that specific range."
+
+Logic Breakdown:
+
+`annotate("rect")`: Draws a rectangle highlight by defining four corners (xmin, xmax, ymin, ymax).
+
+`geom_smooth()`: Adds a statistical trend line.
+
+`method = "lm"`: Forces the trend line to be a straight Linear Model.
+
+
+```{r}
+ggplot(players, aes(x = reflex_score, y = reaction_time_sec)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = 0.2, ymax = 0.3, fill = "green", alpha = 0.2) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "black", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Reaction Speed vs. Reflex Score", subtitle = "Green zone highlights the 'Elite Reflex' window")
+```
+
+## 🧪 Mission 5: Marketability Outliers (Violin + Curves)
+The Memo: "Show the density of Glow Ratings and point out the peak 'Superstar' rating."
+
+Logic Breakdown:
+
+`geom_violin()`: Shows the full distribution shape (width represents frequency).
+
+`scale_fill_viridis_d()`: Applies a professional, high-contrast color scale.
+
+`annotate("curve")`: Draws a curved arrow to point to a specific coordinate.
+
+
+```{r}
+ggplot(players, aes(x = role, y = glow_rating, fill = role)) +
+  geom_violin(alpha = 0.5, show_legend = FALSE) +
+  scale_fill_viridis_d(option = "magma") +
+  annotate("curve", x = 1.5, y = 9.8, xend = 1.1, yend = 9.2, 
+           curvature = .3, arrow = arrow(length = unit(2, "mm")), color = "black") +
+  annotate("text", x = 1.6, y = 9.8, label = "Superstar Ceiling", hjust = 0) +
+  theme_minimal() +
+  labs(title = "Marketability Distributions by Role")
+```
+
+## 🧪 Mission 6: The Tactical Grid (Facets + All Tools)
+The Memo: "Compare Accuracy vs Shield Uptime for every squad. Include a trend line and a 50% accuracy benchmark line for each."
+
+Logic Breakdown:
+
+`facet_wrap()`: Creates a multi-paneled plot based on a categorical variable.
+
+`~squad_name`: The formula that tells R to split the panels by Squad Name.
+
+`theme_bw()`: A clean, "Black and White" high-contrast theme.
+
+
+```{r}
+ggplot(players, aes(x = tag_accuracy_pct, y = shield_uptime_pct)) +
+  geom_point(alpha = 0.4, color = "magenta") +
+  geom_smooth(method = "lm", color = "cyan", size = 0.7, se = FALSE) + 
+  geom_vline(xintercept = 50, linetype = "dotted", color = "black", alpha = 0.5) +
+  facet_wrap(~squad_name) +
+  theme_bw() +
+  labs(
+    title = "Tactical Profile Matrix",
+    subtitle = "Accuracy vs. Defense Uptime (Dotted line = 50% Benchmark)",
+    x = "Tag Accuracy %",
+    y = "Shield Uptime %"
+  )
 ```

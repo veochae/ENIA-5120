@@ -11,21 +11,17 @@ lab:
   assignment_key: lab03
   files:
     - path: lab/lab_spec.md
-      display_name: "Lab 03 – Spec.md"
+      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Spec.md"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 03 – Template.Rmd"
+      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Template.Rmd"
     - path: lab/lab_tests.R
-      display_name: "Lab 03 – Tests.R"
+      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Tests.R"
     - path: lab/lab_rubric.yaml
-      display_name: "Lab 03 – Rubric.yaml"
+      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Rubric.yaml"
 homework:
   assignment_key: hw01
   files:
-    - path: homework/hw_prompt.md
-      display_name: "HW 01 – Data Foundations.md"
     - path: homework/hw_prompt.pdf
       display_name: "HW 01 – Data Foundations.pdf"
-    - path: homework/hw_rubric.yaml
-      display_name: "HW 01 – Rubric.yaml"
     - path: homework/hw_rubric.pdf
       display_name: "HW 01 – Rubric.pdf"
