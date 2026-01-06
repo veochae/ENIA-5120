@@ -6,129 +6,161 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
     theme: readable
 ---
 
-```{r setup, include=FALSE}
-# Load necessary libraries (we're focusing on base R + readr/dplyr today)
-# install.packages(c("readr","dplyr"), repos = "https://cloud.r-project.org")  # Uncomment + run once if needed
-library(readr)   # read_csv() reads data into tibbles quickly
-library(dplyr)   # glimpse(), count(), and pipes for light wrangling
+## 🧭 Mission Background
+Welcome to your first day as a Junior Analyst for the **Laser League**. You’ve been handed a raw data export of player performance. Before the Commissioner can use this to rank the world's best players (Session 3), you need to prove that the data is structured correctly and free of "Gremlins."
+
+**Your Goal:** Perform a forensic audit. Identify what data types R assigned, check the table's structural integrity, and document any quality issues.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# library(): Loads external packages into your current session.
+# readr: Part of the Tidyverse, used for fast and "smart" data loading.
+# dplyr: Provides the tools for inspection (glimpse) and manipulation (pipes).
+
+library(readr)  
+library(dplyr)  
+
+# Global options for the document
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
-# Define the root path (students should adjust if their ENIA folder lives elsewhere)
+# Define the root path (Adjust if your folder structure differs)
 ENIA_ROOT <- "~/ENIA-5120"
 ```
 
-## 1. Loading and Inspecting the Data
-In Session 1 we learned that the first step is always to bring the data into R and check its shape.
+## 1. The Blueprint: Loading & Inspection
+Our first task is to bring the evidence onto our digital workbench (the R Environment).
 
-### 1.1 Load Laser League Data
+### 1.1 Load the Evidence
 
 ```{r}
-league_path <- file.path("../../../data/laser_league_players.csv")
+# --- UTILITY REFERENCE ---
+# file.path(): Safely joins folder names into a file path for any computer (Mac/PC).
+# read_csv(): Loads a .csv file and automatically guesses the data type for each column.
+# head(): Displays the first few rows (default is 6) to verify the data looks correct.
+
+league_path <- "../../../data/laser_league_players.csv"
 players <- read_csv(league_path)
-table_preview <- head(players, 5)
-table_preview
+
+head(players)
 ```
 
 ### 1.2 Identify the Data Structure
+Before we can calculate scores, we need to know the dimensions of our "grid."
+
 
 ```{r}
-players_class <- class(players)    # Shows the top-level object type (tibble/data.frame)
-players_class
+# --- UTILITY REFERENCE ---
+# class(): Tells you the "Object Type" (e.g., tibble/data.frame).
+# nrow() / ncol(): Returns the count of rows and columns individually.
+# glimpse(): A condensed summary showing column names, types, and the first few values.
+# names(): Returns a list of all column headers.
 
-players_glimpse <- glimpse(players)  # Glance at each column name + type
-
-row_count <- nrow(players)          # Count how many observations (rows) we have
-col_count <- ncol(players)          # Count how many fields (columns) we have
-
-column_names <- names(players)      # Store column names for later reference
-column_names
+class(players) 
+nrow(players)
+ncol(players)
+glimpse(players)
+names(players)
 ```
 
-**Question 1.1:** What R class is `players`? How does R internally store this table?  
-**Question 1.2:** Based on `glimpse()`, how many rows/columns are present?
+**Question 1.2.1:** What R class is players? How does R internally store this table?
+
+**Question 1.2.2:** Based on glimpse(), how many rows (observations) and columns (variables) are present?
 
 ## 2. Understanding Data Types
-Variable types determine what analysis we can perform (math vs grouping).
+In R, the type of data determines what math is allowed. You cannot calculate the "average" of a word.
 
 ### 2.1 Inspect Individual Columns
 
 ```{r}
-player_id_type <- class(players$player_id)[1]          # text identifier
-season_score_type <- class(players$season_score)[1]    # numeric score
-reaction_time_type <- class(players$reaction_time_sec)[1]  # numeric timing
+# --- UTILITY REFERENCE ---
+# class(df$column): Extracts a specific column using the "$" sign and reveals its type.
+# [1]: Used to simplify the output to just the primary class name.
 
-player_id_type
-season_score_type
-reaction_time_type
+class(players$player_id)[1]
+class(players$season_score)[1]
+class(players$reaction_time_sec)[1]
 ```
 
-**Question 2.1:** `assists` shows up as `<dbl>` in `glimpse()`. Is this Nominal, Ordinal, or Numeric? Why?  
-**Question 2.2:** `role` is stored as character. Given there's no ranking among roles, is this Nominal or Ordinal? Why does that matter?
+**Question 2.1.1:** assists shows up as <dbl> in glimpse(). Is this Nominal, Ordinal, or Numeric? Why?
+
+**Question 2.1.2:** role is stored as a character. Given there's no ranking among roles, is this Nominal or Ordinal? Why does that matter for our charts later?
 
 ### 2.2 Numerical Summaries
+We use summaries to find "Gremlins" hiding in the numbers (like impossible values).
+
 
 ```{r}
-season_score_summary <- summary(players$season_score)  # min, median, max, etc.
-season_score_summary
+# --- UTILITY REFERENCE ---
+# summary(): Provides the Min, Max, Median, and Mean. 
+# Look closely at the Max: If it is physically impossible, you've found an outlier.
+
+summary(players$season_score)
 ```
 
-**Question 2.3:** What is the median and maximum `season_score`? Could a huge max indicate a data quality issue?
+**Question 2.2.1:** What is the median and maximum season_score? Could a massive max value indicate a data quality issue?
 
-## 3. Initial Data Quality Checks
+## 3. Initial Data Quality Checks (The Forensic Audit)
+Now we hunt for the six quality issues we discussed: Missingness, Duplicates, Casing, Outliers, Inconsistent Labels, and Type Mismatches.
 
 ### 3.1 Missing Values
 
 ```{r}
-missing_totals <- colSums(is.na(players))  # totals NA count for every column at once
-missing_totals
+# --- UTILITY REFERENCE ---
+# is.na(): Checks every cell; returns TRUE if it is empty/missing.
+# colSums(): Adds up all the TRUEs to give a total count of missing values per column.
 
-missing_checks <- data.frame(
-  column = c("season_score", "favorite_drink", "glow_rating"),
-  missing_n = c(
-    sum(is.na(players$season_score)),
-    sum(is.na(players$favorite_drink)),
-    sum(is.na(players$glow_rating))
-  ),
-  row.names = NULL
-)
-missing_checks
+colSums(is.na(players))
 ```
 
-**Question 3.1:** Which variable has the most missing values? If it were critical for analysis, why is that a problem?
+**Question 3.1.1:** Which variable has the most missing values? If this were the primary "Score" variable, why would that be a problem for our analysis?
 
 ### 3.2 Inconsistent Categories
+R sees Neon Yard and neon yard as two different stadiums. We need to check for "Casing Gremlins."
+
 
 ```{r}
-home_arena_counts <- players %>%
-  count(home_arena) %>%             # how many rows per arena label
-  arrange(desc(n))                  # sort to scan for casing/spelling problems
-home_arena_counts
+# --- UTILITY REFERENCE ---
+# %>%: The Pipe. Read it as "And then..."
+# count(): Groups the rows by a column and counts how many times each label appears.
+# arrange(desc(n)): Sorts the counts from highest to lowest.
+
+players %>%
+  count(home_arena) %>%
+  arrange(desc(n))
 ```
 
-**Question 3.2:** Do you notice inconsistent casing/spelling among `home_arena` values? If so, what kind of data issue is that?
+**Question 3.2.1:** Do you notice inconsistent casing or spelling among the home_arena values? What does this tell you about how the data was entered?
 
 ### 3.3 Duplicate IDs
+Every player should have one unique ID. Duplicates mean someone is being double-counted.
+
 
 ```{r}
-duplicate_ids <- sum(duplicated(players$player_id))   # >0 means the same player_id appears twice
-duplicate_ids
+# --- UTILITY REFERENCE ---
+# duplicated(): Flags rows that have appeared before in the dataset.
+# sum(): Counts how many duplicates exist in total.
+
+sum(duplicated(players$player_id))
 ```
 
-**Question 3.3:** If duplicates exist, what does that mean for analysis (e.g., double-counting policy events)?
+**Question 3.3.1:** If duplicates exist, what does that mean for your analysis (e.g., if you were calculating the total prize money awarded)?
 
 ## 4. Challenge: Spot the Issues
+Look at this slice of "Raw Data" from the League's backup server.
 
-```
+Plaintext
+
 | player_id | home_arena  | season_score | preferred_loadout |
 |-----------|-------------|--------------|-------------------|
 | P-0220    | neon yard   | 905          | Hyper Beam        |
 | P-0455    | Glow Hall   | NA           | Pulse Shield      |
 | P-0220    | Neon Yard   | 905          | Hyper Beam        |
 | P-0512    | Photon Dome | -10          | " "               |
-```
 
-**Question 4.1:** List three data quality issues from this snippet.  
-**Question 4.2:** Which R functions from this lab could you use to confirm each issue if it appeared in the full dataset?
+**Question 4.1.1:** List three distinct data quality issues from this snippet.
+
+**Question 4.1.2:** Which R functions from this lab would you use to confirm each issue if it appeared in a dataset of 10,000 players?

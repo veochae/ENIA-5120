@@ -10,11 +10,9 @@ slides:
 lab:
   assignment_key: lab09
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 09 – Clustering Spec.md"
+    - path: lab/lab_spec.pdf
+      display_name: "Lab 09 – Clustering Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 09 – Clustering Template.Rmd"
-    - path: lab/lab_tests.R
-      display_name: "Lab 09 – Clustering Tests.R"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 09 – Rubric.yaml"
+    - path: lab/lab_rubric.pdf
+      display_name: "Lab 09 – Rubric.pdf"

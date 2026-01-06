@@ -1,11 +1,11 @@
 total_points: 15
 criteria:
-  - id: setup_preview
-    description: "Loads players via ENIA_ROOT, captures table preview, and records row/column counts."
+  - id: structure
+    description: "Inspects dataframe structure and dimensions with class(), nrow(), ncol(), glimpse(), and names()."
     max_points: 5
-  - id: type_and_missing
-    description: "Saves column names/types, runs summary() for season_score, and creates missing_totals + missing_checks."
-    max_points: 6
+  - id: types_summary
+    description: "Checks column types and summarizes season_score for potential anomalies."
+    max_points: 5
   - id: quality_checks
-    description: "Reports home_arena counts, duplicate IDs, and answers reflection questions thoughtfully."
-    max_points: 4
+    description: "Checks missingness, inconsistent categories, duplicates, and answers reflection questions."
+    max_points: 5

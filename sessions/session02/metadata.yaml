@@ -10,13 +10,9 @@ slides:
 lab:
   assignment_key: lab02
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 02 – Wrangling Spec.md"
     - path: lab/lab_spec.pdf
       display_name: "Lab 02 – Wrangling Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 02 – Template.Rmd"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 02 – Rubric.yaml"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 02 – Rubric.pdf"

@@ -10,11 +10,9 @@ slides:
 lab:
   assignment_key: lab12
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 12 – Storytelling Spec.md"
+    - path: lab/lab_spec.pdf
+      display_name: "Lab 12 – Storytelling Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 12 – Storytelling Template.Rmd"
-    - path: lab/lab_tests.R
-      display_name: "Lab 12 – Storytelling Tests.R"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 12 – Rubric.yaml"
+    - path: lab/lab_rubric.pdf
+      display_name: "Lab 12 – Rubric.pdf"

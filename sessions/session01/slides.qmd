@@ -11,338 +11,227 @@ format:
     theme: serif     
 ---
 
-# 👋 Today’s Goals
+## 📋 Agenda
 
-By the end of today, you will be able to:
-
-- Explain what “data” means in analytics  
-- Identify different forms of data (structured, unstructured, semi-structured)  
-- Understand what tables, rows, columns, observations, and variables are  
-- Describe what a **dataframe** is in R  
-- Distinguish numerical, categorical, **nominal vs. ordinal**, date, and factor types  
-- Recognize common data quality issues  
-- Begin inspecting data in R  
+* **The Mission:** Your role in the Climate Crisis investigation.
+* **The Lifecycle:** Mapping where we are in the journey.
+* **The Blueprint:** Defining Data and its "Shapes."
+* **The Tool:** Why we use R (and the R "Mindset").
+* **The Language:** Deciphering Data Types.
+* **The Forensic Audit:** Identifying Data Quality "Gremlins."
+* **Mini-Exercise:** Putting your eyes to the test.
 
 ---
 
-# 🔍 Warm-Up: What data did you interact with today?
+## 🎯 Today’s Objectives
 
-- Phone step counter  
-- Weather app  
-- Spotify / YouTube recommendations  
-- Canvas assignment status  
-- Google search history  
-- Bank transactions  
-- Social media posts  
-- Uber / Lyft GPS  
+*By the end of this 75-minute session, you will:*
 
-> Data is everywhere — and constantly being collected.
+1.  **Locate** where Data Wrangling fits in a professional workflow.
+2.  **Differentiate** between Structured, Semi-Structured, and Unstructured data.
+3.  **Navigate** the anatomy of a Dataframe (Rows, Columns, Cells).
+4.  **Identify** specific Data Types (Numeric, Factor, Logical, etc.).
+5.  **Detect** the 6 most common data quality issues in a raw dataset.
 
 ---
 
-# 🔄 The Data Science Workflow
+## 🕵️‍♂️ The Mission: Solving the Climate Crisis
 
-```{mermaid}
-flowchart LR
-  A[Acquire / Collect] --> B[Clean / Wrangle]
-  B --> C[Explore / EDA]
-  C --> D[Visualize Findings]
-  D --> E[Model & Validate]
-  E --> F[Communicate & Deploy]
-  style B fill:#ffe08a,stroke:#000
-  classDef active fill:#ffe08a,stroke:#000,color:#000,font-weight:bold;
-```
+You’ve been tasked with a high-stakes analysis: **Identify the main causes of global warming.**
 
-- We live in the yellow **Clean/Wrangle** box today.
-- Good cleaning enables every downstream step: EDA, visualization, modeling.
+You've heard that "Data" is the key. But before you can present to a committee or influence policy, you have to build the foundation. You can't just look at a spreadsheet and guess—you have to **interrogate** the evidence.
 
 ---
 
-# 📦 What Is Data?
+## 🔄 The Data Science Lifecycle
 
-**Simple definition:** Data = recorded information.
 
-Data comes in many forms:
 
-- Numbers  
-- Text  
-- Images  
-- Video  
-- Audio  
-- Clicks  
-- Sensors  
-- Transactions  
-- Social interactions  
+* **Step 1: Acquisition & Wrangling (Today):** Finding and prepping the data.
+* **Step 2: EDA (Exploratory Data Analysis):** Spotting trends.
+* **Step 3: Visualization:** Telling the story.
+* **Step 4: Modeling:** Predicting the future.
+
+> **Crucial Lesson:** If Step 1 is a disaster, Step 4 will be a lie. Wrangling is the "Safety Check" of Science.
 
 ---
 
-# 🧭 Types of Data in the Real World
+## 💎 What is Data?
 
-| Type | Structure | Examples | Where you see it |
-| --- | --- | --- | --- |
-| **Structured** | Rows + columns | Spreadsheets, CSVs, SQL tables | Finance reports, gradebooks |
-| **Semi-Structured** | Tagged but irregular | JSON, XML, API payloads | Web services, mobile apps |
-| **Unstructured** | No fixed schema | Images, text, video, audio | Social media, sensors |
+Data isn't just "stuff on a computer." Think of it as **Digital Evidence**. 
 
-> We will live primarily in the **structured** column this semester, but you will see hints of the others in APIs/shiny dashboards later.
+It is a captured record of a physical event. 
+* A satellite measures sea levels $\rightarrow$ **The Evidence.**
+* A scientist drills into an ice core to check $CO_2$ $\rightarrow$ **The Evidence.**
 
----
-
-# 📊 Why Focus on Tabular Data?
-
-- Most analytics → spreadsheets, reporting tables, dashboards  
-- Easiest way to learn logic of data manipulation  
-- R and tidyverse are built around tabular workflows  
-- Models require clean, clearly defined variables  
-- Visualization becomes easier and more useful  
+Your job is to determine if that evidence is reliable enough to build a case.
 
 ---
 
-# 🧱 What Is a Dataset?
+## 📦 Shape 1: Structured Data
 
-A dataset is a **collection of observations**.
+**Our Gold Standard.**
 
-Each dataset contains:   
-- **Rows** → individual observations     
-- **Columns** → variables or attributes     
-- **Cells** → values  
-
----
-
-# 📐 Anatomy of a Table
-
-```text
-| player_id | home_arena | season_score | role    |
-|-----------|------------|--------------|---------|
-| P-0041    | Neon Yard  | 780          | Striker |
-| P-0199    | Glow Hall  | 655          | Anchor  |
-| P-0112    | Glow Hall  | NA           | Scout   |
-```
-
-- **Rows** = single player
-- **Columns** = attributes we measure
-- **Cells** = individual facts (may be missing!)
+Structured data is a clean, predictable grid where every piece of information has a specific place.   
+* **Example:** A `.csv` file where every year has a row and every measurement has a column.   
+* **Why we love it:** Computers are optimized to do math on a grid.   
 
 ---
 
-# 📁 What Is a “Dataframe” in R?
+## 🧾 Shape 2: Semi-Structured Data
 
-A **dataframe** is R’s way of storing tabular data.
+**Organized, but "Loose."**
 
-- Each column = one variable  
-- Each column has **one type**  
-- Rows represent observations  
-- Foundation for almost all analysis  
+Think of a **Starbucks App Order** or a **Digital Receipt**. It isn't a flat grid, but it has specific "tags" that tell you what is what (e.g., `<Price>`, `<Item>`, `<Store>`). 
 
-```r
-ENIA_ROOT <- "~/ENIA-5120"
-players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-
-class(players)
-dplyr::glimpse(players)
-summary(players$season_score)
-```
-
-```text
-[1] "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
-Rows: 100
-Columns: 11
-$ player_id        <chr> "P-0001", "P-0002", ...
-$ role             <chr> "Striker", "Anchor", ...
-$ season_score     <dbl> 720, 655, NA, 590, ...
-$ tag_accuracy_pct <dbl> 78.2, 70.5, 65.1, ...
-$ assists          <dbl> 120, 98, 88, 73, ...
-   Min. 1st Qu. Median Mean 3rd Qu. Max.
-  320     520     610   612    705   890
-```
-
-- Internally, a dataframe is a **list of equal-length vectors**.
-- Keeping types consistent (character vs numeric) prevents silent bugs later.
+* It has "layers" (like one receipt having multiple items) that don't fit into a simple table without extra work.
 
 ---
 
-# 🧩 Common Variable Types (Laser League examples)
+## 📸 Shape 3: Unstructured Data
 
-| Type | What it looks like | Example column |
-| --- | --- | --- |
-| **Numeric (continuous)** | Counts, rates | `season_score`, `assists`, `tag_accuracy_pct` |
-| **Numeric (discrete)** | Whole numbers | `matches_played` |
-| **Categorical (nominal)** | Names/labels | `home_arena`, `preferred_loadout` |
-| **Categorical (ordinal)** | Ordered labels | `skill_tier` (Bronze < Silver < Gold) |
-| **Logical** | TRUE/FALSE flags | `injured_flag` |
-| **Date / time** | Calendar stamps | `last_match_date` |
-| **Factor** | Encoded categorical (R) | `role` as factor for modeling |
+**The "Wild" Data.**
+
+* **Examples:** Satellite photos of hurricanes, videos of melting glaciers, or handwritten scientist notes. 
+* There are no rows or columns here—just raw pixels or sound. 
+* **The Goal:** We often use AI/tools to turn this mess into **Structured Data** we can actually count.
+
+
 
 ---
 
-# 🔠 Nominal vs. Ordinal (Important!)
+## 📁 The Container: Dataset vs. Dataframe
 
-| Type | Example | Visual cue |
-| --- | --- | --- |
-| **Nominal** (unordered) | `home_arena` = {Neon Yard, Glow Hall, Photon Dome} | 🔹 Neon | 🔸 Glow | 🔺 Photon (reorder any way) |
-| **Ordinal** (ordered) | `skill_tier` = {Rookie < Veteran < Elite} | Rookie → Veteran → Elite |
+You finally receive your structured climate file. There are two terms you’ll hear constantly:
 
-- Nominal categories are labels; order never matters.
-- Ordinal categories imply ranking; keep sequences when encoding factors.
-- Be precise: mixing these up causes broken summaries and misleading models.
+1.  **The Dataset:** The general collection of info (the "Climate File").
+2.  **The Dataframe:** R’s specific, high-powered container for your data.
+
+> A Dataframe is **"strict."** It demands that every column be a specific type (e.g., a column of only numbers). This strictness allows R to process millions of records in a split second.
 
 ---
 
-# ⚠️ Data Quality Issues to Watch
+## 🧱 Anatomy of the Grid
 
-- Missing values (e.g., some players have no `season_score`)
-- Duplicated IDs after data entry
-- Weird casing (`neon yard` vs `Neon Yard`)
-- Impossible numbers (negative assists?)  
-- Inconsistent categories (`Anchor` vs `anchor`)
-- Timestamps saved as text
 
-We will practice spotting these issues in Lab 01 and fix them systematically in later sessions.
+
+* **Rows (Observations):** Each row is a single, unique event (e.g., the year 1990).
+* **Columns (Variables):** The "lenses" we use to look at that year (e.g., $CO_2$ levels).
+* **The Cell:** The intersection of a row and a column. This is the individual **Fact**.
 
 ---
 
-# 👀 Quick R Demo (Live)
+## 🛠️ Choosing Your Tool: Why R?
 
-```r
-library(dplyr)
-library(ggplot2)
-
-ENIA_ROOT <- "~/ENIA-5120"
-players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-
-players %>%
-  count(role) %>%
-  ggplot(aes(x = role, y = n, fill = role)) +
-  geom_col(show.legend = FALSE) +
-  labs(title = "Players by role", x = NULL, y = "Count") +
-  theme_minimal()
-```
-
-- We preview the data, build a quick count plot, and save it as `role_plot`
-- This pattern is key for initial data analysis (read → inspect → visualize)
-
-```text
-# A tibble: 4 × 2
-  role     n
-  <chr> <int>
-1 Anchor   27
-2 Scout    25
-3 Striker  24
-4 Support  24
-```
----
-
-- Visualize it immediately to reinforce the habit.
-
-```{r role-plot, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Example role distribution (Laser League data)", fig.width=6.5, fig.height=3.5}
-library(ggplot2)
-library(tibble)
-role_counts <- tibble(
-  role = c("Anchor", "Scout", "Striker", "Support"),
-  n = c(27, 25, 24, 24)
-)
-
-ggplot(role_counts, aes(x = role, y = n, fill = role)) +
-  geom_col(show.legend = FALSE) +
-  labs(title = "Players by role (example)", x = NULL, y = "Count") +
-  theme_minimal(base_size = 14)
-```
-
-- The column chart mirrors this summary; we can talk through which roles dominate.
+* **Audit Trail (Reproducibility):** In R, you write a **Script** (a recipe). If you find a mistake in your math, you fix one line and rerun. In Excel, you have to manually re-click and drag through thousands of cells.
+* **Power:** R treats columns as **Vectors**. It calculates the entire 50-year trend at once, rather than looking at cells one-by-one.
 
 ---
 
-# 🧠 Why Variable Types Matter
+## 💡 R "Hacks" for the Newbie
 
-- Encodes how R treats the column (math vs. grouping vs. dates)
-- Drives visualization defaults (continuous vs. discrete scales)
-- Impacts modeling formulas (factors vs. numeric)
-- Avoids silent bugs like “ZIP codes minus ZIP codes”
-
-Use `glimpse()` or `dplyr::count(where(is.character))` to sanity check types the moment you read in data.
+* **The Tab Key:** Your best friend. Start typing a name, hit **Tab**, and R finishes it. 
+* **The Pipe (`%>%`):** R’s way of saying **"AND THEN."** It lets you chain your thoughts together.
+* **The Environment:** Think of this as your **Workbench**. If you don't "load" your dataset into the environment, R can't "see" it.
 
 ---
 
-# 🧹 Understanding Common Data Problems
+## 🔠 The "Translation": Data Types
 
-Data gets messy because of:
+R "types" your evidence so it knows what math is legal.
 
-- Manual entry & typos  
-- Multiple systems exporting data differently  
-- Missing context (optional survey fields)  
-- Copy/paste casing differences  
-- Merge errors that duplicate IDs  
-- Sensors or loggers dropping packets  
-
-We will turn these into learning opportunities in labs.
+| Type | What it looks like | Example Column |
+| :--- | :--- | :--- |
+| **Numeric (Continuous)** | Counts, rates, decimals | `co2_level`, `tag_accuracy_pct` |
+| **Numeric (Discrete)** | Whole numbers | `matches_played`, `year` |
+| **Logical** | TRUE/FALSE flags | `injured_flag`, `ice_melt_record` |
+| **Date / Time** | Calendar stamps | `last_match_date`, `reading_timestamp` |
 
 ---
 
-# ⚠️ Typical Problems You Will Encounter
+## 🔠 Nominal vs. Ordinal (The Ladder)
 
-| Issue | Laser League example | Quick check |
-| --- | --- | --- |
-| **Missing values** | `season_score` empty for new recruits | `colSums(is.na(players))` |
-| **Outliers** | Accuracy = 150% (impossible) | `summary(players$tag_accuracy_pct)` |
-| **Wrong type** | `last_match_date` stored as text | `lubridate::ymd(last_match_date)` |
-| **Inconsistent labels** | `neon yard` vs `Neon Yard` | `count(players, home_arena)` |
-| **Duplicates** | Same `player_id` twice after merge | `duplicated(players$player_id)` |
+In R, Categorical data is called a **Factor**. It comes in two flavors:
 
----
+1.  **Nominal (Labels Only):** No inherent order. 
+    * *Example:* **Energy Source** (Coal, Solar, Wind). One isn't "higher" than the other.
+2.  **Ordinal (The Ladder):** There is a clear rank or sequence.
+    * *Example:* **Climate Risk Level** (Low < Medium < High). 
 
-# 🔍 Detecting Problems in R
 
-```r
-players %>%
-  summarise(
-    missing_score = sum(is.na(season_score)),
-    bad_accuracy = sum(tag_accuracy_pct > 100 | tag_accuracy_pct < 0),
-    unique_arenas = dplyr::n_distinct(home_arena)
-  )
-
-players %>%
-  count(home_arena) %>%
-  arrange(desc(n))
-```
-
-- Quick summaries expose anomalies immediately
-- Save these checks in your labs → earns rubric points for reproducibility
 
 ---
 
-# 🧠 Mini Exercise: Spot the Issues
+## 🤔 Why do Data Types actually matter?
 
-```text
-| player_id | home_arena  | season_score | preferred_loadout |
-|-----------|-------------|--------------|-------------------|
-| P-0220    | neon yard   | 905          | Hyper Beam        |
-| P-0455    | Glow Hall   | NA           | Pulse Shield      |
-| P-0220    | Neon Yard   | 905          | Hyper Beam        |
-| P-0512    | Photon Dome | -10          | " "               |
-```
-
-- Which rows worry you?
-- What functions could you run to confirm?
-- How would you document the fixes in your R Markdown?
+* **Math:** You can't calculate the average of "Low, Medium, High" unless you tell R they are ranked categories.
+* **Charts:** If you don't define an **Ordinal** rank, R lists them alphabetically (**H**igh, **L**ow, **M**edium), making your chart look broken.
+* **Logic:** You can't ask R "Is the temp > 15?" if the temp is saved as "Text."
 
 ---
 
-# 📝 Summary
+## ⚠️ Defining "Messiness"
 
-- Data comes in many forms  
-- Structured/tabular data is our focus  
-- Dataframes store tables in R  
-- Variable types matter for analysis  
-- Nominal vs. Ordinal is a key distinction  
-- Real data is messy — understanding problems is step #1  
-- Next: **EDA and summary statistics**  
+Data is rarely created for analysts; it’s created by tired humans or glitchy sensors. 
+
+**Messiness** is any inconsistency that prevents R from doing math or creating accurate charts. If you don't find these "Gremlins" now, they will sabotage your model later.
 
 ---
 
-# 👉 Next Session
+## 🔍 Quality Issues: Missingness & Duplicates
 
-- Summary statistics     
-- Exploratory Data Analysis 101  
-- Visualization 101.       
+1.  **Missing Values (`NA`):** Gaps in the evidence (e.g., a weather station went offline). **Note:** `NA` is not zero!
+2.  **Duplicated IDs:** The same year or player entered twice. This "double-counting" will artificially inflate your averages.
 
 ---
+
+## 🔍 Quality Issues: Casing & Impossible Numbers
+
+3.  **Inconsistent Casing:** `neon yard` vs `Neon Yard`. To R, these are two different places.
+4.  **Impossible Numbers:** A temperature of $500^{\circ}C$ or "Negative Assists." These are usually "Fat-finger" typos.
+
+---
+
+## 🔍 Quality Issues: Categories & Timestamps
+
+5.  **Inconsistent Categories:** Using `Anchor` in one row and `anchor` in another.
+6.  **Timestamps as Text:** Dates saved as "Jan 1st" instead of a proper `Date` type. You can't sort "text" chronologically!
+
+
+
+---
+
+## 🧩 Mini-Exercise: Spot the Gremlins
+
+**How many issues can you find?**
+
+| ID | Year | Location | Temp_C | Sensor_Active |
+| :--- | :--- | :--- | :--- | :--- |
+| 101 | 1990 | Arlington | 14.5 | TRUE |
+| 102 | 1991 | arlington | **NA** | TRUE |
+| **101** | 1990 | Arlington | 14.5 | TRUE |
+| 103 | 1992 | Arlington | **500.0** | FALSE |
+| 104 | **"1993"** | ARLINGTON | 15.2 | **"Yes"** |
+
+---
+
+## 🏁 The First Audit: Summary
+
+Today was about **Discovery**. You have moved from "I have a file" to "I have a map of the file's flaws." 
+
+**What you’ve mastered:**   
+1.  Identifying the **Shape** of your evidence.   
+2.  Recognizing the **Types** (Numeric vs. Factor).   
+3.  Spotting the **Gremlins** before they ruin your model.   
+
+---
+
+## ⏭️ Next Session: The Surgery
+
+Now that we know what's broken, how do we fix it?
+
+**In Session 2, we will cover:**   
+* **Tidyverse Verbs:** The "surgical tools" for data.   
+* **Filtering:** Cutting out the outliers (the $500^{\circ}C$ days).   
+* **Mutating:** Converting "Text" years into "Numeric" years.   
+* **Summarizing:** Turning 50 years of data into a single, clean trend.   

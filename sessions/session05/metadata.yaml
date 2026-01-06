@@ -10,11 +10,9 @@ slides:
 lab:
   assignment_key: lab05
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 05 – Feature Engineering Spec.md"
+    - path: lab/lab_spec.pdf
+      display_name: "Lab 05 – Feature Engineering Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 05 – Feature Engineering Template.Rmd"
-    - path: lab/lab_tests.R
-      display_name: "Lab 05 – Feature Engineering Tests.R"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 05 – Rubric.yaml"
+    - path: lab/lab_rubric.pdf
+      display_name: "Lab 05 – Rubric.pdf"

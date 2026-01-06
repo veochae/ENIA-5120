@@ -10,14 +10,12 @@ slides:
 lab:
   assignment_key: lab08
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 08 – Logistic Regression Spec.md"
+    - path: lab/lab_spec.pdf
+      display_name: "Lab 08 – Logistic Regression Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 08 – Logistic Regression Template.Rmd"
-    - path: lab/lab_tests.R
-      display_name: "Lab 08 – Logistic Regression Tests.R"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 08 – Rubric.yaml"
+    - path: lab/lab_rubric.pdf
+      display_name: "Lab 08 – Rubric.pdf"
 homework:
   assignment_key: hw04
   files:

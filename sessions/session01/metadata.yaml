@@ -10,15 +10,9 @@ slides:
 lab:
   assignment_key: lab01
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 01 – Spec.md"
     - path: lab/lab_spec.pdf
       display_name: "Lab 01 – Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 01 – Template.Rmd"
-    - path: lab/lab_tests.R
-      display_name: "Lab 01 – Tests.R"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 01 – Rubric.yaml"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 01 – Rubric.pdf"

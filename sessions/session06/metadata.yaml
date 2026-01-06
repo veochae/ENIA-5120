@@ -10,14 +10,12 @@ slides:
 lab:
   assignment_key: lab06
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 06 – Spec.md"
+    - path: lab/lab_spec.pdf
+      display_name: "Lab 06 – Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 06 – Template.Rmd"
-    - path: lab/lab_tests.R
-      display_name: "Lab 06 – Tests.R"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 06 – Rubric.yaml"
+    - path: lab/lab_rubric.pdf
+      display_name: "Lab 06 – Rubric.pdf"
 homework:
   assignment_key: hw03
   files:

@@ -10,11 +10,9 @@ slides:
 lab:
   assignment_key: lab07
   files:
-    - path: lab/lab_spec.md
-      display_name: "Lab 07 – Linear Regression Spec.md"
+    - path: lab/lab_spec.pdf
+      display_name: "Lab 07 – Linear Regression Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 07 – Linear Regression Template.Rmd"
-    - path: lab/lab_tests.R
-      display_name: "Lab 07 – Linear Regression Tests.R"
-    - path: lab/lab_rubric.yaml
-      display_name: "Lab 07 – Rubric.yaml"
+    - path: lab/lab_rubric.pdf
+      display_name: "Lab 07 – Rubric.pdf"
