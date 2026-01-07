@@ -14,6 +14,8 @@ lab:
       display_name: "Lab 10 – Evaluation Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 10 – Evaluation Template.Rmd"
+    - path: lab/lab_answers.Rmd
+      display_name: "Lab 10 – Evaluation Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 10 – Rubric.pdf"
 homework:

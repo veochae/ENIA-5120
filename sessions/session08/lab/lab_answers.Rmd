@@ -25,9 +25,16 @@ summary(glow_model)
 ```
 
 ```{r}
-<write your code here>
+glow_pred <- predict(glow_model, type = "response")
+head(glow_pred)
 ```
 
 ```{r}
-<write your code here>
+conf_mat <- table(
+  Predicted = glow_pred > 0.5,
+  Actual = league_df$high_glow == 1
+)
+conf_mat
+conf_accuracy <- sum(diag(conf_mat)) / sum(conf_mat)
+conf_accuracy
 ```

@@ -11,7 +11,9 @@ Provide context for the analysis and who the audience is.
 
 ## Key Metrics
 ```{r}
-<write your code here>
+metric_table <- tibble::tibble(metric = c("Accuracy", "RMSE"),
+                               value = c(0.85, 12.4))
+metric_table
 ```
 
 ## Visualization
@@ -23,5 +25,10 @@ plot_story
 
 ## Next Steps
 ```{r}
-<write your code here>
+key_takeaways <- c(
+  "Clarify data limitations",
+  "Highlight customer impact",
+  "Plan A/B test"
+)
+key_takeaways
 ```

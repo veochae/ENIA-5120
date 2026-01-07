@@ -14,5 +14,7 @@ lab:
       display_name: "Lab 05 – Feature Engineering Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 05 – Feature Engineering Template.Rmd"
+    - path: lab/lab_answers.Rmd
+      display_name: "Lab 05 – Feature Engineering Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 05 – Rubric.pdf"

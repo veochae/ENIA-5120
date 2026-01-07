@@ -1,0 +1,63 @@
+---
+title: "Lab 04 – Joining & Reshaping"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+ENIA_ROOT <- "~/ENIA-5120"
+library(dplyr)
+library(tidyr)
+library(stringr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load data
+```{r}
+players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
+events <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_events.csv"))
+```
+
+## Duplicate keys
+```{r}
+squad_counts <- players %>%
+  count(squad_id) %>%
+  filter(n > 1)
+squad_counts
+```
+
+## Join tables
+```{r}
+players_clean <- players %>%
+  mutate(squad_id = str_trim(str_to_upper(squad_id)))
+
+events_clean <- events %>%
+  mutate(
+    squad_id = str_to_upper(str_replace_all(str_trim(squad_code), "SQUAD-", "SQ"))
+  )
+
+squad_events <- players_clean %>%
+  left_join(events_clean, by = "squad_id")
+```
+
+## Reshape monthly sales
+```{r}
+program_long <- squad_events %>%
+  filter(!is.na(program_name)) %>%
+  mutate(program_name = str_to_title(program_name)) %>%
+  count(squad_id, program_name, name = "times_joined")
+
+program_long
+```
+
+## Compare wellbeing
+```{r}
+program_comparison <- squad_events %>%
+  mutate(has_program = if_else(is.na(program_name), "No Event", "Event Participant")) %>%
+  group_by(has_program) %>%
+  summarise(
+    avg_score = mean(season_score, na.rm = TRUE),
+    avg_accuracy = mean(tag_accuracy_pct, na.rm = TRUE)
+  )
+program_comparison
+```

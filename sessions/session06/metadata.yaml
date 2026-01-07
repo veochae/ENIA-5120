@@ -14,6 +14,8 @@ lab:
       display_name: "Lab 06 – Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 06 – Template.Rmd"
+    - path: lab/lab_answers.Rmd
+      display_name: "Lab 06 – Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 06 – Rubric.pdf"
 homework:

@@ -1,0 +1,89 @@
+title: "Lab 05 – Feature Engineering & Transformation"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+ENIA_ROOT <- "~/ENIA-5120"
+library(readr)
+library(dplyr)
+library(tidyr)
+library(janitor)
+library(stringr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# 1. Load players dataset
+league_players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
+glimpse(league_players)
+```
+
+```{r}
+# Helper to get most common value
+mode_char <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) {
+    return(NA_character_)
+  }
+  names(which.max(table(x)))
+}
+```
+
+```{r}
+# 2. Engineer player-level features
+players_engineered <- league_players %>%
+  clean_names() %>%
+  mutate(
+    season_score = replace_na(season_score, median(season_score, na.rm = TRUE)),
+    assists = replace_na(assists, median(assists, na.rm = TRUE)),
+    stamina_score = replace_na(stamina_score, median(stamina_score, na.rm = TRUE)),
+    score_per_match = season_score / pmax(matches_played, 1),
+    assist_rate = assists / pmax(matches_played, 1),
+    stamina_adjusted_score = score_per_match * (stamina_score / 100),
+    high_glow = glow_rating >= 8,
+    accuracy_bucket = case_when(
+      tag_accuracy_pct >= 80 ~ "Elite",
+      tag_accuracy_pct >= 65 ~ "Solid",
+      TRUE ~ "Needs Work"
+    ),
+    energy_balance = energy_delta_pct - shield_uptime_pct
+  )
+players_engineered
+```
+
+```{r}
+# 3. Squad-level features
+squad_features <- players_engineered %>%
+  group_by(squad_id, squad_name) %>%
+  summarise(
+    avg_score_per_match = mean(score_per_match, na.rm = TRUE),
+    pct_high_glow = mean(high_glow, na.rm = TRUE),
+    top_loadout = mode_char(preferred_loadout),
+    .groups = "drop"
+  )
+squad_features
+```
+
+```{r}
+# 4. Join back to players
+players_with_context <- players_engineered %>%
+  left_join(squad_features, by = c("squad_id", "squad_name"))
+players_with_context
+```
+
+```{r}
+# 5. Feature glossary
+feature_glossary <- tibble::tribble(
+  ~feature_name, ~description,
+  "score_per_match", "Season score divided by matches_played to normalize for volume.",
+  "assist_rate", "Assists per match, highlights supportive roles.",
+  "stamina_adjusted_score", "Score_per_match scaled by stamina to capture endurance.",
+  "high_glow", "Boolean flag for glow_rating >= 8 (top performers).",
+  "accuracy_bucket", "Categorical bucket describing accuracy tiers.",
+  "energy_balance", "Difference between energy_delta_pct and shield_uptime_pct."
+)
+feature_glossary
+```
+
+Add a short narrative here describing which features you believe will help future predictive models and why.

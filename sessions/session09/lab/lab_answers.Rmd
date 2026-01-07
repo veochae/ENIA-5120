@@ -18,13 +18,17 @@ cust_scaled <- scale(num_cols)
 ```
 
 ```{r}
-<write your code here>
+wss_values <- map_dbl(2:6, ~kmeans(cust_scaled, centers = .x, nstart = 10)$tot.withinss)
+wss_values
 ```
 
 ```{r}
-<write your code here>
+kmeans_model <- kmeans(cust_scaled, centers = 3, nstart = 20)
+summary(kmeans_model)
 ```
 
 ```{r}
-<write your code here>
+cust_clustered <- cust_df %>%
+  dplyr::mutate(cluster = factor(kmeans_model$cluster))
+head(cust_clustered)
 ```

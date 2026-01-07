@@ -18,13 +18,23 @@ summary(model_lm)
 ```
 
 ```{r}
-<write your code here>
+coef_table <- broom::tidy(model_lm) %>%
+  select(term, estimate, p.value)
+coef_table
 ```
 
 ```{r}
-<write your code here>
+par(mfrow = c(2, 2))
+plot(model_lm)
 ```
 
 ```{r}
-<write your code here>
+new_profiles <- tibble(
+  matches_played = c(10, 30),
+  assists = c(8, 20),
+  tag_accuracy_pct = c(45, 62),
+  shield_uptime_pct = c(55, 80)
+)
+predictions <- predict(model_lm, newdata = new_profiles)
+predictions
 ```

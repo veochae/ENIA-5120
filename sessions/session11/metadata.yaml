@@ -14,5 +14,7 @@ lab:
       display_name: "Lab 11 – APIs Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 11 – APIs Template.Rmd"
+    - path: lab/lab_answers.Rmd
+      display_name: "Lab 11 – APIs Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 11 – Rubric.pdf"

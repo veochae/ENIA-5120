@@ -35,7 +35,12 @@ Logic Breakdown:
 
 
 ```{r}
-<write your code here>
+ggplot(players, aes(x = wellbeing_index)) +
+  geom_density(fill = "cyan", alpha = 0.4) +
+  geom_vline(xintercept = 55, color = "red", linetype = "dashed", size = 1) +
+  annotate("text", x = 45, y = 0.02, label = "DANGER ZONE", color = "red", fontface = "bold") +
+  theme_minimal() +
+  labs(title = "Player Wellbeing Distribution", x = "Wellbeing Index", y = "Density")
 ```
 
 🧪 Mission 2: Benchmarking Talent (Boxplot + HLine)
@@ -51,7 +56,14 @@ Logic Breakdown:
 
 
 ```{r}
-<write your code here>
+league_avg_reflex <- mean(players$reflex_score, na.rm = TRUE)
+
+ggplot(players, aes(x = role, y = reflex_score, fill = role)) +
+  geom_boxplot(alpha = 0.6, show_legend = FALSE) +
+  geom_hline(yintercept = league_avg_reflex, color = "darkgreen", size = 1) +
+  annotate("label", x = 0.6, y = league_avg_reflex, label = "League Average", fill = "white") +
+  theme_light() +
+  labs(title = "Reflex Scores by Role vs. League Average", y = "Reflex Score")
 ```
 
 ## 🧪 Mission 3: The Efficiency Target (Ranking + AbLine)
@@ -67,7 +79,11 @@ Logic Breakdown:
 
 
 ```{r}
-<write your code here>
+ggplot(players, aes(x = matches_played, y = season_score)) +
+  geom_point(aes(color = role), alpha = 0.6) +
+  geom_abline(slope = 15, intercept = 0, color = "white", linetype = "dotted") +
+  theme_dark() +
+  labs(title = "Match Count vs. Season Score Efficiency", x = "Matches Played", y = "Total Score")
 ```
 
 ## 🧪 Mission 4: The Human Limit (Scatter + Rect Highlight)
@@ -83,7 +99,12 @@ Logic Breakdown:
 
 
 ```{r}
-<write your code here>
+ggplot(players, aes(x = reflex_score, y = reaction_time_sec)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = 0.2, ymax = 0.3, fill = "green", alpha = 0.2) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "black", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Reaction Speed vs. Reflex Score", subtitle = "Green zone highlights the 'Elite Reflex' window")
 ```
 
 ## 🧪 Mission 5: Marketability Outliers (Violin + Curves)
@@ -99,7 +120,14 @@ Logic Breakdown:
 
 
 ```{r}
-<write your code here>
+ggplot(players, aes(x = role, y = glow_rating, fill = role)) +
+  geom_violin(alpha = 0.5, show_legend = FALSE) +
+  scale_fill_viridis_d(option = "magma") +
+  annotate("curve", x = 1.5, y = 9.8, xend = 1.1, yend = 9.2, 
+           curvature = .3, arrow = arrow(length = unit(2, "mm")), color = "black") +
+  annotate("text", x = 1.6, y = 9.8, label = "Superstar Ceiling", hjust = 0) +
+  theme_minimal() +
+  labs(title = "Marketability Distributions by Role")
 ```
 
 ## 🧪 Mission 6: The Tactical Grid (Facets + All Tools)
@@ -115,5 +143,16 @@ Logic Breakdown:
 
 
 ```{r}
-<write your code here>
+ggplot(players, aes(x = tag_accuracy_pct, y = shield_uptime_pct)) +
+  geom_point(alpha = 0.4, color = "magenta") +
+  geom_smooth(method = "lm", color = "cyan", size = 0.7, se = FALSE) + 
+  geom_vline(xintercept = 50, linetype = "dotted", color = "black", alpha = 0.5) +
+  facet_wrap(~squad_name) +
+  theme_bw() +
+  labs(
+    title = "Tactical Profile Matrix",
+    subtitle = "Accuracy vs. Defense Uptime (Dotted line = 50% Benchmark)",
+    x = "Tag Accuracy %",
+    y = "Shield Uptime %"
+  )
 ```

@@ -68,7 +68,9 @@ glimpse(players)
 3. Arrange the results by `season_score` from highest to lowest.
 
 ```{r}
-<write your code here>
+players %>%
+  filter(role == "Sniper") %>%
+  arrange(desc(season_score))
 ```
 
 ## 2. Diagnosing and Cleaning Missing Data (NA)
@@ -80,7 +82,7 @@ glimpse(players)
 `colSums()`: Sums the TRUE values (which R treats as 1s) for each column.
 
 ```{r}
-<write your code here>
+colSums(is.na(players))
 ```
 
 ### 2.2 Mode Imputation (Categorical Data: preferred_loadout)
@@ -104,7 +106,13 @@ We will focus on the `preferred_loadout` column and fill its NAs using the Mode.
 5. Pull the `preferred_loadout` name from that row.
 
 ```{r}
-<write your code here>
+mode_loadout <- players %>%
+  count(preferred_loadout) %>%
+  arrange(desc(n)) %>%
+  slice(1) %>%
+  pull(preferred_loadout)
+
+paste("The Mode is:", mode_loadout)
 ```
 
 **logic steps (Applying Mode):**
@@ -116,7 +124,12 @@ We will focus on the `preferred_loadout` column and fill its NAs using the Mode.
 5. Check the NA count again to confirm the fix.
 
 ```{r}
-<write your code here>
+players_clean <- players %>%
+  mutate(
+    preferred_loadout = coalesce(preferred_loadout, mode_loadout)
+  )
+
+colSums(is.na(players_clean))
 ```
 
 ## 3. Foundational EDA: Summarizing Data
@@ -143,7 +156,16 @@ We will focus on the `preferred_loadout` column and fill its NAs using the Mode.
 4. Arrange the final table by average score.
 
 ```{r}
-<write your code here>
+role_summary <- players_clean %>%
+  group_by(role) %>%
+  summarise(
+    total_players = n(), 
+    avg_score = mean(season_score, na.rm = TRUE),
+    score_variability = sd(season_score, na.rm = TRUE)
+  ) %>%
+  arrange(desc(avg_score))
+
+role_summary
 ```
 
 *Question 3.1:* Based on the table, which player role has the highest average score? Which role has the most variability?
@@ -157,7 +179,15 @@ We will focus on the `preferred_loadout` column and fill its NAs using the Mode.
 4. Arrange the table by average stamina score.
 
 ```{r}
-<write your code here>
+squad_summary <- players_clean %>%
+  group_by(squad_name) %>%
+  summarise(
+    total_players = n(),
+    avg_stamina = mean(stamina_score, na.rm = TRUE)
+  ) %>%
+  arrange(desc(avg_stamina))
+
+squad_summary
 ```
 
 ## 4. Simple Visual Diagnostics
@@ -173,7 +203,16 @@ We will use a box plot to visually diagnose outliers and compare the median scor
 - `theme(axis.text.x = ...)`: Rotates labels to prevent overlap.
 
 ```{r}
-<write your code here>
+players_clean %>%
+  ggplot(aes(x = squad_name, y = season_score)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.6) +
+  labs(
+    title = "Season Score Distribution by Squad",
+    y = "Season Score",
+    x = "Squad Name"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 *Question 4.1:* Identify the squad(s) that appear to have the highest number of outliers. What might that signal?
@@ -182,7 +221,16 @@ We will use a box plot to visually diagnose outliers and compare the median scor
 We will use a bar chart to look for inconsistencies in the `home_arena` data (e.g., different capitalization).
 
 ```{r}
-<write your code here>
+players_clean %>%
+  ggplot(aes(x = home_arena)) +
+  geom_bar(fill = "darkgreen", alpha = 0.7) +
+  labs(
+    title = "Player Counts by Home Arena",
+    y = "Number of Players (Frequency)",
+    x = "Home Arena"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 *Question 4.2:* Based on the bar chart, do you see potential inconsistencies in `home_arena` (like capitalization differences)? If yes, which tidyverse verb would you use to fix them?

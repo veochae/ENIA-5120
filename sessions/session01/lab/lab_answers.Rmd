@@ -24,9 +24,6 @@ Welcome to your first day as a Junior Analyst for the **Laser League**. You’ve
 library(readr)
 library(dplyr)
 
-# Setting global options to control code visibility via params
-knitr::opts_chunk$set(echo = params$show_code, message = FALSE, warning = FALSE)
-
 # Define the root path (Adjust if your folder structure is different)
 ENIA_ROOT <- "~/ENIA-5120"
 league_path <- file.path("../../../data", "laser_league_players.csv")
@@ -62,7 +59,8 @@ Use `glimpse()` to see every column name and its assigned data type (e.g., <chr>
 
 
 ```{r}
-<write your code here>
+class(players) 
+glimpse(players)
 ```
 
 **Question 1.2.1:** What R class is players? How does R internally store this table?
@@ -83,7 +81,9 @@ Check the class of `reaction_time_sec`.
 
 
 ```{r}
-<write your code here>
+class(players$player_id)
+class(players$season_score)
+class(players$reaction_time_sec)
 ```
 
 **Question 2.1.1:** assists shows up as <dbl> in glimpse(). Is this Nominal, Ordinal, or Numeric? Why?
@@ -100,7 +100,7 @@ Look at the Max value—if it is impossibly high, you've found a "Gremlin."
 
 
 ```{r}
-<write your code here>
+summary(players$season_score)
 ```
 
 **Question 2.2.1:** What is the median and maximum season_score? Could a massive max value indicate a data quality issue or just a very good player?
@@ -118,7 +118,7 @@ Combine `is.na(players)` with `colSums()` to get a report of all missing values 
 
 
 ```{r}
-<write your code here>
+colSums(is.na(players))
 ```
 
 **Question 3.1.1:** Which variable has the most missing values? If this were the primary $CO_2$ measurement in a climate study, why would that be a problem?
@@ -135,7 +135,9 @@ AND THEN (%>%) `arrange()` by descending count (`n`).
 
 
 ```{r}
-<write your code here>
+players %>%
+  count(home_arena) %>%
+  arrange(desc(n))
 ```
 
 **Question 3.2.1:** Do you notice inconsistent casing or spelling (e.g., neon yard vs Neon Yard)? How would this mess up a bar chart of arena popularity?
@@ -149,7 +151,7 @@ Use `sum(duplicated())` on the `player_id` column to see if any unique identifie
 
 
 ```{r}
-<write your code here>
+sum(duplicated(players$player_id))
 ```
 
 ## 4. Challenge: Spot the Issues

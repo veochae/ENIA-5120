@@ -27,31 +27,11 @@ test_df <- testing(split)
 ```
 
 ```{r}
-reg_model <- lm(
-  season_score ~ matches_played + assists + tag_accuracy_pct + shield_uptime_pct,
-  data = train_df
-)
-reg_predictions <- predict(reg_model, newdata = test_df)
-rmse_value <- rmse_vec(test_df$season_score, reg_predictions)
-rmse_value
+<write your code here>
 ```
 
 ```{r}
-log_model <- glm(
-  high_glow ~ matches_played + tag_accuracy_pct + shield_uptime_pct,
-  data = train_df,
-  family = binomial()
-)
-class_probs <- predict(log_model, newdata = test_df, type = "response")
-predicted_class <- if_else(class_probs > 0.5, "Yes", "No")
-actual_class <- if_else(test_df$high_glow == 1, "Yes", "No")
-
-eval_confusion <- table(Predicted = predicted_class, Actual = actual_class)
-eval_confusion
-precision_val <- eval_confusion["Yes", "Yes"] / sum(eval_confusion["Yes", ])
-recall_val <- eval_confusion["Yes", "Yes"] / sum(eval_confusion[, "Yes"])
-precision_val
-recall_val
+<write your code here>
 ```
 
 ## Notes

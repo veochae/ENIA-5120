@@ -11,7 +11,7 @@ format:
     theme: serif 
 ---
 
-# Topics of the Day
+# Topics of the Day 🧭
 
 - Meet the instructor and classmates
 - Overview of ENIA-5120
@@ -21,7 +21,7 @@ format:
   
 ---
 
-# Meet the Instructor
+# Meet the Instructor 👋
 **Veo Chae**  
 Course Instructor, ENIA-5120
 
@@ -44,11 +44,11 @@ Course Instructor, ENIA-5120
   
 ---
 
-# Time for Some Introductions!
+# Time for Some Introductions! 🗣️
 
 ---
 
-# Course Structure
+# Course Structure 🧱
 - **Total Sessions:** 13
 - **Course Structure:**
   - **Lecture:** 1HR 15MIN
@@ -62,7 +62,7 @@ Course Instructor, ENIA-5120
   
 ---
 
-# Course Structure
+# Course Structure 🧱
 ```{mermaid}
 flowchart LR
   A[Data Gathering] --> B[Data Manipulation]
@@ -76,7 +76,7 @@ flowchart LR
 
 ---
 
-# Labs
+# Labs 🧪
 - Each lab will be a series of R coding exercises 
 - We will try to complete most of it during the lab hour
 - If not completed, your task will be to finish what is left, and submit the R Script
@@ -86,7 +86,7 @@ flowchart LR
   
 ---
 
-# Homeworks
+# Homeworks 📝
 - For each homework, you will submit a "portion" of a Data Science Report.   
 - At the end of all the homeworks, you will have a full Data Science Report.   
 - Goal is to get you a template of a Data Science report to fall back on.   
@@ -94,7 +94,7 @@ flowchart LR
 
 ---
 
-# Submission Formats
+# Submission Formats 📬
 - All submissions should follow:   
 - `lab00` _ `<GUID>` . `<FILE_FORMAT>`.  
 - `hw00` _ `<GUID>` _ `<GUID>` . `<FILE_FORMAT>`.  
@@ -103,7 +103,7 @@ flowchart LR
   
 ---
 
-# Final Project
+# Final Project 🧠
 - Final Project will be replication of the homeworks.  
 - With the dataset of your choosing, you will leverage all the DS toolkits you have learned throughout the semester to do a Data Science project.  
 - **Final Deliverables:** Data Science report and a presentation.  
@@ -111,7 +111,7 @@ flowchart LR
 
 ---
 
-# Some Ground Rules
+# Some Ground Rules 🤝
 - No such thing as "Dumb Question".  
 - After each lecture, please don't hesitate to give me feedback.  
 - Let's try our best to put away our phones during lecture.  
@@ -119,7 +119,7 @@ flowchart LR
 
 ---
 
-# Temperature Check
+# Temperature Check 🌡️
 1. How familiar are you with R?
 2. How familiar are you with Data Manipulation?
 3. How familiar are you with Data Visualization?
@@ -129,16 +129,16 @@ flowchart LR
 
 ---
 
-# BREAK
+# BREAK ☕
 
 ---
 
-# Lab 0
+# Lab 0 🧪
 **Environment Setup + Choosing Your Datasets**
 
 ---
 
-# Repository Creation
+# Repository Creation 🧰
 - On `Desktop` or folder of your choosing, create a folder called `ENIA-5120`.  
 - Inside, create 3 folders: `data`,`labs`,`homeworks`.  
 - Go to canvas, `Assignments/Lab 00` download the files.   
@@ -147,7 +147,7 @@ flowchart LR
 
 ---
 
-# Your Dataset for the Course
+# Your Dataset for the Course 📦
 - In canvas, you will see 2 different Datasets.  
 - `laser_league_event.csv` and `laser_league_players.csv`.  
 - Download both files and save in `ENIA-5120/data`.  
@@ -156,7 +156,7 @@ flowchart LR
 
 ---
 
-# Environment Setup - R
+# Environment Setup - R 🧰
 
 :::{.columns}
 :::{.column}
@@ -177,7 +177,7 @@ flowchart LR
 
 ---
 
-# Environment Setup - R
+# Environment Setup - R 🧰
 
 :::{.columns}
 :::{.column}
@@ -198,7 +198,7 @@ flowchart LR
 ---
 
 
-# Environment Setup - Quarto
+# Environment Setup - Quarto 📄
 
 :::{.columns}
 :::{.column}
@@ -218,7 +218,7 @@ flowchart LR
 
 ---
 
-# Environment Setup - Testing
+# Environment Setup - Testing ✅
 - Open RStudio.
 - In the console, run:
 ```r
@@ -232,11 +232,11 @@ quarto::quarto_version()
 
 ---
 
-# Now let's load your datasets!
+# Now let's load your datasets! 🚀
 
 ---
 
-# Deliverables by next week
+# Deliverables by next week 📌
 - **Lab 0:** Submission by `Sunday 11:59PM EST`.   
 - If your set up has error, please have it resolved by next session.   
 

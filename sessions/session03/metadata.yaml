@@ -14,6 +14,8 @@ lab:
       display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Spec.pdf"
     - path: lab/lab_template.Rmd
       display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Template.Rmd"
+    - path: lab/lab_answers.Rmd
+      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Rubric.pdf"
 homework:
