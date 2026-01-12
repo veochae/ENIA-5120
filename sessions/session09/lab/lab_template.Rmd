@@ -18,13 +18,13 @@ cust_scaled <- scale(num_cols)
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```

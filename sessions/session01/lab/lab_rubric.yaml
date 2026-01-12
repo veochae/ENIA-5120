@@ -1,11 +1,11 @@
-total_points: 15
+total_points: 20
 criteria:
   - id: structure
     description: "Inspects dataframe structure and dimensions with class(), nrow(), ncol(), glimpse(), and names()."
-    max_points: 5
+    max_points: 7
   - id: types_summary
     description: "Checks column types and summarizes season_score for potential anomalies."
-    max_points: 5
+    max_points: 7
   - id: quality_checks
     description: "Checks missingness, inconsistent categories, duplicates, and answers reflection questions."
-    max_points: 5
+    max_points: 6
