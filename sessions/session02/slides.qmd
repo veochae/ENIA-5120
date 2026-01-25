@@ -1,5 +1,6 @@
----
-title: "Session 2 – Cleaning, EDA, and Simple Visuals"
+﻿---
+title: "Session 2: The Analytical Detective"
+subtitle: "Moving from Cleaning to Discovery"
 format: 
   revealjs:
     slide-number: true
@@ -7,241 +8,356 @@ format:
     scrollable: true    
     footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
-    theme: serif     
+    theme: serif
+    code-fold: true
+    code-summary: "Show code"
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: true
 ---
 
-## Goals for Today:
+## The Clean Data is Silent - Now What? 🕵️
 
-1.  Understand the pros and cons of basic **Data Cleaning Strategies** (Imputation vs. Deletion).
-2.  Define **Exploratory Data Analysis (EDA)** and its role in policy.
-3.  Master the **Tidyverse Philosophy** and the **Pipe (`%>%`)** operator.
-4.  Learn the core **Tidyverse Verbs** needed for analysis.
-
----
-
-## 📉 Recap: Real Data is Messy
-
-**From Last Time:** We learned that real-world data is inherently flawed.
-
-The **Three Major Flaws** we face right away:
-
-1.  **Missing Values (NA):** Data that simply isn't there (e.g., unreported emissions).
-2.  **Outliers:** Extreme or impossible values (e.g., a country reporting negative spending).
-3.  **Inconsistent Categories:** Spelling/casing variations (e.g., "U.S.A." vs. "USA").
-
-**Today's Focus:** How do we deal with the most common and complex flaw: **Missing Values**?
+* You have scrubbed the typos and filled the **NA** values.
+* But clean data is just a silent spreadsheet.
+* **Exploratory Data Analysis (EDA)** is the process of "interviewing" your data to see what stories it is trying to tell you.
+* **The Goal:** Understand the **landscape** of the data to avoid building analysis on a flawed foundation.
 
 ---
 
-## 🗑️ Strategy 1: Deletion (When to Drop Data)
-
-When facing missing data, our first choice is always: **Drop the row or keep it?**
-
----
-
-### When is Deletion Appropriate?
-
-* **Case A: Very Low Missingness:** If only **less than 5%** of the rows in a critical column have an NA, dropping them might be the simplest solution.
-* **Case B: Critical Missingness:** If a row is missing data on a key variable (like the final outcome score), you might have to drop it because you cannot analyze the result.
-
----
-
-### The Trade-Off: Bias Risk
-
-* **Pro:** Simple, maintains the integrity of the remaining, complete observations.
-* **Con:** If the data is missing *systematically* (e.g., only sensitive data is left blank), dropping it introduces **bias** into your sample.
-
----
-
-## 🔢 Strategy 2: Imputation for Numerical Data
-
-**Goal:** Replace the missing NA value with a reasonable estimate.
-
----
-
-### The Choice: Mean vs. Median
-
-| Method | Best Used When... | Risk/Trade-Off |
-| :--- | :--- | :--- |
-| **Mean (Average)** | Data is **symmetrical** (evenly balanced). | **Sensitive to Outliers!** A single extreme value can badly inflate or deflate the average. |
-| **Median (Middle Value)** | Data is **highly skewed** (common for income, spending, or pollution counts). | Less sensitive to outliers, providing a more **robust** estimate of the center. |
-
-**Rule of Thumb:** Always use the **Median** for imputation in policy/environmental data unless you are certain the data is perfectly symmetrical.
-
----
-
-## 🗂️ Strategy 3: Imputation for Categorical Data
-
-**Goal:** Replace a missing text label with the most likely category.
-
-* **Method:** Use the **Mode** (the most frequent category).
-* **Example:** If 90% of your known policies are 'Regulation,' you might replace a missing policy type with 'Regulation.'
-
----
-
-### Why Be Cautious?
-
-* Imputation **artificially reduces variability** in your data. It makes the data "look" cleaner than it actually is.
-* It's generally better to use imputation for quick EDA than for final, sensitive model training, where accuracy is paramount.
-
----
-
-## 🔍 What is EDA?
-
-**EDA: Exploratory Data Analysis**
-
-* **Definition:** The initial investigation to discover patterns, spot anomalies, test assumptions, and see what the data is trying to tell you.
-* **Analogy:** You are a detective. You are not trying to prove something; you are trying to **understand the landscape** of the data.
-
-### EDA Answers Simple, Critical Questions:
-
-* What is the **average funding** for Environmental programs?
-* Are there **major differences** between regions?
-* Do our key variables appear to be **related**?
-
----
-
-## 📊 Summary Statistics Overview
-
-Summary statistics are the foundation of EDA. They give us quick, single-number answers.
-
-| Category | Statistic | What it Tells Us | Why it Matters |
-| :--- | :--- | :--- | :--- |
-| **Central Tendency** | **Mean** & **Median** | Where is the **typical** value clustered? | If the Mean and Median are far apart, your data is **Skewed**, confirming your cleaning decision (Median over Mean imputation) was correct. |
-| **Dispersion** | **Range** & **Standard Deviation** | How **spread out** are the values? | A very large spread means your predictions will be less certain. High variability in outcomes suggests unstable policy effectiveness. |
-| **Frequency** | **Counts** | How many observations fall into each **group** or **category**? | Ensures your groups are balanced. If 90% of your data is from one region, your analysis is biased towards that region. |
-
-**The Hidden Danger:** If you skip checking these simple stats, your model might be using a **Mean** that is totally distorted by outliers, leading to skewed predictions!
-
----
-
-## 👥 Conceptual Grouping 
-
-The most powerful EDA is comparing statistics **between groups**.
-
-**The Question:** "What is the average environmental score for countries that *did* sign the treaty versus those that *did not*?"
-
-* This requires **Grouping** by the categorical variable (`Signed_Treaty`).
-* And then **Summarizing** the numerical variable (`Env_Score`).
-
-*Conceptual Steps:*
-
-1.  Take the full data.
-2.  Split it into stacks (Signed / Not Signed).
-3.  Calculate the mean of the score *within* each stack.
-4.  Return the final comparison table.
-
----
-
-## 📈 Why Visuals Help EDA
-
-It is extremely difficult to spot flaws or patterns just by looking at lists of numbers.
-
-### The Problem with Printouts:
-
-When you run a command like `summary()`, you see a few numbers.
-
-* *Is the max value a typo?*
-* *Is the data clustered in two separate groups?*
-
-It's impossible to tell from a simple table!
-
----
-
-### The Visual Solution: Diagnostics
-
-| Visual Tool | What it Tells You Instantly |
-| :--- | :--- |
-| **Box Plot** | Clearly shows points outside the normal range (**Outliers**). Tells you which values might be typos or errors. |
-| **Histogram** | Shows the full **shape** of the data. If the bulk is on one side, you know it's skewed, validating your imputation choice (Median). |
-
-Visuals are essential **diagnostic tools** that prevent you from building models on top of flawed assumptions.
-
-
-
----
-
-## 🛠️ Shifting Gears to Tooling
-
-We know **WHAT** to do (Clean, Summarize, Visualize).
-
-Now, we learn the **HOW**—the R language designed specifically for these tasks.
-
----
-
-## ⚙️ Tidyverse Philosophy (The Solution)
-
-**The Tidyverse: A Cohesive Language**
-
-* It is a collection of R packages (`dplyr`, `ggplot2`, etc.) designed to make the transition from **analytical thought** to **code** seamless.
-* **Goal:** Your code should read like a clear data analysis **recipe**.
-
----
-
-## ➡️ The Pipe Operator (`%>%`)
-
-**The Pipe (`%>%`): The Analytical Connector**
-
-* **Function:** Takes the object (data) on the left and passes it as the first argument to the function on the right.
-* **Read as:** "AND THEN..."
-
-**Piped Code Example:**
-
-1.  `df`
-2.  `%>%` Filter the data to the latest year.
-3.  `%>%` Group by region.
-4.  `%>%` Summarize the mean score.
-
-**Key Habit:** Always start with your data frame name, followed by the pipe.
-
----
-
-## 📏 The Six Core Verbs (Part 1)
-
-These six functions do 90% of data manipulation work and are the core of the `dplyr` package:
-
-| Verb | Action | English Question |
-| :--- | :--- | :--- |
-| **`filter()`** | **Rows:** Keeps observations based on a condition. | *Which countries are below the poverty line?* |
-| **`select()`** | **Columns:** Keeps or drops variables by name. | *I only need the GDP and Population columns.* |
-| **`mutate()`** | **New Columns:** Creates a new variable or modifies an existing one. | *Let's calculate GDP per capita.* |
-
----
-
-## 🔢 The Six Core Verbs (Part 2)
-
-| Verb | Action | English Question |
-| :--- | :--- | :--- |
-| **`group_by()`** | **Grouping:** Prepares data for calculations by group. | *Set up the data to analyze by continent.* |
-| **`summarise()`** | **Aggregate:** Reduces groups into a single summary row. | *Calculate the mean score for each continent.* |
-| **`arrange()`** | **Sorting:** Orders the rows of the final table. | *Show me the results from highest to lowest.* |
-
----
-
-## 📝 The Golden Tidyverse Rule
-
-**Rule:** Any function that changes the structure of your data must be followed by a pipe (`%>%`) if you intend to do another operation.
-
-**Example: Chaining Verbs**
-
-```r
-data_frame %>%
-  filter(year > 2020) %>%          # 1. Look only at data after 2020
-  group_by(region) %>%             # 2. Group those years by region
-  summarise(
-    avg_score = mean(env_score, na.rm = TRUE),
-    n_count = n()                  # 3. Calculate the average score and count
-  ) %>%
-  arrange(desc(avg_score))         # 4. Show the results from highest score first
+## Setup Check (R Packages) 🧰
+
+```{r, label="r_setup", echo=TRUE, eval=FALSE}
+library(jsonlite)
+library(rmarkdown)
+library(knitr)
+library(ggplot2)
 ```
 
-## 🚀 Transition to Lab
-Today's Lab Goal:
+---
 
- - Use Imputation logic to clean a numerical column.
+## The Transition: Why EDA? 🧭
 
- - Use the Pipe to chain group_by() and summarise().
+* **Cleaning** asked: *Is the data broken?*
+* **EDA** asks: *What is the data's personality?*
+* **The Why:** You cannot build a bridge if you don't know the soil. EDA is the soil test.
+* It prevents you from applying a **Normal** model to a **Skewed** world.
 
- - Generate the first Summary Statistics Table and Box Plot to check for outliers.
+---
 
-Let's start coding!
+## The Pre-Analysis Audit ✅
+### What do we check before analysis?
+
+* **Balance:** Are our categories representative, or is 90% of our data from one source? (Critical for policy equity).
+* **Feasibility:** Do the ranges make sense? (e.g., Are there negative values for "Carbon Emissions"?).
+* **Anomalies:** Extreme "impossible" values that survived the first cleaning pass.
+
+---
+
+### Outliers
+
+* **The Why:** If the mean (red) is far from the median (green), outliers are hijacking your summary.
+* **Resolution:** Verify errors, report median, or cap extremes.
+
+----
+
+```{r, echo=TRUE, eval=TRUE}
+library(ggplot2)
+set.seed(42)
+df <- data.frame(emissions = rgamma(1000, shape = 2, scale = 2500))
+
+mu <- mean(df$emissions, na.rm = TRUE)
+med <- median(df$emissions, na.rm = TRUE)
+
+ggplot(df, aes(x = emissions)) +
+  geom_histogram(bins = 40, fill = "#374adbff", color = "white") +
+  geom_vline(xintercept = mu, color = "#B71C1C", linewidth = 1.4) +
+  geom_vline(xintercept = med, color = "#1B5E20", linewidth = 1.4) +
+  labs(
+    title = "Outliers shift the mean away from the median",
+    subtitle = "Green = Median (robust), Red = Mean (sensitive)",
+    x = "Annual CO2 emissions",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank())
+```
+
+----
+
+### Data Skewness
+
+* **The Why:** Skewed data breaks "normal" assumptions.
+* **Resolution:** Log transforms turn huge differences into a readable scale.
+
+----
+
+```{r, echo=TRUE, eval=TRUE}
+set.seed(42)
+df <- data.frame(emissions = rlnorm(1000, meanlog = 8, sdlog = 0.7))
+
+df_long <- data.frame(
+  value = c(df$emissions, log(df$emissions)),
+  scale = rep(c("Raw CO2", "Log(CO2)"), each = nrow(df))
+)
+
+ggplot(df_long, aes(x = value)) +
+  geom_histogram(bins = 40, fill = "#43A047", color = "white") +
+  facet_wrap(~ scale, scales = "free_x") +
+  labs(
+    title = "Log transformation reduces skew in emissions",
+    subtitle = "Log makes the tail readable",
+    x = "CO2 emissions",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank())
+```
+
+----
+
+### Class Imbalance (The Majority Bias)
+
+* **The Why:** If 95% of cases are one class, the "average" just describes the majority.
+* **Risk:** The minority becomes invisible in your conclusions.
+* **Resolution:** Emphasize **precision** and **recall**, not just accuracy.
+
+---
+
+## Univariate Health Check 🩺
+### Why do these summaries matter?
+
+* **Mean vs. Median:** Where is the true "center" of experience?
+* **Standard Deviation:** How risky or unstable is the outcome?
+* **Percentiles:** Who is being helped or harmed at the edges?
+
+----
+
+### Mean vs. Median ⚖️
+
+* **Mean (Average):** The *center of gravity*. Uses every data point.
+  * **Why:** Efficient when data is symmetrical, but fragile.
+* **Median (50th percentile):** The *common-sense center*.
+  * **Why:** Robust to outliers; often the truer policy story.
+
+----
+
+### Standard Deviation (SD) 📏
+
+* **Concept:** Average distance of points from the mean.
+* **Why it matters:** SD is your **uncertainty meter**.
+  * **Low SD:** The average is reliable.
+  * **High SD:** The average is a gamble. Outcomes are inconsistent.
+
+----
+
+### Percentiles 🧩
+
+* **Concept:** Slicing the data into 100 buckets.
+* **Why it matters:** Policy happens at the edges.
+  * **10th percentile:** Who is most vulnerable?
+  * **90th/99th:** Who benefits most, or who should be taxed?
+
+---
+
+## Relationships between Variables 💃🕺
+### Numeric vs. Numeric
+
+* **Why:** Is Variable A a lever for Variable B? In quantifiable amount, how much does Var B impact Var A?
+* **Interpretation:** Slope is the `amount`, constant is the `default`
+
+----
+
+$\text{Air Quality Index} = 0.5 \times \text{Tree Cover} + 10$
+
+```{r, echo=TRUE, eval=TRUE}
+set.seed(42)
+df <- data.frame(
+  TreeCover = runif(120, 0, 100)
+)
+df$AirQuality <- 0.5 * df$TreeCover + 10 + rnorm(120, 0, 8)
+
+ggplot(df, aes(x = TreeCover, y = AirQuality)) +
+  geom_point(alpha = 0.7, color = "#1E88E5") +
+  geom_smooth(method = "lm", se = FALSE, color = "#2E7D32", linewidth = 1) +
+  labs(
+    title = "Tree cover vs. air quality",
+    subtitle = "Slope shows leverage",
+    x = "Tree cover (%)",
+    y = "Air quality index"
+  ) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank())
+```
+
+----
+
+### Numeric vs. Categorical
+
+* **Why:** Does structural difference have impact on performance?
+* **Clue:** If box middles don't overlap, groups behave differently. (Mean is different!)
+
+----
+
+```{r, echo=TRUE, eval=TRUE}
+set.seed(42)
+df <- data.frame(
+  Region = rep(c("Coastal", "Inland", "Mountain"), each = 60),
+  WaterQuality = c(
+    rnorm(60, mean = 70, sd = 8),
+    rnorm(60, mean = 78, sd = 7),
+    rnorm(60, mean = 85, sd = 6)
+  )
+)
+
+ggplot(df, aes(x = Region, y = WaterQuality, fill = Region)) +
+  geom_boxplot(width = 0.6, alpha = 0.85) +
+  scale_fill_viridis_d(option = "C", end = 0.85) +
+  labs(
+    title = "Water quality by region",
+    subtitle = "Non-overlap suggests structural differences",
+    x = "Region",
+    y = "Water quality score"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+```
+
+----
+
+### Multicollinearity (The Redundancy Trap)
+
+* **What it is:** Two predictors tell the same story.
+* **Why it matters:** The model cannot tell which variable is the real driver.
+* **Detection:** Look for hot spots in the correlation heatmap (|r| > 0.8).
+
+----
+
+```{r, echo=TRUE, eval=TRUE}
+set.seed(42)
+df <- data.frame(
+  Energy_Use = rnorm(200, mean = 100, sd = 15)
+)
+# Create strongly related predictors
+df$CO2 <- 0.9 * df$Energy_Use + rnorm(200, 0, 6)
+df$Industry_Output <- 0.8 * df$Energy_Use + rnorm(200, 0, 7)
+df$Vehicle_Miles <- 0.7 * df$Energy_Use + rnorm(200, 0, 8)
+df$Electricity_Use <- 0.85 * df$Energy_Use + rnorm(200, 0, 5)
+df$Renewables <- rnorm(200, mean = 30, sd = 8)
+
+cor_mat <- round(cor(df), 2)
+cor_long <- as.data.frame(as.table(cor_mat))
+
+colnames(cor_long) <- c("Var1", "Var2", "Correlation")
+
+ggplot(cor_long, aes(Var1, Var2, fill = Correlation)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(
+    low = "#3B4CC0", mid = "white", high = "#FDE725",
+    midpoint = 0, limits = c(-1, 1)
+  ) +
+  geom_text(aes(label = Correlation), size = 3) +
+  labs(
+    title = "Correlation matrix (multicollinearity)",
+    subtitle = "Hot spots show redundant predictors"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank()
+  )
+```
+
+---
+
+## The Pivot to Visuals 👀
+### Why use ggplot?
+
+* Summary stats can be identical for datasets that look completely different.
+* Visuals reveal **clusters**, **gaps**, and **curves** that tables hide.
+* If you do not visualize, you are flying blind.
+
+---
+
+## Visual Design 🎨
+### What Makes a Good Visual?
+
+* **The Issue of Scale:** Bar charts must start at zero. Non-zero baselines exaggerate small differences to mislead viewers.
+* **Color Blindness:** ~8% of men have red-green color blindness.
+* **The Fix:** Use colorblind-safe palettes like **viridis** or **cividis**.
+
+----
+
+### Example: Cluttered & Misleading
+
+```{r, echo=TRUE, eval=TRUE}
+df <- data.frame(
+  Region = factor(c("A", "B", "C", "D"), levels = c("A", "B", "C", "D")),
+  ProtectedLand = c(68, 71, 70, 69),
+  Budget = c(12.4, 12.6, 12.5, 12.7)
+)
+
+# Distortion: truncated view + cluttered labels + color-blind-unfriendly palette
+bad_plot <- ggplot(df, aes(x = Region, y = ProtectedLand, fill = Region)) +
+  geom_col(width = 0.6) +
+  coord_cartesian(ylim = c(50, 72)) +
+  scale_fill_manual(values = c("#E41A1C", "#4DAF4A", "#FF7F00", "#A65628")) +
+  geom_text(
+    aes(label = paste0(
+      "Protected land: ", ProtectedLand, "%\n",
+      "Budget: $", Budget, "B\n",
+      "Policy score: ", ProtectedLand + 12
+    )),
+    vjust = -0.2,
+    size = 3
+  ) +
+  labs(
+    title = "Protected land by region",
+    subtitle = "Crowded labels + truncated axis",
+    x = "Region",
+    y = "Protected land (%)"
+  ) +
+  theme_bw() +
+  theme(panel.grid.major = element_line(color = "gray40", size = 0.6))
+
+bad_plot
+```
+
+----
+
+### Example: Clear & Accessible
+
+```{r, echo=TRUE, eval=TRUE}
+# Clean scale + accessible palette + clear narrative
+
+good_plot <- ggplot(df, aes(x = Region, y = ProtectedLand, fill = Region)) +
+  geom_col(width = 0.6) +
+  scale_fill_viridis_d(option = "C", end = 0.85) +
+  scale_y_continuous(limits = c(0, 80)) +
+  labs(
+    title = "Protected land is similar across regions",
+    subtitle = "All regions cluster around ~70% coverage",
+    x = "Region",
+    y = "Protected land (%)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+good_plot
+```
+
+---
+
+## ggplot2 Nomenclature 🧩
+### The Grammar of Graphics
+
+| Component | Nomenclature | Description |
+| :--- | :--- | :--- |
+| Data | `data = df` | The raw spreadsheet. |
+| Aesthetics | `aes()` | Mapping columns to visual properties ($X, Y,$ Color). |
+| Geometries | `geom_...()` | The "Shape" (Point, Bar, Boxplot). |
+| Facets | `facet_wrap()` | Splitting one chart into many by category. |
+| Themes | `theme_...()` | The styling (fonts, backgrounds). |
