@@ -14,11 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ## Notes

@@ -27,11 +27,11 @@ test_df <- testing(split)
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ## Notes

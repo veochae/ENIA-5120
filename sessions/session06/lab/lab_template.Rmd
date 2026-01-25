@@ -17,15 +17,15 @@ league_df <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ## Notes

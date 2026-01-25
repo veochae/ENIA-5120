@@ -18,13 +18,13 @@ summary(model_lm)
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```

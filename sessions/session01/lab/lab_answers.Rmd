@@ -99,6 +99,8 @@ Look at the Max value—if it is impossibly high, you've found a "Gremlin."
 
 ```{r}
 summary(players$season_score)
+summary(players['season_score'])
+
 ```
 
 **Question 2.2.1:** What is the median and maximum season_score? Could a massive max value indicate a data quality issue or just a very good player?

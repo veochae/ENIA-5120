@@ -1,8 +1,8 @@
-total_points: 5
+total_points: 20
 criteria:
   - id: setup
     description: "Demonstrates working R/Quarto environment"
-    max_points: 2
+    max_points: 8
   - id: reflection
     description: "Thoughtful reflection on tooling readiness"
-    max_points: 3
+    max_points: 12

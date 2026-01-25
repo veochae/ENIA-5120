@@ -20,20 +20,20 @@ events <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_events.csv"
 
 ## Duplicate keys
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ## Join tables
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ## Reshape monthly sales
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
 ## Compare wellbeing
 ```{r}
-<write your code here>
+"<write your code here>"
 ```

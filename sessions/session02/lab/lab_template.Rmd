@@ -12,181 +12,122 @@ output:
 ---
 
 ## 💻 Environment Setup
+**functions:** 
 
-If you do not have these packages installed, please uncomment and run the following commands:
-
-```{r install-packages, eval=FALSE}
-# install.packages("readr")
-# install.packages("dplyr")
-# install.packages("ggplot2")
-# install.packages("tidyr") # We will use this in later labs
-```
+`library()`: Loads external packages into your R session.  
+`read_csv()`: A tidyverse function that reads data into R; it is faster and more reliable than the base read.csv().
 
 ```{r}
-# Load the essential Tidyverse libraries for data manipulation and visualization
 library(readr)
 library(dplyr)
 library(ggplot2)
 
-# Set global options for the code chunks
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-
-# Define the root path (Students must ensure this path points to their data directory)
-ENIA_ROOT <- "~/ENIA-5120"
-league_path <- file.path("../../../data", "laser_league_players.csv")
+players <- read_csv("../../../data/laser_league_players.csv")
 ```
 
-## 1. Load Data and Pipe Practice
+## 1. The Detective Phase: Initial EDA Diagnosis
+**functions:** 
 
-### 1.1 Essential Load Functions
-**functions:**  
-`read_csv()`: Loads data much faster and smarter than base R's `read.csv()`.
-
-`glimpse()`: Provides a clean, vertical overview of data structure and variable types.
-
-`paste()`: A base R function that concatenates strings and variables together.
-
-```{r}
-players <- read_csv(league_path)
-glimpse(players)
-```
-
-### 1.2 First Pipe Practice (`%>%`)
-**functions:**  
-`%>%` (The Pipe): Takes the output of the code on the left and passes it as the first argument to the code on the right ("AND THEN...").
-
-`filter()`: Selects rows based on a logical condition (e.g., role is 'Sniper').
-
-`arrange()`: Sorts the rows of the data frame.
-
-`desc()`: Used inside `arrange()` to specify descending order (high to low).
+`is.na()`: Checks every cell in the data; returns TRUE if a value is missing (NA).  
+`colSums()`: Adds up values in a column; used here to count the total number of TRUE (missing) values.  
+`geom_histogram()`: A ggplot2 layer that visualizes the distribution of a single numeric variable to check for skewness.
 
 **logic steps:**
 
-1. Start with the `players` data frame.
-2. Filter for players whose role is `'Sniper'`.
-3. Arrange the results by `season_score` from highest to lowest.
+- Quantify the Flaws: Use `is.na()` inside `colSums()` to get a count of missingness for every variable.
+- Check the Shape: Plot a histogram of `season_score` to determine if the data is symmetrical (normal) or skewed.
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
-## 2. Diagnosing and Cleaning Missing Data (NA)
+**Question 1.1:** Based on the histogram, is the season_score variable symmetrical or skewed?
 
-### 2.1 Diagnose Missing Values
-**functions:**  
-`is.na()`: Returns TRUE for every missing value in the data frame.
+**Question 1.2:** According to the "Rule of Thumb" in the slides, does this shape suggest we should use the Mean or the Median for imputation? Why?
 
-`colSums()`: Sums the TRUE values (which R treats as 1s) for each column.
+## 2. Numerical Imputation: Comparing the Consequences
+**functions:** 
 
-```{r}
-<write your code here>
-```
-
-### 2.2 Mode Imputation (Categorical Data: preferred_loadout)
-We will focus on the `preferred_loadout` column and fill its NAs using the Mode.
-
-**functions:**  
-`count()`: A powerful dplyr function that counts the occurrences of a categorical variable.
-
-`slice(1)`: Selects the first row of the data frame (which, after sorting, will contain the mode).
-
-`pull()`: Extracts a single column as a vector (simple list of values) for assignment.
-
-`coalesce()`: Replaces NA values in the first argument with the corresponding value from the second argument (our mode).
-
-**logic steps (Finding Mode):**
-
-1. Start with `players`.
-2. Count the occurrences of each unique `preferred_loadout`.
-3. Arrange the results in descending order (n is the count column).
-4. Slice the top row to isolate the mode.
-5. Pull the `preferred_loadout` name from that row.
-
-```{r}
-<write your code here>
-```
-
-**logic steps (Applying Mode):**
-
-1. Start with `players`.
-2. Mutate (modify) the `preferred_loadout` column.
-3. Use `coalesce()` to fill any NA with the calculated `mode_loadout`.
-4. Store the result in `players_clean`.
-5. Check the NA count again to confirm the fix.
-
-```{r}
-<write your code here>
-```
-
-## 3. Foundational EDA: Summarizing Data
-
-### 3.1 Summarize Scores by Role
-**functions:**  
-`group_by()`: Prepares the data for calculations on groups (e.g., 'Captain', 'Scout'). Must be used before `summarise()`.
-
-`summarise()`: Calculates aggregate statistics for each group (e.g., mean, count, sum).
-
-`n()`: Used inside `summarise()` to count the number of observations.
-
-`mean()`: Calculates the average score.
-
-`sd()`: Calculates the standard deviation (measure of spread/variability).
-
-`na.rm = TRUE`: An argument used in `mean`/`sd`/`sum` to ignore any remaining NA values.
+`filter(!is.na(x))`: The Deletion tool; it removes any row where the specified column is missing.  
+`mean()` / `median()`: Calculates the average or the middle value; `na.rm = TRUE` tells R to ignore NAs during the calculation.  
+`coalesce()`: The Imputation tool; it looks at a column and fills any NA with the value you provide (the "replacement").  
+`sd()`: Calculates Standard Deviation; a measure of how spread out the data is (Dispersion).
 
 **logic steps:**
 
-1. Start with the `players_clean` data.
-2. Group the data by `role`.
-3. Summarise the following for each role: total count (n), average score, score variability (standard deviation).
-4. Arrange the final table by average score.
+- Strategy A (Deletion): Create a version of the data where missing rows are simply dropped.
+- Strategy B (Mean Imputation): Fill NAs with the average (vulnerable to outliers).
+- Strategy C (Median Imputation): Fill NAs with the middle value (robust against outliers).
+- Compare: Evaluate how each strategy changes the "Spread" (SD) of the data.
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
-*Question 3.1:* Based on the table, which player role has the highest average score? Which role has the most variability?
+**Question 2.1:** Look at the Resulting_SD (Standard Deviation). Which strategy resulted in the lowest variability?
 
-### 3.2 Summarize Stamina by Squad
+**Question 2.2:** Your slides mention a "Trade-Off" for imputation. Looking at these results, why might a researcher be worried about "artificially reducing variability"?
+
+## 3. Categorical Imputation: Mode vs. Deletion
+**functions:** 
+
+`count()`: Groups unique text labels and counts how many times each appears.  
+`slice(1)`: Grabs only the very first row of a data frame (useful after sorting).  
+`pull()`: Extracts a single value out of a table so it can be saved as a variable.
+
 **logic steps:**
 
-1. Start with the clean data.
-2. Group the data by `squad_name`.
-3. Summarise the count and average `stamina_score` for each squad.
-4. Arrange the table by average stamina score.
+- Find the Mode: Count frequencies, sort from high to low, and pull the top result.
+- Apply Strategy: Use `mutate` and `coalesce` to fill missing text labels with that Mode.
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
-## 4. Simple Visual Diagnostics
+**Question 3.1:** By how many observations did the Mode category increase after imputation?
 
-### 4.1 Checking Distribution and Outliers (Box Plot)
-We will use a box plot to visually diagnose outliers and compare the median scores across the different `squad_name`s.
+**Question 3.2:** If this were a policy dataset, how might imputing the Mode bias your final report's conclusions about policy diversity?
 
-**functions:**  
-- `ggplot()`: Initializes the plot.
-- `aes()`: Defines the aesthetics.
-- `geom_boxplot()`: Creates a box-and-whisker plot.
-- `labs()`: Sets the plot labels.
-- `theme(axis.text.x = ...)`: Rotates labels to prevent overlap.
+## 4. Deep EDA: Summary Statistics & Grouping
+**functions:** 
+
+`group_by()`: The "Split" step; it tells R to treat different categories (like player roles) as separate groups.  
+`summarise()`: The "Aggregate" step; it reduces many rows of data into a single summary row per group.  
+`n()`: A helper function for `summarise` that counts how many observations are in each group.
+
+**logic steps (following the Conceptual Grouping slide):**
+
+- Split the cleaned data by role.
+- Calculate the Mean, Median, and Count for each role stack.
+- Compare the results to find skewed roles.
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
-*Question 4.1:* Identify the squad(s) that appear to have the highest number of outliers. What might that signal?
+**Question 4.1:** Which role has the largest difference (score_diff) between its Mean and Median?
 
-### 4.2 Checking Frequencies for Inconsistencies (Bar Chart)
-We will use a bar chart to look for inconsistencies in the `home_arena` data (e.g., different capitalization).
+**Question 4.2:** Based on your slides, if the Mean is significantly higher than the Median, what does that tell us about the presence of outliers in that group?
+
+## 5. Visual Diagnostics: Spotting Anomalies
+**functions:** 
+
+`geom_boxplot()`: Creates a box-and-whisker plot; the "box" is the middle 50% of data, and "dots" are outliers.  
+`theme()`: Used here to rotate x-axis labels (`element_text(angle = 45)`) so they don't overlap.
+
+**logic steps:**
+
+- Visualize: Map squads to the x-axis and scores to the y-axis.
+- Identify: Look for "dots" far outside the whiskers—these represent the Outliers mentioned in your slides.
 
 ```{r}
-<write your code here>
+"<write your code here>"
 ```
 
-*Question 4.2:* Based on the bar chart, do you see potential inconsistencies in `home_arena` (like capitalization differences)? If yes, which tidyverse verb would you use to fix them?
+**Question 5.1:** Which squad(s) show the most extreme outliers?
 
-## 5. Lab Conclusion
+**Question 5.2:** Why is it "impossible to tell" this information from the summary table in Section 4 alone?
 
-You have successfully loaded, diagnosed, cleaned a categorical variable, generated core summary statistics, and created simple visual diagnostics using the tidyverse framework. This is the foundation for your analysis!
+## 6. Lab Conclusion
+Final Reflection: You have performed both Deletion and Imputation. If you were writing a policy brief for a government agency, which of these two strategies would you feel more comfortable defending, and why?
