@@ -76,6 +76,7 @@ Structured data is a clean, predictable grid where every piece of information ha
 * **Example:** A `.csv` file where every year has a row and every measurement has a column.   
 * **Why we love it:** Computers are optimized to do math on a grid.   
 
+![Structured Data](img/structured data.png)
 ---
 
 ## 🧾 Shape 2: Semi-Structured Data
@@ -86,6 +87,8 @@ Think of a **Starbucks App Order** or a **Digital Receipt**. It isn't a flat gri
 
 * It has "layers" (like one receipt having multiple items) that don't fit into a simple table without extra work.
 
+![Semi Structured Data](img/semi structured data.jpg)
+
 ---
 
 ## 📸 Shape 3: Unstructured Data
@@ -94,6 +97,9 @@ Think of a **Starbucks App Order** or a **Digital Receipt**. It isn't a flat gri
 
 * **Examples:** Satellite photos of hurricanes, videos of melting glaciers, or handwritten scientist notes. 
 * There are no rows or columns here—just raw pixels or sound. 
+
+![UnStructured Data](img/unstructured data.jpg)
+
 * **The Goal:** We often use AI/tools to turn this mess into **Structured Data** we can actually count.
 
 
@@ -118,6 +124,8 @@ You finally receive your structured climate file. There are two terms you’ll h
 * **Rows (Observations):** Each row is a single, unique event (e.g., the year 1990).
 * **Columns (Variables):** The "lenses" we use to look at that year (e.g., $CO_2$ levels).
 * **The Cell:** The intersection of a row and a column. This is the individual **Fact**.
+
+![Anatomy of table](img/anatomy of table.jpg)
 
 ---
 

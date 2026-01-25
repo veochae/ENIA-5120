@@ -1,0 +1,488 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Lab 01 -- Data Anatomy \& Type Checks},
+  pdfauthor={Your Name},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Lab 01 -- Data Anatomy \& Type Checks}
+\author{Your Name}
+\date{2026-01-12}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\subsection{🧭 Mission Background}\label{mission-background}
+
+Welcome to your first day as a Junior Analyst for the \textbf{Laser
+League}. You've been handed a raw data export of player performance.
+Before the Commissioner can use this to rank the world's best players,
+you need to prove that the data is structured correctly and free of
+``Gremlins.''
+
+\textbf{Your Goal:} Perform a forensic audit. Identify what data types R
+assigned, check the table's structural integrity, and document any
+quality issues.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# {-}{-}{-} UTILITY REFERENCE {-}{-}{-}}
+\CommentTok{\# library(): Loads the forensic toolkit into your session.}
+\CommentTok{\# readr: Part of the Tidyverse, used for fast and "smart" data loading.}
+\CommentTok{\# dplyr: Provides the tools for inspection (glimpse) and manipulation.}
+
+\FunctionTok{library}\NormalTok{(readr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+
+\CommentTok{\# Define the root path (Adjust if your folder structure is different)}
+\NormalTok{ENIA\_ROOT }\OtherTok{\textless{}{-}} \StringTok{"\textasciitilde{}/ENIA{-}5120"}
+\NormalTok{league\_path }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\StringTok{"../../../data"}\NormalTok{, }\StringTok{"laser\_league\_players.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{1. The Blueprint: Loading \&
+Inspection}\label{the-blueprint-loading-inspection}
+
+Our first task is to bring the evidence onto our digital workbench (the
+R Environment).
+
+\subsubsection{1.1 Load the Evidence}\label{load-the-evidence}
+
+\textbf{functions:}\\
+\texttt{read\_csv()}: Loads data much faster and smarter than base R's
+read.csv().\\
+\texttt{head()}: Displays the first 6 rows of a dataset.
+
+\textbf{logic steps:}\\
+Use \texttt{read\_csv()} to load the file located at
+\texttt{league\_path}.\\
+Store the result in an object named \texttt{players}.\\
+Use \texttt{head()} to verify that the table looks correct.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{players }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(league\_path)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 181 Columns: 21
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr (10): player_id, squad_id, squad_name, home_arena, role, preferred_loado...
+## dbl (11): matches_played, assists, season_score, tag_accuracy_pct, shield_up...
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(players)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 21
+##   player_id squad_id squad_name  home_arena   role     preferred_loadout
+##   <chr>     <chr>    <chr>       <chr>        <chr>    <chr>            
+## 1 LT0001    SQ045    Hyper Hawks astro alley  Scout    Stealth Rig      
+## 2 LT0002    SQ045    Hyper Hawks Astro Alley  Captain  Dual Pulse       
+## 3 LT0003    SQ041    Neon Ninjas Photon Forge Captain  Support Pod      
+## 4 LT0004    SQ041    Neon Ninjas Photon Forge Sniper   Support Pod      
+## 5 LT0005    SQ045    Hyper Hawks Nebula Nexus Captain  Rail Blaster     
+## 6 LT0006    SQ045    Hyper Hawks ASTRO ALLEY  Engineer Stealth Rig      
+## # i 15 more variables: matches_played <dbl>, assists <dbl>, season_score <dbl>,
+## #   tag_accuracy_pct <dbl>, shield_uptime_pct <dbl>, stamina_score <dbl>,
+## #   reflex_score <dbl>, reaction_time_sec <dbl>, energy_delta_pct <dbl>,
+## #   favorite_drink <chr>, preferred_channel <chr>, commute_mode <chr>,
+## #   glow_rating <dbl>, wellbeing_index <dbl>, scout_notes <chr>
+\end{verbatim}
+
+\subsubsection{1.2 Identify the Data
+Structure}\label{identify-the-data-structure}
+
+\textbf{functions:}\\
+\texttt{class()}: Tells you the ``Object Type'' (e.g.,
+tibble/data.frame).\\
+\texttt{glimpse()}: Provides a clean, vertical overview of column names
+and variable types.
+
+\textbf{logic steps:}\\
+Check the \texttt{class()} of your \texttt{players} object to see if R
+treats it as a table.\\
+Use \texttt{glimpse()} to see every column name and its assigned data
+type (e.g., , ).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(players) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{glimpse}\NormalTok{(players)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 181
+## Columns: 21
+## $ player_id         <chr> "LT0001", "LT0002", "LT0003", "LT0004", "LT0005", "L~
+## $ squad_id          <chr> "SQ045", "SQ045", "SQ041", "SQ041", "SQ045", "SQ045"~
+## $ squad_name        <chr> "Hyper Hawks", "Hyper Hawks", "Neon Ninjas", "Neon N~
+## $ home_arena        <chr> "astro alley", "Astro Alley", "Photon Forge", "Photo~
+## $ role              <chr> "Scout", "Captain", "Captain", "Sniper", "Captain", ~
+## $ preferred_loadout <chr> "Stealth Rig", "Dual Pulse", "Support Pod", "Support~
+## $ matches_played    <dbl> 22, 7, 32, 10, 6, 7, 39, 11, 25, 12, 23, 37, 25, 19,~
+## $ assists           <dbl> 6, 5, 34, 23, 16, 35, 21, 34, 5, 3, 7, 17, 24, 18, 2~
+## $ season_score      <dbl> 6710.7, 2921.8, 8553.8, 7615.3, 4008.4, 6561.7, 6215~
+## $ tag_accuracy_pct  <dbl> 63.5, 28.5, 58.6, 63.2, 38.2, 41.0, 27.5, 39.0, 47.5~
+## $ shield_uptime_pct <dbl> 13.2, 77.2, 60.7, 94.8, 33.1, 12.0, 24.2, 85.9, 21.3~
+## $ stamina_score     <dbl> 84, 51, 81, 75, 77, 90, 87, 71, 84, 92, 70, 51, 66, ~
+## $ reflex_score      <dbl> 75, 58, 73, 74, 80, 50, 64, 45, 48, 94, 43, 67, 58, ~
+## $ reaction_time_sec <dbl> 0.264, 0.346, 0.311, 0.250, 0.292, 0.392, 0.336, 0.3~
+## $ energy_delta_pct  <dbl> 20.6, 12.2, 6.2, 19.7, -1.7, 7.6, 17.2, 10.2, 9.5, 5~
+## $ favorite_drink    <chr> "Nebula Nectar", "Quasar Quench", "Photon Fizz", "Ph~
+## $ preferred_channel <chr> "Arena App", "Squad Mentor", "Arena App", "Beacon Sc~
+## $ commute_mode      <chr> "Carpool", "Hover Tram", "Hover Tram", "Transit", "C~
+## $ glow_rating       <dbl> 7.5, 1.2, 9.9, 9.1, 3.0, 6.5, 6.3, 7.5, 5.4, 3.9, 4.~
+## $ wellbeing_index   <dbl> 85.7, 64.1, 77.3, 81.1, 70.2, 84.1, 87.0, 74.7, 81.6~
+## $ scout_notes       <chr> "needs recalibration", NA, "late check-in", NA, NA, ~
+\end{verbatim}
+
+\textbf{Question 1.2.1:} What R class is players? How does R internally
+store this table?
+
+\textbf{Question 1.2.2:} Based on glimpse(), how many rows
+(observations) and columns (variables) are present?
+
+\subsection{2. The Language: Data Type
+Checks}\label{the-language-data-type-checks}
+
+In R, the type of data determines what math is allowed. You cannot
+calculate the ``average'' of a word.
+
+\subsubsection{2.1 Inspect Individual
+Columns}\label{inspect-individual-columns}
+
+\textbf{functions:}\\
+\texttt{class(df\$column)}: Extracts a specific column using the \$ sign
+and reveals its type.
+
+\textbf{logic steps:}\\
+Use the \texttt{\$} operator to check the class of
+\texttt{player\_id}.\\
+Check the class of \texttt{season\_score}.\\
+Check the class of \texttt{reaction\_time\_sec}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(players}\SpecialCharTok{$}\NormalTok{player\_id)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "character"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(players}\SpecialCharTok{$}\NormalTok{season\_score)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "numeric"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(players}\SpecialCharTok{$}\NormalTok{reaction\_time\_sec)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "numeric"
+\end{verbatim}
+
+\textbf{Question 2.1.1:} assists shows up as in glimpse(). Is this
+Nominal, Ordinal, or Numeric? Why?
+
+\textbf{Question 2.1.2:} role is stored as a character. Given there's no
+ranking among roles, is this Nominal or Ordinal? Why does that matter
+for our future analysis?
+
+\subsubsection{2.2 Numerical Summaries}\label{numerical-summaries}
+
+\textbf{functions:}\\
+\texttt{summary()}: Provides the Min, Max, Median, and Mean.
+
+\textbf{logic steps:}\\
+Run a \texttt{summary()} on the \texttt{season\_score} column.\\
+Look at the Max value---if it is impossibly high, you've found a
+``Gremlin.''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(players}\SpecialCharTok{$}\NormalTok{season\_score)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    2650    4988    5868    5788    6795    8703
+\end{verbatim}
+
+\textbf{Question 2.2.1:} What is the median and maximum season\_score?
+Could a massive max value indicate a data quality issue or just a very
+good player?
+
+\subsection{3. Forensic Audit: Finding the
+Gremlins}\label{forensic-audit-finding-the-gremlins}
+
+Now we look for the quality issues we discussed: Missingness,
+Duplicates, and Inconsistent Casing.
+
+\subsubsection{3.1 Missing Values (NA)}\label{missing-values-na}
+
+\textbf{functions:}\\
+\texttt{is.na()}: Returns TRUE for every missing value.\\
+\texttt{colSums()}: Adds up all the TRUEs to give a total count of
+missing values per column.
+
+\textbf{logic steps:}\\
+Combine \texttt{is.na(players)} with \texttt{colSums()} to get a report
+of all missing values in the entire table.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(players))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         player_id          squad_id        squad_name        home_arena 
+##                 0                 0                 0                 0 
+##              role preferred_loadout    matches_played           assists 
+##                 0                31                 0                 0 
+##      season_score  tag_accuracy_pct shield_uptime_pct     stamina_score 
+##                 0                 0                 0                 0 
+##      reflex_score reaction_time_sec  energy_delta_pct    favorite_drink 
+##                 0                 0                 0                 2 
+## preferred_channel      commute_mode       glow_rating   wellbeing_index 
+##                 0                 0                 0                 0 
+##       scout_notes 
+##                27
+\end{verbatim}
+
+\textbf{Question 3.1.1:} Which variable has the most missing values? If
+this were the primary \(CO_2\) measurement in a climate study, why would
+that be a problem?
+
+\subsubsection{3.2 Inconsistent Casing}\label{inconsistent-casing}
+
+\textbf{functions:}\\
+\texttt{count()}: Groups the rows by a column and counts how many times
+each label appears.\\
+\texttt{arrange(desc(n))}: Sorts the counts from highest to lowest.
+
+\textbf{logic steps:}\\
+Take the \texttt{players} data.\\
+AND THEN (\%\textgreater\%) \texttt{count()} the \texttt{home\_arena}
+column.\\
+AND THEN (\%\textgreater\%) \texttt{arrange()} by descending count
+(\texttt{n}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{players }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(home\_arena) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(n))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 8 x 2
+##   home_arena       n
+##   <chr>        <int>
+## 1 Astro Alley     51
+## 2 Nebula Nexus    47
+## 3 Photon Forge    42
+## 4 Nova Spire      37
+## 5 ASTRO ALLEY      1
+## 6 Photon forge     1
+## 7 astro alley      1
+## 8 photon Forge     1
+\end{verbatim}
+
+\textbf{Question 3.2.1:} Do you notice inconsistent casing or spelling
+(e.g., neon yard vs Neon Yard)? How would this mess up a bar chart of
+arena popularity?
+
+\subsubsection{3.3 Duplicate IDs}\label{duplicate-ids}
+
+\textbf{functions:}\\
+\texttt{duplicated()}: Flags rows that have appeared before in the
+dataset.
+
+\textbf{logic steps:}\\
+Use \texttt{sum(duplicated())} on the \texttt{player\_id} column to see
+if any unique identifier appears more than once.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sum}\NormalTok{(}\FunctionTok{duplicated}\NormalTok{(players}\SpecialCharTok{$}\NormalTok{player\_id))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1
+\end{verbatim}
+
+\subsection{4. Challenge: Spot the
+Issues}\label{challenge-spot-the-issues}
+
+Look at this slice of ``Raw Data'' from the League's backup server.
+
+Plaintext
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+player\_id & home\_arena & season\_score & preferred\_loadout \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+P-0220 & neon yard & 905 & Hyper Beam \\
+P-0455 & Glow Hall & NA & Pulse Shield \\
+P-0220 & Neon Yard & 905 & Hyper Beam \\
+P-0512 & Photon Dome & -10 & '' '' \\
+\end{longtable}
+
+\textbf{Question 4.1.1:} List three distinct data quality issues from
+this snippet (e.g., Impossible numbers, Duplicates, Casing).
+
+\textbf{Question 4.1.2:} Which specific R functions from this lab would
+you use to confirm each issue if it appeared in a massive dataset of
+100,000 players?
+
+\end{document}

@@ -3,11 +3,9 @@ title: "Lab 01 – Data Anatomy & Type Checks"
 author: "Your Name"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+  pdf_document:
     toc: true
-    toc_float: true
-    code_folding: hide
-    theme: readable
+    number_sections: true
 ---
 
 ## 🧭 Mission Background
