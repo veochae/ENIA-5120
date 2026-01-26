@@ -1,181 +1,472 @@
 ---
-title: "Lab 02 – Tidy Data Cleaning and Foundational EDA"
+title: "Lab 02 – Data Cleaning Strategies and Exploratory Data Analysis (EDA)"
 author: "Your Name"
 date: "`r Sys.Date()`"
 output: 
   html_document:
     toc: true
-    toc_depth: 3
-    theme: cosmo
-    code_folding: hide # This tells the engine to hide the code by default
     toc_float: true
+    theme: cosmo
 ---
 
-## 💻 Environment Setup
-**functions:** 
+## 🧭 Mission Background
+You are the lead analyst for a public policy team reviewing global fishing effort. Before the team makes policy recommendations, you must inspect the data, diagnose missingness, and test how different imputation strategies change the story.
 
-`library()`: Loads external packages into your R session.  
-`read_csv()`: A tidyverse function that reads data into R; it is faster and more reliable than the base read.csv().
+**Your Goal:** Use EDA to understand the shape of the data and apply deletion, mean/median imputation, and mode imputation to handle missing values.
 
-```{r}
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# library(): Loads external packages into your session.
+# readr: Part of the Tidyverse, used for fast and "smart" data loading.
+# dplyr: Provides the tools for inspection and manipulation.
+
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-players <- read_csv("../../../data/laser_league_players.csv")
+# Define the root path (Adjust if your folder structure is different)
+ENIA_ROOT <- "~/ENIA-5120"
+efforts_path <- file.path("../../../data", "gfw_outputs", "efforts_by_flag_gear.csv")
 ```
 
-## 1. The Detective Phase: Initial EDA Diagnosis
-**functions:** 
+## 1. The Evidence Intake: Load & Inspect
+We start by pulling the dataset into R and confirming its structure.
 
-`is.na()`: Checks every cell in the data; returns TRUE if a value is missing (NA).  
-`colSums()`: Adds up values in a column; used here to count the total number of TRUE (missing) values.  
-`geom_histogram()`: A ggplot2 layer that visualizes the distribution of a single numeric variable to check for skewness.
+### 1.1 Load the Data
+**functions:**  
+`read_csv()`: Reads data into R quickly and reliably.  
+`head()`: Displays the first 6 rows for a quick sanity check.
 
-**logic steps:**
-
-- Quantify the Flaws: Use `is.na()` inside `colSums()` to get a count of missingness for every variable.
-- Check the Shape: Plot a histogram of `season_score` to determine if the data is symmetrical (normal) or skewed.
+**logic steps:**  
+Locate the file path in `efforts_path`.  
+Load the CSV into a data frame named `df`.  
+Print the first rows to confirm columns and values look reasonable.
 
 ```{r}
-colSums(is.na(players))
-
-ggplot(players, aes(x = season_score)) +
-  geom_histogram(fill = "steelblue", color = "white") +
-  labs(title = "Diagnostic: Checking for Skewness", x = "Season Score")
+df <- read_csv(efforts_path)
+head(df)
 ```
 
-**Question 1.1:** Based on the histogram, is the season_score variable symmetrical or skewed?
+### 1.2 Inspect the Structure
+**functions:**  
+`class()`: Tells you the object type (e.g., tibble/data.frame).  
+`glimpse()`: Gives a vertical view of columns and data types.  
+`nrow()` / `ncol()`: Counts rows and columns.
 
-**Question 1.2:** According to the "Rule of Thumb" in the slides, does this shape suggest we should use the Mean or the Median for imputation? Why?
-
-## 2. Numerical Imputation: Comparing the Consequences
-**functions:** 
-
-`filter(!is.na(x))`: The Deletion tool; it removes any row where the specified column is missing.  
-`mean()` / `median()`: Calculates the average or the middle value; `na.rm = TRUE` tells R to ignore NAs during the calculation.  
-`coalesce()`: The Imputation tool; it looks at a column and fills any NA with the value you provide (the "replacement").  
-`sd()`: Calculates Standard Deviation; a measure of how spread out the data is (Dispersion).
-
-**logic steps:**
-
-- Strategy A (Deletion): Create a version of the data where missing rows are simply dropped.
-- Strategy B (Mean Imputation): Fill NAs with the average (vulnerable to outliers).
-- Strategy C (Median Imputation): Fill NAs with the middle value (robust against outliers).
-- Compare: Evaluate how each strategy changes the "Spread" (SD) of the data.
+**logic steps:**  
+Confirm `df` is a data frame/tibble.  
+Scan column names and data types with `glimpse()`.  
+Record row and column counts to know dataset size.
 
 ```{r}
-# Execute strategies
-players_deleted <- players %>% filter(!is.na(season_score))
+class(df)
+glimpse(df)
 
-mean_val <- mean(players$season_score, na.rm = TRUE)
-players_mean_imp <- players %>% mutate(season_score = coalesce(season_score, mean_val))
+nrow(df)
+ncol(df)
+```
 
-median_val <- median(players$season_score, na.rm = TRUE)
-players_median_imp <- players %>% mutate(season_score = coalesce(season_score, median_val))
+### 1.3 Basic Statistical Summary
+**functions:**  
+`summary()`: Provides min, max, mean, and quartiles for numeric columns.  
+`select(where(is.numeric))`: Keeps only numeric variables.
 
-# Compare spread
+**logic steps:**  
+Keep only numeric columns to avoid text summaries.  
+Run `summary()` to inspect min, max, and quartiles.  
+Use this to spot unusually large or small values.
+
+```{r}
+numeric_summary <- summary(df %>% select(where(is.numeric)))
+numeric_summary
+```
+
+## 2. Missingness + Balance
+We check missingness and whether categories are balanced.
+
+### 2.1 Missingness by Column
+**functions:**  
+`is.na()`: Checks every cell; returns TRUE if a value is missing (NA).  
+`colSums()`: Adds up TRUE values to count missingness by column.
+
+**logic steps:**  
+Use `is.na()` inside `colSums()` to count missing values by column.
+
+```{r}
+missing_totals <- colSums(is.na(df))
+missing_totals
+```
+
+**Question 2.1.1:** Which column has the most missing values?
+
+### 2.2 Class Imbalance Check
+**functions:**  
+`count()`: Tallies how many observations fall in each category.  
+`arrange(desc(n))`: Sorts counts from highest to lowest.  
+`filter(!is.na())`: Drops missing categories when needed.
+`ggplot()`: Initializes a plot object.  
+`aes()`: Maps variables to visual channels.  
+`geom_col()`: Draws bars with heights from data.  
+`labs()`: Adds plot titles and axis labels.  
+`theme_minimal()`: Applies a clean theme.  
+`theme()`: Fine-tunes text and layout.  
+`element_text()`: Styles axis labels.
+`reorder()`: Orders categories by a numeric value.
+
+**logic steps:**  
+Remove missing flags for a fair comparison table.  
+Count records per `flag` and per `geartype`.  
+Sort counts to see which categories dominate.  
+Plot each count table as a bar chart for visual balance.
+
+```{r}
+df_noflag <- df %>%
+  filter(!is.na(flag))
+
+flag_counts <- df_noflag %>%
+  count(flag) %>%
+  arrange(desc(n))
+
+geartype_counts <- df %>%
+  count(geartype) %>%
+  arrange(desc(n))
+
+# Base R fallback (uncomment if dplyr::count() fails)
+# flag_counts <- as.data.frame(sort(table(df_noflag$flag), decreasing = TRUE))
+# names(flag_counts) <- c("n", "flag")
+# flag_counts <- flag_counts[, c("flag", "n")]
+# geartype_counts <- as.data.frame(sort(table(df$geartype), decreasing = TRUE))
+# names(geartype_counts) <- c("n", "geartype")
+# geartype_counts <- geartype_counts[, c("geartype", "n")]
+
+flag_counts
+geartype_counts
+
+flag_bar_plot <- ggplot(flag_counts, aes(x = reorder(flag, -n), y = n)) +
+  geom_col(fill = "#0072B2") +
+  labs(title = "Flag Counts", x = "Flag", y = "Records") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+gear_bar_plot <- ggplot(geartype_counts, aes(x = reorder(geartype, -n), y = n)) +
+  geom_col(fill = "#009E73") +
+  labs(title = "Gear Type Counts", x = "Gear Type", y = "Records") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+flag_bar_plot
+gear_bar_plot
+```
+
+**Question 2.2.1:** Is the dataset balanced across flags, or does one flag dominate?
+
+**Question 2.2.2:** Why can class imbalance distort policy conclusions?
+
+## 3. Imputation Comes First
+We will use **imputed data moving forward**.
+
+### 3.1 Mean vs. Median (Numeric)
+**functions:**  
+`filter(!is.na(x))`: Deletion tool that drops missing rows.  
+`mean()` / `median()`: Measures central tendency; `na.rm = TRUE` ignores NAs.  
+`coalesce()`: Imputation tool that fills NAs with a replacement value.  
+`sd()`: Calculates Standard Deviation (spread).
+`mutate()`: Adds or replaces a column in the data frame.
+
+**logic steps:**  
+Create a deletion-only version by removing missing `crew_size`.  
+Compute the mean and median to see if they diverge.  
+Create two imputed versions using mean and median.  
+Compare resulting mean and SD across strategies to judge impact.
+
+```{r}
+# Strategy A: Deletion
+df_deleted <- df %>% filter(!is.na(crew_size))
+
+# Strategy B: Mean imputation
+mean_val <- mean(df$crew_size, na.rm = TRUE)
+df_mean_imp <- df %>%
+  mutate(crew_size = coalesce(crew_size, mean_val))
+
+# Strategy C: Median imputation
+median_val <- median(df$crew_size, na.rm = TRUE)
+df_median_imp <- df %>%
+  mutate(crew_size = coalesce(crew_size, median_val))
+
 comparison <- data.frame(
   Strategy = c("Deletion", "Mean Imputation", "Median Imputation"),
-  Resulting_Mean = c(mean(players_deleted$season_score), mean(players_mean_imp$season_score), mean(players_median_imp$season_score)),
-  Resulting_SD = c(sd(players_deleted$season_score), sd(players_mean_imp$season_score), sd(players_median_imp$season_score))
+  Resulting_Mean = c(
+    mean(df_deleted$crew_size),
+    mean(df_mean_imp$crew_size),
+    mean(df_median_imp$crew_size)
+  ),
+  Resulting_SD = c(
+    sd(df_deleted$crew_size),
+    sd(df_mean_imp$crew_size),
+    sd(df_median_imp$crew_size)
+  )
 )
 comparison
 ```
 
-**Question 2.1:** Look at the Resulting_SD (Standard Deviation). Which strategy resulted in the lowest variability?
+**Question 3.1.1:** Which strategy produced the lowest SD (variability)?
 
-**Question 2.2:** Your slides mention a "Trade-Off" for imputation. Looking at these results, why might a researcher be worried about "artificially reducing variability"?
+**Question 3.1.2:** Why might lower variability after imputation be misleading?
 
-## 3. Categorical Imputation: Mode vs. Deletion
-**functions:** 
+**Question 3.1.3:** When the mean and median differ, which is safer to use and why?
 
-`count()`: Groups unique text labels and counts how many times each appears.  
-`slice(1)`: Grabs only the very first row of a data frame (useful after sorting).  
-`pull()`: Extracts a single value out of a table so it can be saved as a variable.
+### 3.2 Mode Imputation (Categorical)
+**functions:**  
+`count()`: Counts category frequencies.  
+`arrange(desc(n))`: Sorts from most common to least.  
+`slice(1)`: Selects the top row (the mode).  
+`pull()`: Extracts a single value from a table.  
+`coalesce()`: Fills missing values with the replacement.
+`filter(!is.na())`: Removes missing categories before counting.  
+`mutate()`: Replaces missing values in a column.  
+`table()`: Base R frequency check for before/after.
 
-**logic steps:**
-
-- Find the Mode: Count frequencies, sort from high to low, and pull the top result.
-- Apply Strategy: Use `mutate` and `coalesce` to fill missing text labels with that Mode.
+**logic steps:**  
+Filter to non-missing flags for a clean frequency count.  
+Identify the most frequent `flag` (the mode).  
+Impute missing flags using the mode.  
+Compare the mode frequency before and after imputation.
 
 ```{r}
-# Find the mode
-mode_val <- players %>% 
-  count(preferred_loadout) %>% 
-  arrange(desc(n)) %>% 
-  slice(1) %>% 
-  pull(preferred_loadout)
+mode_flag <- df %>%
+  filter(!is.na(flag)) %>%
+  count(flag) %>%
+  arrange(desc(n)) %>%
+  slice(1) %>%
+  pull(flag)
 
-players_clean <- players_median_imp %>%
-  mutate(preferred_loadout = coalesce(preferred_loadout, mode_val))
+df_mode_imp <- df_median_imp %>%
+  mutate(flag = coalesce(flag, mode_flag))
 
-# Compare count of the mode
+# Compare frequency of the mode
 # Before:
-table(players$preferred_loadout)[mode_val]
+table(df$flag)[mode_flag]
 # After:
-table(players_clean$preferred_loadout)[mode_val]
+table(df_mode_imp$flag)[mode_flag]
 ```
 
-**Question 3.1:** By how many observations did the Mode category increase after imputation?
+**Question 3.2.1:** By how many observations did the mode category increase after imputation?
 
-**Question 3.2:** If this were a policy dataset, how might imputing the Mode bias your final report's conclusions about policy diversity?
+**Question 3.2.2:** Why can mode imputation reduce diversity in categorical data?
 
-## 4. Deep EDA: Summary Statistics & Grouping
-**functions:** 
-
-`group_by()`: The "Split" step; it tells R to treat different categories (like player roles) as separate groups.  
-`summarise()`: The "Aggregate" step; it reduces many rows of data into a single summary row per group.  
-`n()`: A helper function for `summarise` that counts how many observations are in each group.
-
-**logic steps:**
-
-- Split the cleaned data by role.
-- Calculate the Mean, Median, and Count for each role stack.
-- Compare the results to find skewed roles.
-
+### 3.3 Imputed Dataset for Analysis
 ```{r}
-role_eda <- players_clean %>%
-  group_by(role) %>%
-  summarise(
-    n_players = n(),
-    avg_score = mean(season_score),
-    med_score = median(season_score),
-    score_diff = mean(season_score) - median(season_score)
-  ) %>%
-  arrange(desc(avg_score))
-
-role_eda
+df_imputed <- df_mode_imp
 ```
 
-**Question 4.1:** Which role has the largest difference (score_diff) between its Mean and Median?
+## 4. Outliers: 3 Standard Deviations Away
+We flag extreme values using the 3-SD rule.
 
-**Question 4.2:** Based on your slides, if the Mean is significantly higher than the Median, what does that tell us about the presence of outliers in that group?
+**functions:**  
+`mean()` / `sd()`: Compute center and spread.  
+`abs()`: Calculates distance from the mean.
+`filter()`: Keeps only rows that meet a condition.
 
-## 5. Visual Diagnostics: Spotting Anomalies
-**functions:** 
-
-`geom_boxplot()`: Creates a box-and-whisker plot; the "box" is the middle 50% of data, and "dots" are outliers.  
-`theme()`: Used here to rotate x-axis labels (`element_text(angle = 45)`) so they don't overlap.
-
-**logic steps:**
-
-- Visualize: Map squads to the x-axis and scores to the y-axis.
-- Identify: Look for "dots" far outside the whiskers—these represent the Outliers mentioned in your slides.
+**logic steps:**  
+Compute the mean and SD of `apparent_fishing_hours`.  
+Measure each value’s distance from the mean.  
+Flag rows whose distance exceeds 3 SD.  
+Count how many rows are flagged.
 
 ```{r}
-ggplot(players_clean, aes(x = squad_name, y = season_score, fill = squad_name)) +
+hours_mean <- mean(df_imputed$apparent_fishing_hours, na.rm = TRUE)
+hours_sd <- sd(df_imputed$apparent_fishing_hours, na.rm = TRUE)
+
+hours_outliers <- df_imputed %>%
+  filter(abs(apparent_fishing_hours - hours_mean) > 3 * hours_sd)
+
+nrow(hours_outliers)
+```
+
+**Question 4.1.1:** How many rows are flagged as outliers by the 3-SD rule?
+
+**Question 4.1.2:** Why can the 3-SD rule be misleading if the data is skewed?
+
+### 4.2 Overall Boxplot: With vs. Without Outliers
+**functions:**  
+`geom_boxplot()`: Highlights median, quartiles, and outliers.
+`ggplot()`: Initializes a plot object.  
+`aes()`: Maps variables to axes.  
+`labs()`: Adds titles and axis labels.  
+`theme_minimal()`: Applies a clean theme.
+
+**logic steps:**  
+Create a trimmed dataset by removing 3-SD outliers.  
+Plot the full distribution to show raw spread.  
+Plot the trimmed distribution to show the typical range.
+
+```{r}
+df_trim <- df_imputed %>%
+  filter(abs(apparent_fishing_hours - hours_mean) <= 3 * hours_sd)
+
+box_overall <- ggplot(df_imputed, aes(x = "All", y = apparent_fishing_hours)) +
+  geom_boxplot(fill = "#56B4E9") +
+  labs(title = "Overall Fishing Hours", x = "", y = "Fishing Hours") +
+  theme_minimal()
+
+box_trim <- ggplot(df_trim, aes(x = "Trimmed", y = apparent_fishing_hours)) +
+  geom_boxplot(fill = "#009E73") +
+  labs(title = "Overall Fishing Hours (Trimmed)", x = "", y = "Fishing Hours") +
+  theme_minimal()
+
+box_overall
+box_trim
+```
+
+## 5. Distribution Shape + Log Transformation
+We use `catch_value_usd` to compare raw vs. log distributions.
+
+**functions:**  
+`pivot_longer()`: Reshapes data for faceting.  
+`geom_histogram()`: Shows distribution shape.
+`ggplot()`: Initializes a plot object.  
+`aes()`: Maps values to axes.  
+`facet_wrap()`: Places raw and log plots side by side.  
+`labs()`: Adds titles and axis labels.  
+`theme_minimal()`: Applies a clean theme.
+
+**logic steps:**  
+Gather raw and log values into a long format.  
+Plot the raw distribution of `catch_value_usd`.  
+Plot the log-transformed distribution side by side for comparison.
+
+```{r}
+catch_long <- df_imputed %>%
+  select(catch_value_usd, log_catch_value) %>%
+  pivot_longer(cols = everything(), names_to = "scale", values_to = "value")
+
+ggplot(catch_long, aes(x = value)) +
+  geom_histogram(bins = 30, fill = "#009E73", color = "white") +
+  facet_wrap(~ scale, scales = "free_x") +
+  labs(
+    title = "Pre vs. Post Log Transform",
+    x = "Value",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+**Question 5.1.1:** Which distribution looks closer to normal: raw or log-transformed?
+
+## 6. Relationships + Multicollinearity
+We examine correlation and linear relationships among numeric variables.
+
+### 6.1 Correlation Heatmap (Raw Units)
+**functions:**  
+`cor()`: Calculates correlations between numeric variables.  
+`geom_tile()`: Draws a heatmap.
+`as.table()`: Converts a matrix to long form.  
+`as.data.frame()`: Turns a table into a data frame.  
+`scale_fill_gradient2()`: Sets a diverging color scale.  
+`geom_text()`: Adds correlation labels to tiles.  
+`ggplot()`: Initializes a plot object.  
+`aes()`: Maps variables to visual channels.  
+`theme_minimal()`: Applies a clean theme.  
+`theme()`: Adjusts axis text.
+
+**logic steps:**  
+Select numeric columns in raw units.  
+Compute the correlation matrix.  
+Reshape the matrix for plotting.  
+Draw a heatmap to spot large correlations (multicollinearity).
+
+```{r}
+corr_mat <- round(cor(df_imputed %>% select(apparent_fishing_hours, effort_index, fuel_consumption, catch_value_usd, crew_size), use = "complete.obs"), 2)
+
+corr_long <- as.data.frame(as.table(corr_mat))
+colnames(corr_long) <- c("Var1", "Var2", "Correlation")
+
+corr_plot <- ggplot(corr_long, aes(Var1, Var2, fill = Correlation)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "#0072B2", mid = "white", high = "#D55E00", midpoint = 0, limits = c(-1, 1)) +
+  geom_text(aes(label = Correlation), size = 3) +
+  labs(title = "Correlation Matrix (Raw Units)") +
+  theme_minimal() +
+  theme(axis.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+
+corr_plot
+```
+
+**Question 6.1.1:** Which two variables are most strongly correlated?
+
+**Question 6.1.2:** If you were predicting `catch_value_usd`, do `fuel_consumption` and `apparent_fishing_hours` tell a similar story? Why might that be a problem?
+
+### 6.2 Scatterplot with Linear Model
+**functions:**  
+`geom_point()`: Plots raw data points.  
+`geom_smooth(method = "lm")`: Adds a linear trend line.  
+`lm()`: Fits a line with a slope and intercept.
+`ggplot()`: Initializes a plot object.  
+`aes()`: Maps variables to axes.  
+`labs()`: Adds titles and axis labels.  
+`theme_minimal()`: Applies a clean theme.
+
+**logic steps:**  
+Plot `catch_value_usd` against `apparent_fishing_hours`.  
+Fit a linear model and extract slope/intercept.  
+Add the fitted line to the plot.  
+Display the equation in the subtitle for interpretation.
+
+```{r}
+lm_fit <- lm(catch_value_usd ~ apparent_fishing_hours, data = df_imputed)
+coef_vals <- coef(lm_fit)
+
+intercept <- round(coef_vals[1], 2)
+slope <- round(coef_vals[2], 2)
+eq_text <- paste0("catch_value_usd = ", intercept, " + ", slope, " * apparent_fishing_hours")
+
+scatter_plot <- ggplot(df_imputed, aes(x = apparent_fishing_hours, y = catch_value_usd)) +
+  geom_point(alpha = 0.5, color = "#0072B2") +
+  geom_smooth(method = "lm", se = FALSE, color = "#009E73", linewidth = 1) +
+  labs(
+    title = "Catch Value vs. Fishing Hours",
+    subtitle = eq_text,
+    x = "Apparent Fishing Hours",
+    y = "Catch Value (USD)"
+  ) +
+  theme_minimal()
+
+scatter_plot
+```
+
+**Question 6.2.1:** Does the scatterplot suggest a strong linear relationship? Why?
+
+## 7. Boxplot by Gear (Trimmed Dataset)
+We compare gear types using the trimmed dataset.
+
+**functions:**  
+`geom_boxplot()`: Highlights median, quartiles, and outliers.  
+`theme()`: Used here to rotate axis labels.
+`ggplot()`: Initializes a plot object.  
+`aes()`: Maps variables to axes.  
+`labs()`: Adds titles and axis labels.  
+`theme_minimal()`: Applies a clean theme.  
+`element_text()`: Styles axis labels.
+
+**logic steps:**  
+Use the trimmed dataset from Section 4.  
+Map `geartype` to the x-axis and fishing hours to the y-axis.  
+Render a boxplot to compare distributions across gear types.
+
+```{r}
+box_plot <- ggplot(df_trim, aes(x = geartype, y = apparent_fishing_hours, fill = geartype)) +
   geom_boxplot() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "EDA Diagnostic: Identifying Outliers by Squad",
-       subtitle = "Visuals show what summary tables hide")
+  labs(title = "Fishing Hours by Gear", x = "Gear Type", y = "Fishing Hours")
+
+box_plot
 ```
 
-**Question 5.1:** Which squad(s) show the most extreme outliers?
+**Question 7.1.1:** Which gear types show the most extreme outliers after trimming?
 
-**Question 5.2:** Why is it "impossible to tell" this information from the summary table in Section 4 alone?
+**Question 7.1.2:** Why is a boxplot more informative than a mean alone for spotting outliers?
 
-## 6. Lab Conclusion
-Final Reflection: You have performed both Deletion and Imputation. If you were writing a policy brief for a government agency, which of these two strategies would you feel more comfortable defending, and why?
+## 8. Lab Conclusion
+Final Reflection: If you were writing a policy report, which imputation strategy would you defend and why?

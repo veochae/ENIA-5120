@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Session 2: The Analytical Detective"
 subtitle: "Moving from Cleaning to Discovery"
 format: 
@@ -10,7 +10,6 @@ format:
     self-contained: true
     theme: serif
     code-fold: true
-    code-summary: "Show code"
 execute:
   echo: true
   warning: false
@@ -18,7 +17,7 @@ execute:
   eval: true
 ---
 
-## The Clean Data is Silent - Now What? 🕵️
+## You cleaned your dataset - Now What? 🕵️
 
 * You have scrubbed the typos and filled the **NA** values.
 * But clean data is just a silent spreadsheet.
@@ -42,7 +41,7 @@ library(ggplot2)
 
 * **Cleaning** asked: *Is the data broken?*
 * **EDA** asks: *What is the data's personality?*
-* **The Why:** You cannot build a bridge if you don't know the soil. EDA is the soil test.
+* **The Why:** You cannot build ML models on top of what you don't know. You have to understand the data before you jump into "predict" something.
 * It prevents you from applying a **Normal** model to a **Skewed** world.
 
 ---
@@ -51,14 +50,15 @@ library(ggplot2)
 ### What do we check before analysis?
 
 * **Balance:** Are our categories representative, or is 90% of our data from one source? (Critical for policy equity).
-* **Feasibility:** Do the ranges make sense? (e.g., Are there negative values for "Carbon Emissions"?).
+* **Feasibility:** Do the ranges make sense? (e.g., Does the data display a state of "normalcy"? Or is it showing a skewed nature of a problem?).
 * **Anomalies:** Extreme "impossible" values that survived the first cleaning pass.
 
 ---
 
-### Outliers
+### Outliers 🎯
 
 * **The Why:** If the mean (red) is far from the median (green), outliers are hijacking your summary.
+* **The What:** However, it's always important to consider: "Does this represent the reality?"
 * **Resolution:** Verify errors, report median, or cap extremes.
 
 ----
@@ -66,13 +66,13 @@ library(ggplot2)
 ```{r, echo=TRUE, eval=TRUE}
 library(ggplot2)
 set.seed(42)
-df <- data.frame(emissions = rgamma(1000, shape = 2, scale = 2500))
+df <- data.frame(emissions = rgamma(1000, shape = 2, scale = 5000))
 
 mu <- mean(df$emissions, na.rm = TRUE)
 med <- median(df$emissions, na.rm = TRUE)
 
 ggplot(df, aes(x = emissions)) +
-  geom_histogram(bins = 40, fill = "#374adbff", color = "white") +
+  geom_histogram(bins = 40, fill = "#959fe847", color = "white") +
   geom_vline(xintercept = mu, color = "#B71C1C", linewidth = 1.4) +
   geom_vline(xintercept = med, color = "#1B5E20", linewidth = 1.4) +
   labs(
@@ -87,12 +87,47 @@ ggplot(df, aes(x = emissions)) +
 
 ----
 
-### Data Skewness
+### How do we know if it's an outlier? 📏
+
+* **Rule of thumb:** A point more than **3 standard deviations** from the mean is often flagged as an outlier.
+* **Why “normal” matters:** The 3‑SD rule only makes sense when data is **bell‑shaped**. In a normal distribution, almost everything falls near the center, so 3‑SD points are truly rare.
+* **If data is skewed:** Long tails are expected, so the 3‑SD rule can label too many “outliers.” Use visuals or robust methods instead.
+
+---
+
+#### Example: Normal Distribution of Student Grades 📊
+
+```{r, echo=TRUE, eval=TRUE}
+set.seed(42)
+grades <- pmin(pmax(rnorm(300, mean = 80, sd = 8), 0), 100)
+
+ggplot(data.frame(grades = grades), aes(x = grades)) +
+  geom_histogram(bins = 20, fill = "#2a9d8f", color = "white") +
+  labs(
+    title = "Student Grades (Approximately Normal)",
+    x = "Score",
+    y = "Number of Students"
+  ) +
+  theme_minimal()
+```
+
+---
+
+### Normal Distribution 🔔
+
+* What does **typical** mean to you?
+* In real world settings, the intuition around **typical** is built around **average**.
+* So if something were to be **normal**, most things would be around the average right?
+* That's what Normal Distribution shows. 
+* What if you are comparing 2 different things? And one is typical and one is not? 
+* Because Normal Distribution shows "the usual", it allows for fair comparison, and therefore is commonly used in data science settings. 
+
+---
+
+### Data Skewness 📉
 
 * **The Why:** Skewed data breaks "normal" assumptions.
 * **Resolution:** Log transforms turn huge differences into a readable scale.
-
-----
 
 ```{r, echo=TRUE, eval=TRUE}
 set.seed(42)
@@ -116,18 +151,37 @@ ggplot(df_long, aes(x = value)) +
   theme(panel.grid.minor = element_blank())
 ```
 
-----
+---
 
-### Class Imbalance (The Majority Bias)
+### What is transformation? 🔍
+
+* Imagine you are looking at a city map while standing next to a skyscraper. 
+* The skyscraper fills up your view right? 
+* Now, let's zoom out. If you zoom out, tall buildings are still taller than shorter ones, but you can see the whole map now. 
+* Transformation, although a lot of other usage, mainly is used in data analysis to "right size" values that are not in proportionate scale. 
+
+---
+
+### Class Imbalance (The Majority Bias) ⚖️
 
 * **The Why:** If 95% of cases are one class, the "average" just describes the majority.
 * **Risk:** The minority becomes invisible in your conclusions.
-* **Resolution:** Emphasize **precision** and **recall**, not just accuracy.
+* **Resolution:** Emphasize **precision** and **recall**, not just accuracy. 
+
+---
+
+### Precision and Recall 🎯
+* Imagine 1000 transactions and only 10 are fraud
+* If we build a model that says "not fraud" everytime, how accurate is it?
+* Is this a good model?
+* **Accuracy** measures how well we predictg the majority case, not whether we catch what we care about, which is the 1%
+* **Precision**: When the model flags something as fraud, how often is it actually fraud?
+* **Recall**: Out of all the real fraud cases, how many did we actually catch?
 
 ---
 
 ## Univariate Health Check 🩺
-### Why do these summaries matter?
+### Why do these summaries matter? 🧠
 
 * **Mean vs. Median:** Where is the true "center" of experience?
 * **Standard Deviation:** How risky or unstable is the outcome?
@@ -163,7 +217,7 @@ ggplot(df_long, aes(x = value)) +
 ---
 
 ## Relationships between Variables 💃🕺
-### Numeric vs. Numeric
+### Numeric vs. Numeric 🔗
 
 * **Why:** Is Variable A a lever for Variable B? In quantifiable amount, how much does Var B impact Var A?
 * **Interpretation:** Slope is the `amount`, constant is the `default`
@@ -194,7 +248,7 @@ ggplot(df, aes(x = TreeCover, y = AirQuality)) +
 
 ----
 
-### Numeric vs. Categorical
+### Numeric vs. Categorical 📦
 
 * **Why:** Does structural difference have impact on performance?
 * **Clue:** If box middles don't overlap, groups behave differently. (Mean is different!)
@@ -227,7 +281,7 @@ ggplot(df, aes(x = Region, y = WaterQuality, fill = Region)) +
 
 ----
 
-### Multicollinearity (The Redundancy Trap)
+### Multicollinearity (The Redundancy Trap) 🔁
 
 * **What it is:** Two predictors tell the same story.
 * **Why it matters:** The model cannot tell which variable is the real driver.
@@ -255,7 +309,7 @@ colnames(cor_long) <- c("Var1", "Var2", "Correlation")
 ggplot(cor_long, aes(Var1, Var2, fill = Correlation)) +
   geom_tile(color = "white") +
   scale_fill_gradient2(
-    low = "#3B4CC0", mid = "white", high = "#FDE725",
+    low = "#3B4CC0", mid = "white", high = "#eede49ff",
     midpoint = 0, limits = c(-1, 1)
   ) +
   geom_text(aes(label = Correlation), size = 3) +
@@ -274,7 +328,7 @@ ggplot(cor_long, aes(Var1, Var2, fill = Correlation)) +
 ---
 
 ## The Pivot to Visuals 👀
-### Why use ggplot?
+### Why use ggplot? 👓
 
 * Summary stats can be identical for datasets that look completely different.
 * Visuals reveal **clusters**, **gaps**, and **curves** that tables hide.
@@ -283,7 +337,7 @@ ggplot(cor_long, aes(Var1, Var2, fill = Correlation)) +
 ---
 
 ## Visual Design 🎨
-### What Makes a Good Visual?
+### What Makes a Good Visual? ✨
 
 * **The Issue of Scale:** Bar charts must start at zero. Non-zero baselines exaggerate small differences to mislead viewers.
 * **Color Blindness:** ~8% of men have red-green color blindness.
@@ -291,7 +345,7 @@ ggplot(cor_long, aes(Var1, Var2, fill = Correlation)) +
 
 ----
 
-### Example: Cluttered & Misleading
+### Example: Cluttered & Misleading 🚧
 
 ```{r, echo=TRUE, eval=TRUE}
 df <- data.frame(
@@ -304,7 +358,7 @@ df <- data.frame(
 bad_plot <- ggplot(df, aes(x = Region, y = ProtectedLand, fill = Region)) +
   geom_col(width = 0.6) +
   coord_cartesian(ylim = c(50, 72)) +
-  scale_fill_manual(values = c("#E41A1C", "#4DAF4A", "#FF7F00", "#A65628")) +
+  scale_fill_manual(values = c("#E41A1C", "#E41A1C", "#E41A1C", "#A65628")) +
   geom_text(
     aes(label = paste0(
       "Protected land: ", ProtectedLand, "%\n",
@@ -328,7 +382,7 @@ bad_plot
 
 ----
 
-### Example: Clear & Accessible
+### Example: Clear & Accessible ✅
 
 ```{r, echo=TRUE, eval=TRUE}
 # Clean scale + accessible palette + clear narrative
@@ -352,7 +406,7 @@ good_plot
 ---
 
 ## ggplot2 Nomenclature 🧩
-### The Grammar of Graphics
+### The Grammar of Graphics 🧩
 
 | Component | Nomenclature | Description |
 | :--- | :--- | :--- |

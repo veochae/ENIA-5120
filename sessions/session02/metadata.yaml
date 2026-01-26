@@ -11,10 +11,10 @@ lab:
   assignment_key: lab02
   files:
     - path: lab/lab_spec.pdf
-      display_name: "Lab 02 – Wrangling Spec.pdf"
+      display_name: "Lab 02 – Data Cleaning Strategies & EDA Spec.pdf"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 02 – Template.Rmd"
+      display_name: "Lab 02 – Data Cleaning Strategies & EDA Template.Rmd"
     - path: lab/lab_answers.Rmd
-      display_name: "Lab 02 – Answers.Rmd"
+      display_name: "Lab 02 – Data Cleaning Strategies & EDA Answers.Rmd"
     - path: lab/lab_rubric.pdf
-      display_name: "Lab 02 – Rubric.pdf"
+      display_name: "Lab 02 – Data Cleaning Strategies & EDA Rubric.pdf"

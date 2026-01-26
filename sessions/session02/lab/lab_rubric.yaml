@@ -1,11 +1,11 @@
 total_points: 20
 criteria:
   - id: diagnostics
-    description: "Runs initial EDA checks (missingness, histogram) and interprets findings."
+    description: "Runs structure checks, summary stats, missingness, and class balance diagnostics."
     max_points: 6
   - id: imputation
-    description: "Implements deletion, mean imputation, median imputation, and compares outcomes."
+    description: "Implements deletion, mean/median imputation, and mode imputation with interpretation."
     max_points: 8
-  - id: grouping_visuals
-    description: "Applies mode imputation, builds role_eda summary, and produces the outlier boxplot with interpretation."
+  - id: visuals_relationships
+    description: "Creates log-transform comparison, correlation heatmap, scatterplot, and boxplot with reflection."
     max_points: 6

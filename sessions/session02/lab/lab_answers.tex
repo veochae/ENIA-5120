@@ -1,0 +1,904 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Lab 02 -- Data Cleaning Strategies and Exploratory Data Analysis (EDA)},
+  pdfauthor={Your Name},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Lab 02 -- Data Cleaning Strategies and Exploratory Data Analysis
+(EDA)}
+\author{Your Name}
+\date{2026-01-25}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{mission-background}{%
+\subsection{🧭 Mission Background}\label{mission-background}}
+
+You are the lead analyst for a public policy team reviewing global
+fishing effort. Before the team makes policy recommendations, you must
+inspect the data, diagnose missingness, and test how different
+imputation strategies change the story.
+
+\textbf{Your Goal:} Use EDA to understand the shape of the data and
+apply deletion, mean/median imputation, and mode imputation to handle
+missing values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# {-}{-}{-} UTILITY REFERENCE {-}{-}{-}}
+\CommentTok{\# library(): Loads external packages into your session.}
+\CommentTok{\# readr: Part of the Tidyverse, used for fast and "smart" data loading.}
+\CommentTok{\# dplyr: Provides the tools for inspection and manipulation.}
+
+\FunctionTok{library}\NormalTok{(readr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(tidyr)}
+
+\CommentTok{\# Define the root path (Adjust if your folder structure is different)}
+\NormalTok{ENIA\_ROOT }\OtherTok{\textless{}{-}} \StringTok{"\textasciitilde{}/ENIA{-}5120"}
+\NormalTok{efforts\_path }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\StringTok{"../../../data"}\NormalTok{, }\StringTok{"gfw\_outputs"}\NormalTok{, }\StringTok{"efforts\_by\_flag\_gear.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{the-evidence-intake-load-inspect}{%
+\subsection{1. The Evidence Intake: Load \&
+Inspect}\label{the-evidence-intake-load-inspect}}
+
+We start by pulling the dataset into R and confirming its structure.
+
+\hypertarget{load-the-data}{%
+\subsubsection{1.1 Load the Data}\label{load-the-data}}
+
+\textbf{functions:}\\
+\texttt{read\_csv()}: Reads data into R quickly and reliably.\\
+\texttt{head()}: Displays the first 6 rows for a quick sanity check.
+
+\textbf{logic steps:}\\
+Locate the file path in \texttt{efforts\_path}.\\
+Load the CSV into a data frame named \texttt{df}.\\
+Print the first rows to confirm columns and values look reasonable.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(efforts\_path)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 4253 Columns: 13
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr  (3): time_range, flag, geartype
+## dbl (10): lat, lon, vessel_ids, apparent_fishing_hours, effort_index, fuel_c...
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 13
+##     lat   lon time_range flag  geartype        vessel_ids apparent_fishing_hours
+##   <dbl> <dbl> <chr>      <chr> <chr>                <dbl>                  <dbl>
+## 1  -8.4 -81.9 2023-03    <NA>  purse_seines             1                   0.04
+## 2  -8.8 -80.2 2023-02    PER   other_purse_se~          1                   1.57
+## 3 -13.5 -76.3 2023-03    PER   other_purse_se~          1                   1.87
+## 4 -11.9 -80.6 2023-02    PER   tuna_purse_sei~          1                   0.33
+## 5 -12.9 -78   2023-02    PER   fishing                  1                   4.18
+## 6 -14.3 -77.7 2023-02    PER   other_purse_se~          7                  27.4 
+## # i 6 more variables: effort_index <dbl>, fuel_consumption <dbl>,
+## #   catch_value_usd <dbl>, crew_size <dbl>, log_catch_value <dbl>,
+## #   log_hours <dbl>
+\end{verbatim}
+
+\hypertarget{inspect-the-structure}{%
+\subsubsection{1.2 Inspect the Structure}\label{inspect-the-structure}}
+
+\textbf{functions:}\\
+\texttt{class()}: Tells you the object type (e.g., tibble/data.frame).\\
+\texttt{glimpse()}: Gives a vertical view of columns and data types.\\
+\texttt{nrow()} / \texttt{ncol()}: Counts rows and columns.
+
+\textbf{logic steps:}\\
+Confirm \texttt{df} is a data frame/tibble.\\
+Scan column names and data types with \texttt{glimpse()}.\\
+Record row and column counts to know dataset size.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{glimpse}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 4,253
+## Columns: 13
+## $ lat                    <dbl> -8.4, -8.8, -13.5, -11.9, -12.9, -14.3, -12.4, ~
+## $ lon                    <dbl> -81.9, -80.2, -76.3, -80.6, -78.0, -77.7, -78.7~
+## $ time_range             <chr> "2023-03", "2023-02", "2023-03", "2023-02", "20~
+## $ flag                   <chr> NA, "PER", "PER", "PER", "PER", "PER", "PER", "~
+## $ geartype               <chr> "purse_seines", "other_purse_seines", "other_pu~
+## $ vessel_ids             <dbl> 1, 1, 1, 1, 1, 7, 1, 1, 13, 1, 1, 9, 1, 1, 1, 1~
+## $ apparent_fishing_hours <dbl> 0.0400, 1.5700, 1.8700, 0.3300, 4.1800, 27.3905~
+## $ effort_index           <dbl> 8.18, 7.00, 4.03, 0.00, 1.49, 34.20, 2.12, 0.93~
+## $ fuel_consumption       <dbl> 10.08, 17.08, 4.70, 0.00, 9.63, 33.58, 3.16, 5.~
+## $ catch_value_usd        <dbl> 5.76, 9.01, 10.61, 3.51, 68.36, 97.53, 25.46, 7~
+## $ crew_size              <dbl> 6.9, 8.2, 7.4, NA, 10.0, 10.1, 7.1, 7.7, 9.3, 7~
+## $ log_catch_value        <dbl> 1.750937, 2.198335, 2.361797, 1.255616, 4.22478~
+## $ log_hours              <dbl> 0.03922071, 0.94390590, 1.05431203, 0.28517894,~
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{nrow}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4253
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ncol}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 13
+\end{verbatim}
+
+\hypertarget{basic-statistical-summary}{%
+\subsubsection{1.3 Basic Statistical
+Summary}\label{basic-statistical-summary}}
+
+\textbf{functions:}\\
+\texttt{summary()}: Provides min, max, mean, and quartiles for numeric
+columns.\\
+\texttt{select(where(is.numeric))}: Keeps only numeric variables.
+
+\textbf{logic steps:}\\
+Keep only numeric columns to avoid text summaries.\\
+Run \texttt{summary()} to inspect min, max, and quartiles.\\
+Use this to spot unusually large or small values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{numeric\_summary }\OtherTok{\textless{}{-}} \FunctionTok{summary}\NormalTok{(df }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(}\FunctionTok{where}\NormalTok{(is.numeric)))}
+\NormalTok{numeric\_summary}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       lat              lon           vessel_ids     apparent_fishing_hours
+##  Min.   :-19.30   Min.   :-84.40   Min.   : 1.000   Min.   : 0.010        
+##  1st Qu.:-14.50   1st Qu.:-79.70   1st Qu.: 1.000   1st Qu.: 0.990        
+##  Median :-12.00   Median :-78.10   Median : 1.000   Median : 2.410        
+##  Mean   :-11.45   Mean   :-78.38   Mean   : 3.382   Mean   : 5.076        
+##  3rd Qu.: -8.20   3rd Qu.:-77.20   3rd Qu.: 2.000   3rd Qu.: 6.050        
+##  Max.   : -3.40   Max.   :-70.70   Max.   :75.000   Max.   :27.390        
+##                                                                           
+##   effort_index    fuel_consumption catch_value_usd    crew_size     
+##  Min.   : 0.000   Min.   : 0.00    Min.   :  1.14   Min.   : 6.400  
+##  1st Qu.: 4.390   1st Qu.: 4.25    1st Qu.:  9.23   1st Qu.: 7.100  
+##  Median : 7.850   Median : 8.40    Median : 17.90   Median : 7.600  
+##  Mean   : 9.737   Mean   :10.27    Mean   : 33.98   Mean   : 7.792  
+##  3rd Qu.:12.590   3rd Qu.:13.72    3rd Qu.: 38.42   3rd Qu.: 8.300  
+##  Max.   :44.050   Max.   :43.15    Max.   :567.95   Max.   :12.600  
+##                                                     NA's   :348     
+##  log_catch_value   log_hours      
+##  Min.   :0.131   Min.   :0.00995  
+##  1st Qu.:2.222   1st Qu.:0.68814  
+##  Median :2.885   Median :1.22671  
+##  Mean   :2.977   Mean   :1.38090  
+##  3rd Qu.:3.649   3rd Qu.:1.95303  
+##  Max.   :6.342   Max.   :3.34605  
+## 
+\end{verbatim}
+
+\hypertarget{missingness-balance}{%
+\subsection{2. Missingness + Balance}\label{missingness-balance}}
+
+We check missingness and whether categories are balanced.
+
+\hypertarget{missingness-by-column}{%
+\subsubsection{2.1 Missingness by Column}\label{missingness-by-column}}
+
+\textbf{functions:}\\
+\texttt{is.na()}: Checks every cell; returns TRUE if a value is missing
+(NA).\\
+\texttt{colSums()}: Adds up TRUE values to count missingness by column.
+
+\textbf{logic steps:}\\
+Use \texttt{is.na()} inside \texttt{colSums()} to count missing values
+by column.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{missing\_totals }\OtherTok{\textless{}{-}} \FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(df))}
+\NormalTok{missing\_totals}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                    lat                    lon             time_range 
+##                      0                      0                      0 
+##                   flag               geartype             vessel_ids 
+##                    407                      0                      0 
+## apparent_fishing_hours           effort_index       fuel_consumption 
+##                      0                      0                      0 
+##        catch_value_usd              crew_size        log_catch_value 
+##                      0                    348                      0 
+##              log_hours 
+##                      0
+\end{verbatim}
+
+\textbf{Question 2.1.1:} Which column has the most missing values?
+
+\hypertarget{class-imbalance-check}{%
+\subsubsection{2.2 Class Imbalance Check}\label{class-imbalance-check}}
+
+\textbf{functions:}\\
+\texttt{count()}: Tallies how many observations fall in each category.\\
+\texttt{arrange(desc(n))}: Sorts counts from highest to lowest.\\
+\texttt{filter(!is.na())}: Drops missing categories when needed.
+\texttt{ggplot()}: Initializes a plot object.\\
+\texttt{aes()}: Maps variables to visual channels.\\
+\texttt{geom\_col()}: Draws bars with heights from data.\\
+\texttt{labs()}: Adds plot titles and axis labels.\\
+\texttt{theme\_minimal()}: Applies a clean theme.\\
+\texttt{theme()}: Fine-tunes text and layout.\\
+\texttt{element\_text()}: Styles axis labels. \texttt{reorder()}: Orders
+categories by a numeric value.
+
+\textbf{logic steps:}\\
+Remove missing flags for a fair comparison table.\\
+Count records per \texttt{flag} and per \texttt{geartype}.\\
+Sort counts to see which categories dominate.\\
+Plot each count table as a bar chart for visual balance.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_noflag }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(flag))}
+
+\NormalTok{flag\_counts }\OtherTok{\textless{}{-}}\NormalTok{ df\_noflag }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(flag) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(n))}
+
+\NormalTok{geartype\_counts }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(geartype) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(n))}
+
+\CommentTok{\# Base R fallback (uncomment if dplyr::count() fails)}
+\CommentTok{\# flag\_counts \textless{}{-} as.data.frame(sort(table(df\_noflag$flag), decreasing = TRUE))}
+\CommentTok{\# names(flag\_counts) \textless{}{-} c("n", "flag")}
+\CommentTok{\# flag\_counts \textless{}{-} flag\_counts[, c("flag", "n")]}
+\CommentTok{\# geartype\_counts \textless{}{-} as.data.frame(sort(table(df$geartype), decreasing = TRUE))}
+\CommentTok{\# names(geartype\_counts) \textless{}{-} c("n", "geartype")}
+\CommentTok{\# geartype\_counts \textless{}{-} geartype\_counts[, c("geartype", "n")]}
+
+\NormalTok{flag\_counts}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 11 x 2
+##    flag      n
+##    <chr> <int>
+##  1 PER    3170
+##  2 ECU     328
+##  3 AIA      95
+##  4 HND      93
+##  5 GBR      80
+##  6 SSD      37
+##  7 PAN      30
+##  8 ESP       7
+##  9 USA       4
+## 10 CHN       1
+## 11 JPN       1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{geartype\_counts}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 9 x 2
+##   geartype               n
+##   <chr>              <int>
+## 1 other_purse_seines  1989
+## 2 tuna_purse_seines    867
+## 3 purse_seines         578
+## 4 pole_and_line        324
+## 5 fishing              269
+## 6 inconclusive          97
+## 7 set_gillnets          79
+## 8 set_longlines         42
+## 9 drifting_longlines     8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{flag\_bar\_plot }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(flag\_counts, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{reorder}\NormalTok{(flag, }\SpecialCharTok{{-}}\NormalTok{n), }\AttributeTok{y =}\NormalTok{ n)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#0072B2"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Flag Counts"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Flag"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Records"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+
+\NormalTok{gear\_bar\_plot }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(geartype\_counts, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{reorder}\NormalTok{(geartype, }\SpecialCharTok{{-}}\NormalTok{n), }\AttributeTok{y =}\NormalTok{ n)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#009E73"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Gear Type Counts"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Gear Type"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Records"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+
+\NormalTok{flag\_bar\_plot}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gear\_bar\_plot}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\textbf{Question 2.2.1:} Is the dataset balanced across flags, or does
+one flag dominate?
+
+\textbf{Question 2.2.2:} Why can class imbalance distort policy
+conclusions?
+
+\hypertarget{imputation-comes-first}{%
+\subsection{3. Imputation Comes First}\label{imputation-comes-first}}
+
+We will use \textbf{imputed data moving forward}.
+
+\hypertarget{mean-vs.-median-numeric}{%
+\subsubsection{3.1 Mean vs.~Median
+(Numeric)}\label{mean-vs.-median-numeric}}
+
+\textbf{functions:}\\
+\texttt{filter(!is.na(x))}: Deletion tool that drops missing rows.\\
+\texttt{mean()} / \texttt{median()}: Measures central tendency;
+\texttt{na.rm\ =\ TRUE} ignores NAs.\\
+\texttt{coalesce()}: Imputation tool that fills NAs with a replacement
+value.\\
+\texttt{sd()}: Calculates Standard Deviation (spread).
+\texttt{mutate()}: Adds or replaces a column in the data frame.
+
+\textbf{logic steps:}\\
+Create a deletion-only version by removing missing
+\texttt{crew\_size}.\\
+Compute the mean and median to see if they diverge.\\
+Create two imputed versions using mean and median.\\
+Compare resulting mean and SD across strategies to judge impact.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Strategy A: Deletion}
+\NormalTok{df\_deleted }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(crew\_size))}
+
+\CommentTok{\# Strategy B: Mean imputation}
+\NormalTok{mean\_val }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{crew\_size, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{df\_mean\_imp }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{crew\_size =} \FunctionTok{coalesce}\NormalTok{(crew\_size, mean\_val))}
+
+\CommentTok{\# Strategy C: Median imputation}
+\NormalTok{median\_val }\OtherTok{\textless{}{-}} \FunctionTok{median}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{crew\_size, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{df\_median\_imp }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{crew\_size =} \FunctionTok{coalesce}\NormalTok{(crew\_size, median\_val))}
+
+\NormalTok{comparison }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{Strategy =} \FunctionTok{c}\NormalTok{(}\StringTok{"Deletion"}\NormalTok{, }\StringTok{"Mean Imputation"}\NormalTok{, }\StringTok{"Median Imputation"}\NormalTok{),}
+  \AttributeTok{Resulting\_Mean =} \FunctionTok{c}\NormalTok{(}
+    \FunctionTok{mean}\NormalTok{(df\_deleted}\SpecialCharTok{$}\NormalTok{crew\_size),}
+    \FunctionTok{mean}\NormalTok{(df\_mean\_imp}\SpecialCharTok{$}\NormalTok{crew\_size),}
+    \FunctionTok{mean}\NormalTok{(df\_median\_imp}\SpecialCharTok{$}\NormalTok{crew\_size)}
+\NormalTok{  ),}
+  \AttributeTok{Resulting\_SD =} \FunctionTok{c}\NormalTok{(}
+    \FunctionTok{sd}\NormalTok{(df\_deleted}\SpecialCharTok{$}\NormalTok{crew\_size),}
+    \FunctionTok{sd}\NormalTok{(df\_mean\_imp}\SpecialCharTok{$}\NormalTok{crew\_size),}
+    \FunctionTok{sd}\NormalTok{(df\_median\_imp}\SpecialCharTok{$}\NormalTok{crew\_size)}
+\NormalTok{  )}
+\NormalTok{)}
+\NormalTok{comparison}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            Strategy Resulting_Mean Resulting_SD
+## 1          Deletion       7.792190    0.8943916
+## 2   Mean Imputation       7.792190    0.8570102
+## 3 Median Imputation       7.776464    0.8586281
+\end{verbatim}
+
+\textbf{Question 3.1.1:} Which strategy produced the lowest SD
+(variability)?
+
+\textbf{Question 3.1.2:} Why might lower variability after imputation be
+misleading?
+
+\textbf{Question 3.1.3:} When the mean and median differ, which is safer
+to use and why?
+
+\hypertarget{mode-imputation-categorical}{%
+\subsubsection{3.2 Mode Imputation
+(Categorical)}\label{mode-imputation-categorical}}
+
+\textbf{functions:}\\
+\texttt{count()}: Counts category frequencies.\\
+\texttt{arrange(desc(n))}: Sorts from most common to least.\\
+\texttt{slice(1)}: Selects the top row (the mode).\\
+\texttt{pull()}: Extracts a single value from a table.\\
+\texttt{coalesce()}: Fills missing values with the replacement.
+\texttt{filter(!is.na())}: Removes missing categories before counting.\\
+\texttt{mutate()}: Replaces missing values in a column.\\
+\texttt{table()}: Base R frequency check for before/after.
+
+\textbf{logic steps:}\\
+Filter to non-missing flags for a clean frequency count.\\
+Identify the most frequent \texttt{flag} (the mode).\\
+Impute missing flags using the mode.\\
+Compare the mode frequency before and after imputation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mode\_flag }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(flag)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(flag) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(n)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pull}\NormalTok{(flag)}
+
+\NormalTok{df\_mode\_imp }\OtherTok{\textless{}{-}}\NormalTok{ df\_median\_imp }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{flag =} \FunctionTok{coalesce}\NormalTok{(flag, mode\_flag))}
+
+\CommentTok{\# Compare frequency of the mode}
+\CommentTok{\# Before:}
+\FunctionTok{table}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{flag)[mode\_flag]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  PER 
+## 3170
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# After:}
+\FunctionTok{table}\NormalTok{(df\_mode\_imp}\SpecialCharTok{$}\NormalTok{flag)[mode\_flag]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  PER 
+## 3577
+\end{verbatim}
+
+\textbf{Question 3.2.1:} By how many observations did the mode category
+increase after imputation?
+
+\textbf{Question 3.2.2:} Why can mode imputation reduce diversity in
+categorical data?
+
+\hypertarget{imputed-dataset-for-analysis}{%
+\subsubsection{3.3 Imputed Dataset for
+Analysis}\label{imputed-dataset-for-analysis}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_imputed }\OtherTok{\textless{}{-}}\NormalTok{ df\_mode\_imp}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{outliers-3-standard-deviations-away}{%
+\subsection{4. Outliers: 3 Standard Deviations
+Away}\label{outliers-3-standard-deviations-away}}
+
+We flag extreme values using the 3-SD rule.
+
+\textbf{functions:}\\
+\texttt{mean()} / \texttt{sd()}: Compute center and spread.\\
+\texttt{abs()}: Calculates distance from the mean. \texttt{filter()}:
+Keeps only rows that meet a condition.
+
+\textbf{logic steps:}\\
+Compute the mean and SD of \texttt{apparent\_fishing\_hours}.\\
+Measure each value's distance from the mean.\\
+Flag rows whose distance exceeds 3 SD.\\
+Count how many rows are flagged.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hours\_mean }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(df\_imputed}\SpecialCharTok{$}\NormalTok{apparent\_fishing\_hours, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{hours\_sd }\OtherTok{\textless{}{-}} \FunctionTok{sd}\NormalTok{(df\_imputed}\SpecialCharTok{$}\NormalTok{apparent\_fishing\_hours, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{hours\_outliers }\OtherTok{\textless{}{-}}\NormalTok{ df\_imputed }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\FunctionTok{abs}\NormalTok{(apparent\_fishing\_hours }\SpecialCharTok{{-}}\NormalTok{ hours\_mean) }\SpecialCharTok{\textgreater{}} \DecValTok{3} \SpecialCharTok{*}\NormalTok{ hours\_sd)}
+
+\FunctionTok{nrow}\NormalTok{(hours\_outliers)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 12
+\end{verbatim}
+
+\textbf{Question 4.1.1:} How many rows are flagged as outliers by the
+3-SD rule?
+
+\textbf{Question 4.1.2:} Why can the 3-SD rule be misleading if the data
+is skewed?
+
+\hypertarget{overall-boxplot-with-vs.-without-outliers}{%
+\subsubsection{4.2 Overall Boxplot: With vs.~Without
+Outliers}\label{overall-boxplot-with-vs.-without-outliers}}
+
+\textbf{functions:}\\
+\texttt{geom\_boxplot()}: Highlights median, quartiles, and outliers.
+\texttt{ggplot()}: Initializes a plot object.\\
+\texttt{aes()}: Maps variables to axes.\\
+\texttt{labs()}: Adds titles and axis labels.\\
+\texttt{theme\_minimal()}: Applies a clean theme.
+
+\textbf{logic steps:}\\
+Create a trimmed dataset by removing 3-SD outliers.\\
+Plot the full distribution to show raw spread.\\
+Plot the trimmed distribution to show the typical range.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trim }\OtherTok{\textless{}{-}}\NormalTok{ df\_imputed }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\FunctionTok{abs}\NormalTok{(apparent\_fishing\_hours }\SpecialCharTok{{-}}\NormalTok{ hours\_mean) }\SpecialCharTok{\textless{}=} \DecValTok{3} \SpecialCharTok{*}\NormalTok{ hours\_sd)}
+
+\NormalTok{box\_overall }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(df\_imputed, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{"All"}\NormalTok{, }\AttributeTok{y =}\NormalTok{ apparent\_fishing\_hours)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#56B4E9"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Overall Fishing Hours"}\NormalTok{, }\AttributeTok{x =} \StringTok{""}\NormalTok{, }\AttributeTok{y =} \StringTok{"Fishing Hours"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{box\_trim }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(df\_trim, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{"Trimmed"}\NormalTok{, }\AttributeTok{y =}\NormalTok{ apparent\_fishing\_hours)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#009E73"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Overall Fishing Hours (Trimmed)"}\NormalTok{, }\AttributeTok{x =} \StringTok{""}\NormalTok{, }\AttributeTok{y =} \StringTok{"Fishing Hours"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{box\_overall}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{box\_trim}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-10-2.pdf}
+
+\hypertarget{distribution-shape-log-transformation}{%
+\subsection{5. Distribution Shape + Log
+Transformation}\label{distribution-shape-log-transformation}}
+
+We use \texttt{catch\_value\_usd} to compare raw vs.~log distributions.
+
+\textbf{functions:}\\
+\texttt{pivot\_longer()}: Reshapes data for faceting.\\
+\texttt{geom\_histogram()}: Shows distribution shape. \texttt{ggplot()}:
+Initializes a plot object.\\
+\texttt{aes()}: Maps values to axes.\\
+\texttt{facet\_wrap()}: Places raw and log plots side by side.\\
+\texttt{labs()}: Adds titles and axis labels.\\
+\texttt{theme\_minimal()}: Applies a clean theme.
+
+\textbf{logic steps:}\\
+Gather raw and log values into a long format.\\
+Plot the raw distribution of \texttt{catch\_value\_usd}.\\
+Plot the log-transformed distribution side by side for comparison.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{catch\_long }\OtherTok{\textless{}{-}}\NormalTok{ df\_imputed }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(catch\_value\_usd, log\_catch\_value) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{everything}\NormalTok{(), }\AttributeTok{names\_to =} \StringTok{"scale"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"value"}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{(catch\_long, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ value)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{bins =} \DecValTok{30}\NormalTok{, }\AttributeTok{fill =} \StringTok{"\#009E73"}\NormalTok{, }\AttributeTok{color =} \StringTok{"white"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ scale, }\AttributeTok{scales =} \StringTok{"free\_x"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Pre vs. Post Log Transform"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Value"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Count"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+\textbf{Question 5.1.1:} Which distribution looks closer to normal: raw
+or log-transformed?
+
+\hypertarget{relationships-multicollinearity}{%
+\subsection{6. Relationships +
+Multicollinearity}\label{relationships-multicollinearity}}
+
+We examine correlation and linear relationships among numeric variables.
+
+\hypertarget{correlation-heatmap-raw-units}{%
+\subsubsection{6.1 Correlation Heatmap (Raw
+Units)}\label{correlation-heatmap-raw-units}}
+
+\textbf{functions:}\\
+\texttt{cor()}: Calculates correlations between numeric variables.\\
+\texttt{geom\_tile()}: Draws a heatmap. \texttt{as.table()}: Converts a
+matrix to long form.\\
+\texttt{as.data.frame()}: Turns a table into a data frame.\\
+\texttt{scale\_fill\_gradient2()}: Sets a diverging color scale.\\
+\texttt{geom\_text()}: Adds correlation labels to tiles.\\
+\texttt{ggplot()}: Initializes a plot object.\\
+\texttt{aes()}: Maps variables to visual channels.\\
+\texttt{theme\_minimal()}: Applies a clean theme.\\
+\texttt{theme()}: Adjusts axis text.
+
+\textbf{logic steps:}\\
+Select numeric columns in raw units.\\
+Compute the correlation matrix.\\
+Reshape the matrix for plotting.\\
+Draw a heatmap to spot large correlations (multicollinearity).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{corr\_mat }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(}\FunctionTok{cor}\NormalTok{(df\_imputed }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(apparent\_fishing\_hours, effort\_index, fuel\_consumption, catch\_value\_usd, crew\_size), }\AttributeTok{use =} \StringTok{"complete.obs"}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+
+\NormalTok{corr\_long }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{as.table}\NormalTok{(corr\_mat))}
+\FunctionTok{colnames}\NormalTok{(corr\_long) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Var1"}\NormalTok{, }\StringTok{"Var2"}\NormalTok{, }\StringTok{"Correlation"}\NormalTok{)}
+
+\NormalTok{corr\_plot }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(corr\_long, }\FunctionTok{aes}\NormalTok{(Var1, Var2, }\AttributeTok{fill =}\NormalTok{ Correlation)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_tile}\NormalTok{(}\AttributeTok{color =} \StringTok{"white"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradient2}\NormalTok{(}\AttributeTok{low =} \StringTok{"\#0072B2"}\NormalTok{, }\AttributeTok{mid =} \StringTok{"white"}\NormalTok{, }\AttributeTok{high =} \StringTok{"\#D55E00"}\NormalTok{, }\AttributeTok{midpoint =} \DecValTok{0}\NormalTok{, }\AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ Correlation), }\AttributeTok{size =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Correlation Matrix (Raw Units)"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.title =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+
+\NormalTok{corr\_plot}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\textbf{Question 6.1.1:} Which two variables are most strongly
+correlated?
+
+\textbf{Question 6.1.2:} If you were predicting
+\texttt{catch\_value\_usd}, do \texttt{fuel\_consumption} and
+\texttt{apparent\_fishing\_hours} tell a similar story? Why might that
+be a problem?
+
+\hypertarget{scatterplot-with-linear-model}{%
+\subsubsection{6.2 Scatterplot with Linear
+Model}\label{scatterplot-with-linear-model}}
+
+\textbf{functions:}\\
+\texttt{geom\_point()}: Plots raw data points.\\
+\texttt{geom\_smooth(method\ =\ "lm")}: Adds a linear trend line.\\
+\texttt{lm()}: Fits a line with a slope and intercept.
+\texttt{ggplot()}: Initializes a plot object.\\
+\texttt{aes()}: Maps variables to axes.\\
+\texttt{labs()}: Adds titles and axis labels.\\
+\texttt{theme\_minimal()}: Applies a clean theme.
+
+\textbf{logic steps:}\\
+Plot \texttt{catch\_value\_usd} against
+\texttt{apparent\_fishing\_hours}.\\
+Fit a linear model and extract slope/intercept.\\
+Add the fitted line to the plot.\\
+Display the equation in the subtitle for interpretation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm\_fit }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(catch\_value\_usd }\SpecialCharTok{\textasciitilde{}}\NormalTok{ apparent\_fishing\_hours, }\AttributeTok{data =}\NormalTok{ df\_imputed)}
+\NormalTok{coef\_vals }\OtherTok{\textless{}{-}} \FunctionTok{coef}\NormalTok{(lm\_fit)}
+
+\NormalTok{intercept }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(coef\_vals[}\DecValTok{1}\NormalTok{], }\DecValTok{2}\NormalTok{)}
+\NormalTok{slope }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(coef\_vals[}\DecValTok{2}\NormalTok{], }\DecValTok{2}\NormalTok{)}
+\NormalTok{eq\_text }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"catch\_value\_usd = "}\NormalTok{, intercept, }\StringTok{" + "}\NormalTok{, slope, }\StringTok{" * apparent\_fishing\_hours"}\NormalTok{)}
+
+\NormalTok{scatter\_plot }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(df\_imputed, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ apparent\_fishing\_hours, }\AttributeTok{y =}\NormalTok{ catch\_value\_usd)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#0072B2"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#009E73"}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Catch Value vs. Fishing Hours"}\NormalTok{,}
+    \AttributeTok{subtitle =}\NormalTok{ eq\_text,}
+    \AttributeTok{x =} \StringTok{"Apparent Fishing Hours"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Catch Value (USD)"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{scatter\_plot}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula = 'y ~ x'
+\end{verbatim}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+\textbf{Question 6.2.1:} Does the scatterplot suggest a strong linear
+relationship? Why?
+
+\hypertarget{boxplot-by-gear-trimmed-dataset}{%
+\subsection{7. Boxplot by Gear (Trimmed
+Dataset)}\label{boxplot-by-gear-trimmed-dataset}}
+
+We compare gear types using the trimmed dataset.
+
+\textbf{functions:}\\
+\texttt{geom\_boxplot()}: Highlights median, quartiles, and outliers.\\
+\texttt{theme()}: Used here to rotate axis labels. \texttt{ggplot()}:
+Initializes a plot object.\\
+\texttt{aes()}: Maps variables to axes.\\
+\texttt{labs()}: Adds titles and axis labels.\\
+\texttt{theme\_minimal()}: Applies a clean theme.\\
+\texttt{element\_text()}: Styles axis labels.
+
+\textbf{logic steps:}\\
+Use the trimmed dataset from Section 4.\\
+Map \texttt{geartype} to the x-axis and fishing hours to the y-axis.\\
+Render a boxplot to compare distributions across gear types.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{box\_plot }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(df\_trim, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ geartype, }\AttributeTok{y =}\NormalTok{ apparent\_fishing\_hours, }\AttributeTok{fill =}\NormalTok{ geartype)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Fishing Hours by Gear"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Gear Type"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Fishing Hours"}\NormalTok{)}
+
+\NormalTok{box\_plot}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{lab_answers_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\textbf{Question 7.1.1:} Which gear types show the most extreme outliers
+after trimming?
+
+\textbf{Question 7.1.2:} Why is a boxplot more informative than a mean
+alone for spotting outliers?
+
+\hypertarget{lab-conclusion}{%
+\subsection{8. Lab Conclusion}\label{lab-conclusion}}
+
+Final Reflection: If you were writing a policy report, which imputation
+strategy would you defend and why?
+
+\end{document}
