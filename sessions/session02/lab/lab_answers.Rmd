@@ -27,7 +27,7 @@ library(tidyr)
 
 # Define the root path (Adjust if your folder structure is different)
 ENIA_ROOT <- "~/ENIA-5120"
-efforts_path <- file.path("../../../data", "gfw_outputs", "efforts_by_flag_gear.csv")
+efforts_path <- file.path("../../../data/gfw_outputs/efforts_by_flag_gear.csv")
 ```
 
 ## 1. The Evidence Intake: Load & Inspect
@@ -332,12 +332,16 @@ We use `catch_value_usd` to compare raw vs. log distributions.
 `theme_minimal()`: Applies a clean theme.
 
 **logic steps:**  
+Create a log-transformed version of `catch_value_usd`.  
 Gather raw and log values into a long format.  
 Plot the raw distribution of `catch_value_usd`.  
 Plot the log-transformed distribution side by side for comparison.
 
 ```{r}
-catch_long <- df_imputed %>%
+df_log <- df_imputed %>%
+  mutate(log_catch_value = log(catch_value_usd))
+
+catch_long <- df_log %>%
   select(catch_value_usd, log_catch_value) %>%
   pivot_longer(cols = everything(), names_to = "scale", values_to = "value")
 

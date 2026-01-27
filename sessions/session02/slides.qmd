@@ -95,6 +95,17 @@ ggplot(df, aes(x = emissions)) +
 
 ---
 
+### Normal Distribution 🔔
+
+* What does **typical** mean to you?
+* In real world settings, the intuition around **typical** is built around **average**.
+* So if something were to be **normal**, most things would be around the average right?
+* That's what Normal Distribution shows. 
+* What if you are comparing 2 different things? And one is typical and one is not? 
+* Because Normal Distribution shows "the usual", it allows for fair comparison, and therefore is commonly used in data science settings. 
+
+---
+
 #### Example: Normal Distribution of Student Grades 📊
 
 ```{r, echo=TRUE, eval=TRUE}
@@ -113,16 +124,6 @@ ggplot(data.frame(grades = grades), aes(x = grades)) +
 
 ---
 
-### Normal Distribution 🔔
-
-* What does **typical** mean to you?
-* In real world settings, the intuition around **typical** is built around **average**.
-* So if something were to be **normal**, most things would be around the average right?
-* That's what Normal Distribution shows. 
-* What if you are comparing 2 different things? And one is typical and one is not? 
-* Because Normal Distribution shows "the usual", it allows for fair comparison, and therefore is commonly used in data science settings. 
-
----
 
 ### Data Skewness 📉
 
