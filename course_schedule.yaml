@@ -48,13 +48,13 @@ labs:
     submission_types: ["online_upload"]
   - key: lab03
     session: session03
-    name: "Lab 03 – Visualization Foundations"
+    name: "Lab 03 – Joining & Reshaping"
     due_at: "2026-02-08T23:59:00-05:00"
     points: 20
     submission_types: ["online_upload"]
   - key: lab04
     session: session04
-    name: "Lab 04 – Joining & Reshaping"
+    name: "Lab 04 – Feature Engineering & Transformation"
     due_at: "2026-02-16T23:59:00-05:00"
     points: 20
     submission_types: ["online_upload"]

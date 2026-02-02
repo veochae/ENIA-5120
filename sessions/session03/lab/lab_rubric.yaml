@@ -1,7 +1,7 @@
 ﻿total_points: 20
 criteria:
   - id: loading_cleaning
-    description: "Loads both datasets and applies required type/categorical cleaning correctly."
+    description: "Loads both datasets, inspects structure, and cleans station groups/ZIP types correctly."
     max_points: 5
   - id: demand_supply
     description: "Computes and visualizes EV demand/supply by city with correct grouping and sorting."
@@ -9,6 +9,6 @@ criteria:
   - id: joins_ratios
     description: "Compares joins and builds a city audit with EV-to-station ratios."
     max_points: 5
-  - id: county_mapping
-    description: "Computes county ratios, station ownership, tech levels, and produces the WA map."
+  - id: city_mapping
+    description: "Builds city ratios, station group mix, charger tech shares, and produces the WA map."
     max_points: 5

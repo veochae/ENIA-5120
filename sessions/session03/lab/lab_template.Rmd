@@ -13,7 +13,7 @@ output:
 ## 🧭 Mission Background
 You are part of a state policy team auditing **EV demand vs. charging supply** in Washington. Your task is to clean, summarize, join, and visualize the data to identify where infrastructure is lagging.
 
-**Your Goal:** Build a city- and county-level audit that reveals mismatches between EV population and public charging stations.
+**Your Goal:** Build a city-level audit that reveals mismatches between EV population and public charging stations.
 
 ```{r setup, message=FALSE, warning=FALSE}
 # --- UTILITY REFERENCE ---
@@ -26,10 +26,11 @@ You are part of a state policy team auditing **EV demand vs. charging supply** i
 library(tidyverse)
 library(maps)
 library(plotly)
+library(ggplot2)
 
 # Define file paths (adjust if your folder structure differs)
-ev_pop_path <- file.path("../../../data", "wa_ev_population.csv")
-ev_stations_path <- file.path("../../../data", "wa_ev_charge_stations.csv")
+ev_pop_path = file.path("../../../data", "wa_ev_population.csv")
+ev_stations_path = file.path("../../../data", "wa_ev_charge_stations.csv")
 ```
 
 ## 1. The Evidence Intake: Load the Data
@@ -46,7 +47,14 @@ Preview each table with `head()` to verify columns.
 Use `glimpse()` to confirm data types and spot obvious issues.
 
 ```{r}
-"<write your code here>"
+ev_pop = read_csv(ev_pop_path)
+ev_stations = read_csv(ev_stations_path)
+
+head(ev_pop)
+head(ev_stations)
+
+glimpse(ev_pop)
+glimpse(ev_stations)
 ```
 
 **Question 1.1.1:** How many rows and columns does each dataset contain?
@@ -54,39 +62,25 @@ Use `glimpse()` to confirm data types and spot obvious issues.
 ---
 
 ## 2. Data Types and Categorical Adjustments
-We clean strings and convert data types so joins and summaries behave correctly.
+We standardize data types and station group labels for consistent summaries and plots.
 
-### 2.1 Clean Population Table
+### 2.1 Clean Stations Table
 **functions:**  
-`mutate()` – Create or modify columns.  
-`str_to_title()` – Standardize casing.  
-`case_when()` – Recode categories.  
-`as.character()` – Set ZIP/postal codes as text.
+`mutate()` – Create cleaned columns.  
+`as.character()` – Treat ZIP codes as strings.  
+`case_when()` + `str_detect()` – Recode station groups.  
+`as.factor()` – Store station groups as a factor.
 
 **logic steps:**  
-Standardize `make` casing to avoid duplicate labels.  
-Recode eligibility into **Eligible / Ineligible / Unknown**.  
-Convert `postal_code` to character so it matches station ZIPs.
+Convert `zip` to character so leading zeros are preserved and joins/labels are reliable.  
+Use `case_when()` with `str_detect()` to collapse raw station labels into Public/Private/Unknown.  
+Store the cleaned `station_group` as a factor for stable ordering and legend display.
 
 ```{r}
 "<write your code here>"
 ```
 
-### 2.2 Clean Stations Table
-**functions:**  
-`mutate()` – Modify columns.  
-`as.character()` – Treat ZIP codes as text.  
-`as.factor()` – Convert station group to categorical.
-
-**logic steps:**  
-Convert `zip` to character for joining.  
-Convert `station_group` to factor for grouping/plotting.
-
-```{r}
-"<write your code here>"
-```
-
-**Question 2.2.1:** Why must `postal_code` and `zip` have the same data type before joining?
+**Question 2.2.1:** Why is it helpful to treat `zip` as a character value?
 
 ---
 
@@ -159,45 +153,46 @@ Create a **city audit** with EV-to-station ratios.
 We estimate how many EVs compete per public station.
 
 **functions:**  
-`distinct()` – Unique city/ZIP mappings.  
-`inner_join()` / `left_join()` – Combine county and station data.  
-`mutate()` – Compute ratios.  
-`geom_col()` + `coord_flip()` – Visualize ratios.
+`mutate()` – Compute EV-to-station ratios.  
+`arrange()` – Sort by ratio.  
+`slice_head()` – Keep the 20 lowest ratios.  
+`ggplot()` + `geom_col()` + `coord_flip()` – Visualize ratios.
 
 **logic steps:**  
-Aggregate station counts by county.  
-Merge in EV counts by county.  
-Compute EV-to-station ratios.  
-Plot counties by ratio to identify shortages.
+Add a `ratio` column as `ev_count / station_count` to measure load per station.  
+Sort by the ratio and keep the 20 lowest values to find best-served cities.  
+Plot the ratios with ordered bars to highlight relative availability.
 
 ```{r}
 "<write your code here>"
 ```
 
-**Question 6.1.1:** Which city has the highest EVs-per-station ratio?
+**Question 6.1.1:** Which city has the lowest EVs-per-station ratio?
 
 **Question 6.1.2:** Why is ratio more informative than raw counts here?
 
 ---
 
-## 7. Station Groups by County
-We compare **Public vs Private** station ownership in high-demand counties.
+## 7. Station Groups by City
+We compare **Public vs Private** station ownership in high-demand cities.
 
 **functions:**  
-`slice_max()` – Select top counties by station count.  
-`pull()` – Extract a vector of county names.  
-`geom_bar()` – Stacked bar chart.
+`slice_max()` – Select top EV-demand cities.  
+`group_by()` + `summarize()` – Count stations by city and group.  
+`left_join()` – Attach station groups to top cities.  
+`ggplot()` + `geom_bar()` + `coord_flip()` – Plot group totals.
 
 **logic steps:**  
-Select the top 15 counties by station count.  
-Filter stations to those counties.  
-Plot station groups with a cleaner legend placement.
+Select the top 10 EV-demand cities using `slice_max()`.  
+Count stations by `city` and `station_group` to get group totals.  
+Left join those totals onto the top-city list so only high-demand cities appear.  
+Plot grouped totals with a flipped axis and simplified legend.
 
 ```{r}
 "<write your code here>"
 ```
 
-**Question 7.1.1:** Do top counties rely more on public or private stations?
+**Question 7.1.1:** Do top cities rely more on public or private stations?
 
 ---
 
@@ -205,14 +200,17 @@ Plot station groups with a cleaner legend placement.
 We compare the **share of Level 1 / Level 2 / DC Fast** ports by ownership group.
 
 **functions:**  
-`pivot_longer()` – Convert wide tech columns into long form.  
-`group_by()` / `summarize()` – Aggregate total ports by group and level.  
-`geom_col(position = "fill")` – Compare proportional shares.
+`select()` – Keep charger columns.  
+`pivot_longer()` – Reshape wide to long.  
+`filter()` – Keep positive, non-missing counts.  
+`group_by()` + `summarize()` – Total ports by group and level.  
+`ggplot()` + `geom_col(position = "fill")` – Plot proportional shares.
 
 **logic steps:**  
-Pivot charger-level columns into a long table.  
-Sum total ports by `station_group` and `level`.  
-Plot proportional shares to compare technology mix.
+Reshape Level 1/Level 2/DC fast columns into a long `level`/`count` format.  
+Filter out missing or zero counts to avoid diluting totals.  
+Aggregate total ports by `station_group` and `level`.  
+Plot stacked proportions to compare technology mix across ownership types.
 
 ```{r}
 "<write your code here>"
@@ -226,17 +224,19 @@ Plot proportional shares to compare technology mix.
 We map **EV density vs. station density** by latitude and longitude.
 
 **functions:**  
-`group_by()` / `summarize()` – Compute EV and station counts by location.  
-`full_join()` – Combine location-based counts.  
-`replace_na()` – Handle missing counts.  
-`geom_point()` – Plot ratio points.  
-`coord_quickmap()` – Preserve map scale.
+`mutate()` + `round()` – Round coordinates for aggregation.  
+`group_by()` + `summarize()` – Count EVs and stations by location.  
+`full_join()` – Combine EV and station locations.  
+`replace_na()` + `ifelse()` – Handle missing counts and zero stations.  
+`ggplot()` + `borders()` + `geom_point()` – Map demand and supply.  
+`plotly::ggplotly()` – Make the map interactive.
 
 **logic steps:**  
-Count EVs by latitude/longitude.  
-Count stations by latitude/longitude.  
-Join the two tables and compute the EV/station ratio.  
-Plot the ratio on a WA map to see gaps.
+Round lat/long to 2 decimals to create consistent location bins.  
+Count EVs and stations within each rounded coordinate pair.  
+Full-join the location tables and replace missing counts with zero.  
+Compute the EV-per-station ratio, guarding against zero stations.  
+Map station counts (color) and EV counts (size) over WA counties to spot gaps.
 
 ```{r}
 "<write your code here>"
@@ -247,4 +247,4 @@ Plot the ratio on a WA map to see gaps.
 ---
 
 ## 10. Lab Conclusion
-Final Reflection: If you were advising policymakers, which 1–2 counties would you prioritize for new public charging stations, and why?
+Final Reflection: If you were advising policymakers, which 1–2 cities would you prioritize for new public charging stations, and why?
