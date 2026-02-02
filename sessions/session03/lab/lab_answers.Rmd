@@ -1,158 +1,395 @@
 ---
-title: "Lab 03: The Commissioner's Visual Briefing"
-subtitle: "Advanced Storytelling with ggplot2"
-author: "Data Analytics Student"
+title: "Lab 03 – EV Infrastructure Audit"
+author: "Your Name"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
     toc: true
     toc_float: true
-    theme: cosmo
+    code_folding: hide
+    theme: readable
 ---
 
-```{r setup, include=FALSE}
+## 🧭 Mission Background
+You are part of a state policy team auditing **EV demand vs. charging supply** in Washington. Your task is to clean, summarize, join, and visualize the data to identify where infrastructure is lagging.
+
+**Your Goal:** Build a city-level audit that reveals mismatches between EV population and public charging stations.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# library(): Loads the analytic toolkit into your session.
+# readr: Fast and "smart" data loading.
+# dplyr/tidyr: Cleaning, reshaping, and summarizing.
+# ggplot2: Visualization.
+# maps: Geographic map outlines.
+
 library(tidyverse)
-players <- read_csv("../../../data/laser_league_players.csv")
+library(maps)
+library(plotly)
+
+# Define file paths (adjust if your folder structure differs)
+ev_pop_path <- file.path("../../../data", "wa_ev_population.csv")
+ev_stations_path <- file.path("../../../data", "wa_ev_charge_stations.csv")
 ```
 
-# 🏁 Overview
-In this lab, you will transform raw Laser League data into "Executive Briefs." You will learn to use auxiliary layers—like reference lines, rectangles, and text annotations—to make your plots more than just dots on a screen.
+## 1. The Evidence Intake: Load the Data
 
-## 🧪 Mission 1: The "Fatigue" Threshold (Density + VLine)
-The Memo: "Flag any areas where Wellbeing drops below 55. We need a visual marker for the 'Danger Zone'."
+### 1.1 Load and Inspect
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
 
-Logic Breakdown:
-
-`ggplot()`: Initializes the plot and connects it to the dataset.
-
-`aes()`: Maps variables to visual properties (Aesthetics).
-
-`geom_density()`: Calculates and draws a kernel density estimate.
-
-`geom_vline()`: Draws a vertical line at a specific numeric intercept on the X-axis.
-
-`annotate()`: Manually adds custom text or shapes that are not tied to a specific data column.
-
+**logic steps:**  
+Load both CSV files into `ev_pop` and `ev_stations`.  
+Preview each table with ``head()`` to verify columns.  
+Use ``glimpse()`` to confirm data types and spot obvious issues.
 
 ```{r}
-ggplot(players, aes(x = wellbeing_index)) +
-  geom_density(fill = "cyan", alpha = 0.4) +
-  geom_vline(xintercept = 55, color = "red", linetype = "dashed", size = 1) +
-  annotate("text", x = 45, y = 0.02, label = "DANGER ZONE", color = "red", fontface = "bold") +
-  theme_minimal() +
-  labs(title = "Player Wellbeing Distribution", x = "Wellbeing Index", y = "Density")
+ev_pop <- read_csv(ev_pop_path)
+ev_stations <- read_csv(ev_stations_path)
+
+head(ev_pop)
+head(ev_stations)
+
+glimpse(ev_pop)
+glimpse(ev_stations)
 ```
 
-🧪 Mission 2: Benchmarking Talent (Boxplot + HLine)
-The Memo: "Is the Sniper's median reflex actually higher than the league average? I need a baseline."
+**Question 1.1.1:** How many rows and columns does each dataset contain?
 
-Logic Breakdown:
+---
 
-`geom_boxplot()`: Displays the distribution (Min, Q1, Median, Q3, Max).
+## 2. Data Types and Categorical Adjustments
+We clean strings and convert data types so summaries and plots behave correctly.
 
-`geom_hline()`: Draws a horizontal line across the entire plot at a specific Y-intercept.
+### 2.1 Clean Stations Table
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
 
-`mean()`: Calculates the mathematical average used for the reference line.
-
-
-```{r}
-league_avg_reflex <- mean(players$reflex_score, na.rm = TRUE)
-
-ggplot(players, aes(x = role, y = reflex_score, fill = role)) +
-  geom_boxplot(alpha = 0.6, show_legend = FALSE) +
-  geom_hline(yintercept = league_avg_reflex, color = "darkgreen", size = 1) +
-  annotate("label", x = 0.6, y = league_avg_reflex, label = "League Average", fill = "white") +
-  theme_light() +
-  labs(title = "Reflex Scores by Role vs. League Average", y = "Reflex Score")
-```
-
-## 🧪 Mission 3: The Efficiency Target (Ranking + AbLine)
-The Memo: "We expect a 'Target Slope' of 15 points per match. Show me the Season Score vs Experience."
-
-Logic Breakdown:
-
-`geom_point()`: Creates a scatter plot using individual observations.
-
-`geom_abline()`: Draws a line with a specific Slope and Intercept.
-
-`theme_dark()`: Applies a high-contrast dark background.
-
+**logic steps:**  
+Convert `zip` to character for consistency.  
+Recode `station_group` into Public/Private/Unknown for grouping/plotting.
 
 ```{r}
-ggplot(players, aes(x = matches_played, y = season_score)) +
-  geom_point(aes(color = role), alpha = 0.6) +
-  geom_abline(slope = 15, intercept = 0, color = "white", linetype = "dotted") +
-  theme_dark() +
-  labs(title = "Match Count vs. Season Score Efficiency", x = "Matches Played", y = "Total Score")
-```
 
-## 🧪 Mission 4: The Human Limit (Scatter + Rect Highlight)
-The Memo: "Reaction times between 0.2s and 0.3s are considered elite. Highlight that specific range."
-
-Logic Breakdown:
-
-`annotate("rect")`: Draws a rectangle highlight by defining four corners (xmin, xmax, ymin, ymax).
-
-`geom_smooth()`: Adds a statistical trend line.
-
-`method = "lm"`: Forces the trend line to be a straight Linear Model.
-
-
-```{r}
-ggplot(players, aes(x = reflex_score, y = reaction_time_sec)) +
-  annotate("rect", xmin = -Inf, xmax = Inf, ymin = 0.2, ymax = 0.3, fill = "green", alpha = 0.2) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "lm", color = "black", se = FALSE) +
-  theme_minimal() +
-  labs(title = "Reaction Speed vs. Reflex Score", subtitle = "Green zone highlights the 'Elite Reflex' window")
-```
-
-## 🧪 Mission 5: Marketability Outliers (Violin + Curves)
-The Memo: "Show the density of Glow Ratings and point out the peak 'Superstar' rating."
-
-Logic Breakdown:
-
-`geom_violin()`: Shows the full distribution shape (width represents frequency).
-
-`scale_fill_viridis_d()`: Applies a professional, high-contrast color scale.
-
-`annotate("curve")`: Draws a curved arrow to point to a specific coordinate.
-
-
-```{r}
-ggplot(players, aes(x = role, y = glow_rating, fill = role)) +
-  geom_violin(alpha = 0.5, show_legend = FALSE) +
-  scale_fill_viridis_d(option = "magma") +
-  annotate("curve", x = 1.5, y = 9.8, xend = 1.1, yend = 9.2, 
-           curvature = .3, arrow = arrow(length = unit(2, "mm")), color = "black") +
-  annotate("text", x = 1.6, y = 9.8, label = "Superstar Ceiling", hjust = 0) +
-  theme_minimal() +
-  labs(title = "Marketability Distributions by Role")
-```
-
-## 🧪 Mission 6: The Tactical Grid (Facets + All Tools)
-The Memo: "Compare Accuracy vs Shield Uptime for every squad. Include a trend line and a 50% accuracy benchmark line for each."
-
-Logic Breakdown:
-
-`facet_wrap()`: Creates a multi-paneled plot based on a categorical variable.
-
-`~squad_name`: The formula that tells R to split the panels by Squad Name.
-
-`theme_bw()`: A clean, "Black and White" high-contrast theme.
-
-
-```{r}
-ggplot(players, aes(x = tag_accuracy_pct, y = shield_uptime_pct)) +
-  geom_point(alpha = 0.4, color = "magenta") +
-  geom_smooth(method = "lm", color = "cyan", size = 0.7, se = FALSE) + 
-  geom_vline(xintercept = 50, linetype = "dotted", color = "black", alpha = 0.5) +
-  facet_wrap(~squad_name) +
-  theme_bw() +
-  labs(
-    title = "Tactical Profile Matrix",
-    subtitle = "Accuracy vs. Defense Uptime (Dotted line = 50% Benchmark)",
-    x = "Tag Accuracy %",
-    y = "Shield Uptime %"
+ev_stations <- ev_stations %>%
+  mutate(
+    zip = as.character(zip),
+    station_group = case_when(
+      str_detect(station_group, "Public") ~ "Public",
+      str_detect(station_group, "Private") ~ "Private",
+      TRUE ~ "Unknown"
+    ),
+    station_group = as.factor(station_group)
   )
 ```
+
+**Question 2.2.1:** Why is it helpful to treat `zip` as a character value?
+
+---
+
+## 3. EV Counts by City (Demand)
+
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Count EVs by city.  
+Sort to identify the highest-demand cities.  
+Plot the top 15 to visualize concentration.
+
+```{r}
+city_demand <- ev_pop %>%
+  group_by(city) %>%
+  summarize(ev_count = n()) %>%
+  arrange(desc(ev_count))
+
+city_demand
+
+ggplot(head(city_demand, 15), aes(x = reorder(city, ev_count), y = ev_count)) +
+  `geom_col()` +
+  coord_flip() +
+  labs(title = "Top 15 Cities by EV Count", x = "City", y = "EVs") +
+  theme_minimal()
+```
+
+**Question 3.1.1:** Which city has the highest EV demand?
+
+---
+
+## 4. EV Station Counts by City (Supply)
+
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Count stations by city.  
+Sort to find the most supplied cities.  
+Plot the top 15 station counts for comparison.
+
+```{r}
+city_supply <- ev_stations %>%
+  group_by(city) %>%
+  summarize(station_count = n()) %>%
+  arrange(desc(station_count))
+
+city_supply
+
+ggplot(head(city_supply, 15), aes(x = reorder(city, station_count), y = station_count)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Top 15 Cities by Station Count", x = "City", y = "Stations") +
+  theme_minimal()
+```
+
+**Question 4.1.1:** Do the top EV-demand cities also appear in the top station-supply list?
+
+---
+
+## 5. The Join Experiment
+We test how different joins change the number of cities we observe.
+
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Try left, inner, and full joins.  
+Compare row counts across joins to see what each keeps/drops.  
+Create a **city audit** table with EV counts and station counts.
+
+```{r}
+# Try Left Join: Keeps all cities in Washington with EVs
+test_left <- left_join(city_demand, city_supply, by = "city")
+
+# Try Inner Join: Keeps only cities that have BOTH EVs and Stations
+test_inner <- inner_join(city_demand, city_supply, by = "city")
+
+# Try Full Join: Keeps every city mentioned in either dataset
+test_full <- full_join(city_demand, city_supply, by = "city")
+
+city_data = test_left %>%
+  mutate(
+    station_count = ifelse(is.na(station_count), 0, station_count)
+  )
+
+nrow(test_left)
+nrow(test_inner)
+nrow(test_full)
+```
+
+**Question 5.1.1:** Which join produced the most rows, and why?
+
+**Question 5.1.2:** Which join best supports a supply-gap audit? Explain.
+
+---
+
+## 6. EV/Station Ratios by City
+We estimate how many EVs compete per public station.
+
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Compute EV-to-station ratios.  
+Take the bottom 20 cities with the lowest EV-to-station ratio.  
+Plot cities by ratio to identify where stations are most available per EV.
+
+```{r}
+city_data <- city_data %>%
+  mutate(
+    ratio = ev_count / station_count
+  ) %>%
+  arrange(ratio) %>%
+  slice_head(n = 20)
+
+city_data
+
+ggplot(city_data, aes(x = reorder(city, -ratio), y = ratio)) +
+  geom_col(fill = "darkorange") +
+  coord_flip() +
+  labs(title = "EVs per Public Station by City", x = "City", y = "Ratio") +
+  theme_minimal()
+```
+
+**Question 6.1.1:** Which city has the lowest EVs-per-station ratio?
+
+**Question 6.1.2:** Why is ratio more informative than raw counts here?
+
+---
+
+## 7. Station Groups by City
+We compare **Public vs Private** station ownership in high-demand cities.
+
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Select the top 10 cities by EV count.  
+Count stations by city and station group.  
+Left join with the top-demand cities.  
+Plot station groups with a cleaner legend placement.
+
+```{r}
+top_cities <- city_demand %>%
+  slice_max(ev_count, n = 10)
+
+grouped_ev_stations <- ev_stations %>%
+  group_by(city, station_group) %>%
+  summarize(station_count = n())
+
+grouped_ev_stations
+
+stations_by_group <- top_cities %>%
+  left_join(grouped_ev_stations, by = "city")
+
+stations_by_group
+
+ggplot(stations_by_group, aes(x = city, y = station_count, fill = station_group)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Station Ownership in Top 10 Cities", x = "City", y = "Total Stations") +
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+**Question 7.1.1:** Do top cities rely more on public or private stations?
+
+---
+
+## 8. Charger Mix by Station Group
+We compare the **share of Level 1 / Level 2 / DC Fast** ports by ownership group.
+
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Pivot charger-level columns into a long table.  
+Sum total ports by `station_group` and `level`.  
+Plot proportional shares to compare technology mix.
+
+```{r}
+ev_stations
+
+tech_long <- ev_stations %>%
+  select(id, station_group, ev_lvl_1, ev_lvl_2, ev_dc_fast_count) %>%
+  pivot_longer(
+    cols = c(ev_lvl_1, ev_lvl_2, ev_dc_fast_count),
+    names_to = "level",
+    values_to = "count"
+  ) %>%
+  filter(!is.na(count), count > 0)
+
+tech_long
+
+tech_summary <- tech_long %>%
+  group_by(station_group, level) %>%
+  summarize(total_ports = sum(count))
+
+tech_summary
+
+ggplot(tech_summary, aes(x = station_group, y = total_ports, fill = level)) +
+  `geom_col(position = "fill")` +
+  scale_y_continuous(labels = scales::percent) +
+  coord_flip() +
+  labs(
+    title = "Charger mix by station group",
+    subtitle = "Share of Level 1 / Level 2 / DC Fast",
+    x = "Station Group",
+    y = "Share of ports"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+
+**Question 8.1.1:** Which station group has the highest share of DC fast ports?
+
+---
+
+## 9. Geographic Map: EV-to-Station Ratio
+We map **EV density vs. station density** by latitude and longitude.
+
+**functions:**  
+``mutate()`` – Compute ratios.  
+`arrange()` / `slice_`head()`` – Select lowest ratios.  
+``geom_col()`` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Count EVs by latitude/longitude.  
+Count stations by latitude/longitude.  
+Join the two tables and compute the EV/station ratio.  
+Plot the ratio on a WA map to see gaps.
+
+```{r}
+ev_loc <- ev_pop %>%
+  mutate(
+    longitude = round(longitude, 2),
+    latitude = round(latitude, 2)
+  ) %>%
+  group_by(longitude, latitude) %>%
+  summarize(ev_count = n())
+
+station_loc <- ev_stations %>%
+  mutate(
+    longitude = round(longitude, 2),
+    latitude = round(latitude, 2)
+  ) %>%
+  group_by(longitude, latitude) %>%
+  summarize(station_count = n())
+
+loc_ratio <- full_join(ev_loc, station_loc, by = c("longitude", "latitude")) %>%
+  mutate(
+    ev_count = replace_na(ev_count, 0),
+    station_count = replace_na(station_count, 0),
+    ratio = ev_count / ifelse(station_count == 0, 1, station_count)
+  )
+
+loc_ratio
+
+p_map <- ggplot() +
+  borders("county", "washington", colour = "grey80", fill = "grey95") +
+  geom_point(
+    data = loc_ratio,
+    aes(x = longitude, y = latitude, color = station_count, size = ev_count),
+    alpha = 0.6
+  ) +
+  scale_color_viridis_c(option = "C", name = "Stations") +
+  scale_size_continuous(name = "EVs") +
+  `coord_quickmap()` +
+  theme_void() +
+  labs(title = "WA EV Demand (size) and Station Supply (color)")
+
+p_map
+
+plotly::ggplotly(p_map)
+```
+
+**Question 9.1.1:** Where do you observe the biggest gaps between demand and supply?
+
+---
+
+## 10. Lab Conclusion
+Final Reflection: If you were advising policymakers, which 1–2 cities would you prioritize for new public charging stations, and why?
+
+
+
+
+

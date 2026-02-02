@@ -1,8 +1,8 @@
-session: 3
-title: "Session 3 – Data Visualization"
+﻿session: 3
+title: "Session 3 – Data Merging and Pivoting"
 module:
-  name: "Week 3 – Visualization Foundations"
-  description: "Explore ggplot2, practice multiple geoms, and communicate insights with polished visuals."
+  name: "Week 3 – Data Merging and Pivoting"
+  description: "Learn about different data merging techniques and different pivot methods"
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -11,13 +11,13 @@ lab:
   assignment_key: lab03
   files:
     - path: lab/lab_spec.pdf
-      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Spec.pdf"
+      display_name: "Lab 03: EV Infrastructure Audit – Spec.pdf"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Template.Rmd"
+      display_name: "Lab 03: EV Infrastructure Audit – Template.Rmd"
     - path: lab/lab_answers.Rmd
-      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Answers.Rmd"
+      display_name: "Lab 03: EV Infrastructure Audit – Answers.Rmd"
     - path: lab/lab_rubric.pdf
-      display_name: "Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) – Rubric.pdf"
+      display_name: "Lab 03: EV Infrastructure Audit – Rubric.pdf"
 homework:
   assignment_key: hw01
   files:

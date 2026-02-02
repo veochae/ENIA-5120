@@ -1,11 +1,14 @@
-total_points: 20
+﻿total_points: 20
 criteria:
-  - id: completion
-    description: "Completes all six missions with correct variables and layers"
-    max_points: 12
-  - id: annotations
-    description: "Uses reference lines, highlights, and annotations effectively"
+  - id: loading_cleaning
+    description: "Loads both datasets and applies required type/categorical cleaning correctly."
     max_points: 5
-  - id: clarity
-    description: "Titles, labels, and themes support an executive briefing"
-    max_points: 3
+  - id: demand_supply
+    description: "Computes and visualizes EV demand/supply by city with correct grouping and sorting."
+    max_points: 5
+  - id: joins_ratios
+    description: "Compares joins and builds a city audit with EV-to-station ratios."
+    max_points: 5
+  - id: county_mapping
+    description: "Computes county ratios, station ownership, tech levels, and produces the WA map."
+    max_points: 5

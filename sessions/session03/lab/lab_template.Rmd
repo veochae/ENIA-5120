@@ -1,119 +1,250 @@
----
-title: "Lab 03: The Commissioner's Visual Briefing"
-subtitle: "Advanced Storytelling with ggplot2"
-author: "Data Analytics Student"
+﻿﻿﻿---
+title: "Lab 03 – EV Infrastructure Audit"
+author: "Your Name"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
     toc: true
     toc_float: true
-    theme: cosmo
+    code_folding: hide
+    theme: readable
 ---
 
-```{r setup, include=FALSE}
+## 🧭 Mission Background
+You are part of a state policy team auditing **EV demand vs. charging supply** in Washington. Your task is to clean, summarize, join, and visualize the data to identify where infrastructure is lagging.
+
+**Your Goal:** Build a city- and county-level audit that reveals mismatches between EV population and public charging stations.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# library(): Loads the analytic toolkit into your session.
+# readr: Fast and "smart" data loading.
+# dplyr/tidyr: Cleaning, reshaping, and summarizing.
+# ggplot2: Visualization.
+# maps: Geographic map outlines.
+
 library(tidyverse)
-players <- read_csv("../../../data/laser_league_players.csv")
+library(maps)
+library(plotly)
+
+# Define file paths (adjust if your folder structure differs)
+ev_pop_path <- file.path("../../../data", "wa_ev_population.csv")
+ev_stations_path <- file.path("../../../data", "wa_ev_charge_stations.csv")
 ```
 
-# 🏁 Overview
-In this lab, you will transform raw Laser League data into "Executive Briefs." You will learn to use auxiliary layers—like reference lines, rectangles, and text annotations—to make your plots more than just dots on a screen.
+## 1. The Evidence Intake: Load the Data
 
-## 🧪 Mission 1: The "Fatigue" Threshold (Density + VLine)
-The Memo: "Flag any areas where Wellbeing drops below 55. We need a visual marker for the 'Danger Zone'."
+### 1.1 Load and Inspect
+**functions:**  
+`read_csv()` – Load data quickly and safely.  
+`head()` – Preview the first rows.  
+`glimpse()` – Inspect columns and data types.
 
-Logic Breakdown:
-
-`ggplot()`: Initializes the plot and connects it to the dataset.
-
-`aes()`: Maps variables to visual properties (Aesthetics).
-
-`geom_density()`: Calculates and draws a kernel density estimate.
-
-`geom_vline()`: Draws a vertical line at a specific numeric intercept on the X-axis.
-
-`annotate()`: Manually adds custom text or shapes that are not tied to a specific data column.
-
+**logic steps:**  
+Load both CSV files into `ev_pop` and `ev_stations`.  
+Preview each table with `head()` to verify columns.  
+Use `glimpse()` to confirm data types and spot obvious issues.
 
 ```{r}
 "<write your code here>"
 ```
 
-🧪 Mission 2: Benchmarking Talent (Boxplot + HLine)
-The Memo: "Is the Sniper's median reflex actually higher than the league average? I need a baseline."
+**Question 1.1.1:** How many rows and columns does each dataset contain?
 
-Logic Breakdown:
+---
 
-`geom_boxplot()`: Displays the distribution (Min, Q1, Median, Q3, Max).
+## 2. Data Types and Categorical Adjustments
+We clean strings and convert data types so joins and summaries behave correctly.
 
-`geom_hline()`: Draws a horizontal line across the entire plot at a specific Y-intercept.
+### 2.1 Clean Population Table
+**functions:**  
+`mutate()` – Create or modify columns.  
+`str_to_title()` – Standardize casing.  
+`case_when()` – Recode categories.  
+`as.character()` – Set ZIP/postal codes as text.
 
-`mean()`: Calculates the mathematical average used for the reference line.
-
-
-```{r}
-"<write your code here>"
-```
-
-## 🧪 Mission 3: The Efficiency Target (Ranking + AbLine)
-The Memo: "We expect a 'Target Slope' of 15 points per match. Show me the Season Score vs Experience."
-
-Logic Breakdown:
-
-`geom_point()`: Creates a scatter plot using individual observations.
-
-`geom_abline()`: Draws a line with a specific Slope and Intercept.
-
-`theme_dark()`: Applies a high-contrast dark background.
-
+**logic steps:**  
+Standardize `make` casing to avoid duplicate labels.  
+Recode eligibility into **Eligible / Ineligible / Unknown**.  
+Convert `postal_code` to character so it matches station ZIPs.
 
 ```{r}
 "<write your code here>"
 ```
 
-## 🧪 Mission 4: The Human Limit (Scatter + Rect Highlight)
-The Memo: "Reaction times between 0.2s and 0.3s are considered elite. Highlight that specific range."
+### 2.2 Clean Stations Table
+**functions:**  
+`mutate()` – Modify columns.  
+`as.character()` – Treat ZIP codes as text.  
+`as.factor()` – Convert station group to categorical.
 
-Logic Breakdown:
-
-`annotate("rect")`: Draws a rectangle highlight by defining four corners (xmin, xmax, ymin, ymax).
-
-`geom_smooth()`: Adds a statistical trend line.
-
-`method = "lm"`: Forces the trend line to be a straight Linear Model.
-
+**logic steps:**  
+Convert `zip` to character for joining.  
+Convert `station_group` to factor for grouping/plotting.
 
 ```{r}
 "<write your code here>"
 ```
 
-## 🧪 Mission 5: Marketability Outliers (Violin + Curves)
-The Memo: "Show the density of Glow Ratings and point out the peak 'Superstar' rating."
+**Question 2.2.1:** Why must `postal_code` and `zip` have the same data type before joining?
 
-Logic Breakdown:
+---
 
-`geom_violin()`: Shows the full distribution shape (width represents frequency).
+## 3. EV Counts by City (Demand)
 
-`scale_fill_viridis_d()`: Applies a professional, high-contrast color scale.
+**functions:**  
+`group_by()` – Group by city.  
+`summarize()` – Count EVs.  
+`arrange(desc())` – Sort from highest to lowest.  
+`ggplot()` + `geom_col()` + `coord_flip()` – Bar chart.
 
-`annotate("curve")`: Draws a curved arrow to point to a specific coordinate.
+**logic steps:**  
+Count EVs by city.  
+Sort to identify the highest-demand cities.  
+Plot the top 15 to visualize concentration.
 
+```{r}
+"<write your code here>"
+```
+
+**Question 3.1.1:** Which city has the highest EV demand?
+
+---
+
+## 4. EV Station Counts by City (Supply)
+
+**functions:**  
+`group_by()` / `summarize()` – Count stations by city.  
+`arrange(desc())` – Sort by station count.  
+`geom_col()` – Bar chart.
+
+**logic steps:**  
+Count stations by city.  
+Sort to find the most supplied cities.  
+Plot the top 15 station counts for comparison.
 
 ```{r}
 "<write your code here>"
 ```
 
-## 🧪 Mission 6: The Tactical Grid (Facets + All Tools)
-The Memo: "Compare Accuracy vs Shield Uptime for every squad. Include a trend line and a 50% accuracy benchmark line for each."
+**Question 4.1.1:** Do the top EV-demand cities also appear in the top station-supply list?
 
-Logic Breakdown:
+---
 
-`facet_wrap()`: Creates a multi-paneled plot based on a categorical variable.
+## 5. The Join Experiment
+We test how different joins change the number of cities we observe.
 
-`~squad_name`: The formula that tells R to split the panels by Squad Name.
+**functions:**  
+`left_join()` – Keep all EV-demand cities.  
+`inner_join()` – Keep only cities in both tables.  
+`full_join()` – Keep all cities from either table.  
+`mutate()` / `ifelse()` – Replace missing station counts with 0.
 
-`theme_bw()`: A clean, "Black and White" high-contrast theme.
-
+**logic steps:**  
+Try left, inner, and full joins.  
+Compare row counts across joins to see what each keeps/drops.  
+Create a **city audit** with EV-to-station ratios.
 
 ```{r}
 "<write your code here>"
 ```
+
+**Question 5.1.1:** Which join produced the most rows, and why?
+
+**Question 5.1.2:** Which join best supports a supply-gap audit? Explain.
+
+---
+
+## 6. EV/Station Ratios by City
+We estimate how many EVs compete per public station.
+
+**functions:**  
+`distinct()` – Unique city/ZIP mappings.  
+`inner_join()` / `left_join()` – Combine county and station data.  
+`mutate()` – Compute ratios.  
+`geom_col()` + `coord_flip()` – Visualize ratios.
+
+**logic steps:**  
+Aggregate station counts by county.  
+Merge in EV counts by county.  
+Compute EV-to-station ratios.  
+Plot counties by ratio to identify shortages.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 6.1.1:** Which city has the highest EVs-per-station ratio?
+
+**Question 6.1.2:** Why is ratio more informative than raw counts here?
+
+---
+
+## 7. Station Groups by County
+We compare **Public vs Private** station ownership in high-demand counties.
+
+**functions:**  
+`slice_max()` – Select top counties by station count.  
+`pull()` – Extract a vector of county names.  
+`geom_bar()` – Stacked bar chart.
+
+**logic steps:**  
+Select the top 15 counties by station count.  
+Filter stations to those counties.  
+Plot station groups with a cleaner legend placement.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 7.1.1:** Do top counties rely more on public or private stations?
+
+---
+
+## 8. Charger Mix by Station Group
+We compare the **share of Level 1 / Level 2 / DC Fast** ports by ownership group.
+
+**functions:**  
+`pivot_longer()` – Convert wide tech columns into long form.  
+`group_by()` / `summarize()` – Aggregate total ports by group and level.  
+`geom_col(position = "fill")` – Compare proportional shares.
+
+**logic steps:**  
+Pivot charger-level columns into a long table.  
+Sum total ports by `station_group` and `level`.  
+Plot proportional shares to compare technology mix.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 8.1.1:** Which station group has the highest share of DC fast ports?
+
+---
+
+## 9. Geographic Map: EV-to-Station Ratio
+We map **EV density vs. station density** by latitude and longitude.
+
+**functions:**  
+`group_by()` / `summarize()` – Compute EV and station counts by location.  
+`full_join()` – Combine location-based counts.  
+`replace_na()` – Handle missing counts.  
+`geom_point()` – Plot ratio points.  
+`coord_quickmap()` – Preserve map scale.
+
+**logic steps:**  
+Count EVs by latitude/longitude.  
+Count stations by latitude/longitude.  
+Join the two tables and compute the EV/station ratio.  
+Plot the ratio on a WA map to see gaps.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 9.1.1:** Where do you observe the biggest gaps between demand and supply?
+
+---
+
+## 10. Lab Conclusion
+Final Reflection: If you were advising policymakers, which 1–2 counties would you prioritize for new public charging stations, and why?
