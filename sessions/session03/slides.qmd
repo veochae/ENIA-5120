@@ -1,5 +1,6 @@
 ---
-title: "Session 3 – Data Visualization with ggplot2"
+title: "Session 3 — Joining, Reshaping, and Integrating Data"
+subtitle: "Keys, Joins, Pivoting, and Ratios"
 format: 
   revealjs:
     slide-number: true
@@ -7,200 +8,168 @@ format:
     scrollable: true    
     footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
-    theme: serif     
-    fig-width: 8
-    fig-height: 5    
+    theme: serif
 execute:
-  echo: true    # Shows the code on the slide
-  eval: true    # RUNS the code
+  echo: true
   warning: false
-  message: false 
-
+  message: false
+  eval: false
 ---
-```{r setup, include=FALSE}
-# This chunk runs but is hidden from the slides
-library(readr)
-library(dplyr)
-library(ggplot2)
-players <- read_csv("laser_league_players.csv")
-```
 
+## 📋 Agenda
 
-# Today's Agenda 🗺️
-
-1. **The Impact:** Why visuals matter in the history of policy.   
-2. **Visual Literacy:** How to spot (and avoid) misleading charts.   
-3. **The Grammar of Graphics:** The logic and syntax of `ggplot2`.   
-4. **The Workflow:** Interactive "Build-a-Plot" coding.   
-5. **Professional Polish:** Transforming drafts into report-ready assets.   
+* **The Why:** Why integration is the core of real analysis.
+* **Keys:** Primary vs. foreign keys and table relationships.
+* **Joins:** What each join keeps and loses.
+* **Pitfalls:** Dupes, missing keys, dirty strings.
+* **Pivoting:** Wide ↔ Long and why it matters.
+* **Ratios:** Turning counts into signal.
+* **Quality Checks:** Trust, but verify.
 
 ---
 
-# Learning Goals 🎯
-By the end of this session, you will be able to:
+## 🎯 Today’s Objectives
 
--   **Translate** raw data into a visual story that supports a policy claim.
--   **Diagnose** common visual "lies" like truncated axes and 3D distortions.
--   **Implement** the layered grammar of graphics using `ggplot2`.
--   **Construct** accessible and professional charts that follow high data-to-ink standards.
--   **Export** high-resolution visuals for inclusion in policy briefs and memos.
+*By the end of this session, you will:* 
 
----
-
-# 2. The Power of the Visual 🔎
-
-## Why Visualize? 
-
-> "A bad visual is worse than no visual at all."
-
--   **Discovery:** Finding patterns your brain can't see in a spreadsheet.
--   **Translation:** Taking 10,000 rows of data and making them understandable in 10 seconds.
--   **Influence:** Policy isn't changed by numbers; it's changed by the *stories* numbers tell.
+1. **Define** primary and foreign keys and recognize table relationships.
+2. **Choose** the correct join type for a policy question.
+3. **Prevent** common join failures (duplicates, missing keys, mismatched text).
+4. **Reshape** data with pivots for analysis and visualization.
+5. **Create** ratios safely and interpret them correctly.
 
 ---
 
-## Hero Example: John Snow (1854) 🗺️
-**The Problem:** Cholera was thought to be "bad air" (miasma).
-**The Visual:** Mapping deaths to street addresses and water pumps.
+## 🧭 Why Integration Matters
 
+* Real analyses rarely live in one table.
+* Most policy questions require **demand + supply**, **people + places**, or **outcomes + programs**.
+* Integration errors are silent—they *look* correct but change conclusions.
 
-
-**The Result:** The visual clustering around the Broad Street pump proved it was waterborne. Officials removed the handle, and modern epidemiology was born.
-
----
-
-## Hero Example: Florence Nightingale (1858) 🌹
-**The Problem:** Soldiers were dying in hospitals, not on the battlefield.
-**The Visual:** The "Rose Diagram."
-
-
-
-**The Result:** It proved that poor sanitation was the primary killer. It revolutionized hospital hygiene policy across the British Empire.
+> **Rule:** If the join is wrong, the story is wrong.
 
 ---
 
-# 3. Visual Literacy: Spot the Lie ⚠️
+## 🔑 Keys 101: Primary vs. Foreign
 
-## The "Dirty Tricks" of Visualization
-1.  **Truncated Y-Axes:** Starting at 90 instead of 0 to exaggerate small differences.
-2.  **The 3D Trap:** 3D bars and pie charts distort proportions—objects in the "front" always look bigger.
-3.  **Chartjunk:** Unnecessary decorations that distract from the data.
-
-
+* **Primary Key:** Unique ID in a table (no duplicates).
+* **Foreign Key:** Column that points to a primary key in another table.
+* Keys define how tables relate and prevent ambiguity.
 
 ---
 
-## Ethics & Accessibility ♿
--   **Color Blindness:** ~8% of men have some form of color deficiency.
--   **The Solution:** Use palettes like `viridis` that map clearly even in grayscale or for color-blind readers.
--   **The "Squint Test":** If you squint at your graph and the main point disappears, the visual is too cluttered.
+## 🗂️ Relationships: One-to-One vs. One-to-Many
+
+* **One-to-One:** Each key appears once in both tables.
+* **One-to-Many:** One key in Table A appears multiple times in Table B.
+* **Many-to-Many:** Both sides repeat → requires caution (row explosion risk).
 
 ---
 
-# 4. The Grammar of Graphics 🧩
+## 🧩 Join Types: What You Keep vs. Lose
 
-## ggplot2: The Layered Logic 🧱  
-Think of a plot like a **sandwich**:   
-
-1.  **Data:** The bread (The `laser_league_players` CSV).   
-2.  **Aesthetics (`aes`):** The "mapping" (X = Stamina, Y = Score, Color = Role).   
-3.  **Geometries (`geoms`):** The "shape" (Dots, Bars, or Lines).   
- 
+* **Inner Join:** Only matches in both tables.
+* **Left Join:** Keep all from left, match from right.
+* **Right Join:** Keep all from right, match from left.
+* **Full Join:** Keep everything from both tables.
 
 ---
 
-## Choosing Your Geometry 📐
-| Goal | Question | Geometry |
-|:---|:---|:---|
-| **Distribution** | How spread out is the Wellbeing Index? | `geom_histogram()` |
-| **Comparison** | Which squad has the highest reflex scores? | `geom_boxplot()` |
-| **Relationship** | Does stamina predict season score? | `geom_point()` |
+## 🧩 Join Types: Policy Intuition
+
+* **Inner:** “Show only places where both programs and outcomes exist.”
+* **Left:** “Keep every community in the audit, even if missing data.”
+* **Full:** “Preserve all records to inspect gaps.”
 
 ---
 
-# 5. Interactive Build-a-Plot 🛠️
+## ⚠️ Join Pitfall #1: Duplicate Keys
 
-## Step 1: The Canvas 🎨
-We start with nothing—just the coordinate system.
-
-```{r}
-#| echo: true
-#| eval: true
-library(ggplot2)
-ggplot(data = players, mapping = aes(x = tag_accuracy_pct, y = season_score))
-```
-
-## Step 2: Adding the Points ✨
-Now we add the "Geometric" layer. Note the `+` sign!
-```{r}
-#| echo: true
-#| eval: true
-ggplot(players, aes(x = tag_accuracy_pct, y = season_score)) +
-  geom_point()
-```
-
-## Step 3: Handling Overplotting 🌫️
-Points are stacking up! We use Alpha (transparency) to see the density.
-
-```{r}
-#| echo: true
-#| eval: true
-ggplot(players, aes(x = tag_accuracy_pct, y = season_score)) +
-  geom_point(alpha = 0.5) # 50% transparent
-```
-
-## Step 4: Adding the "Policy Story" 🧭
-Let's add a statistical trend line and color by role.
-
-```{r}
-#| echo: true
-#| eval: true
-ggplot(players, aes(x = tag_accuracy_pct, y = season_score, color = role)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", se = FALSE) # Adds a linear trend line
-```
-
-## Step 5: Professional Polish ✨  
-- From "Draft" to "Briefing-Ready"
-- We must remove the "Code-speak" (underscores) from our labels.
-
-```{r}
-#| echo: true
-#| eval: true
-ggplot(players, aes(x = tag_accuracy_pct, y = season_score)) +
-  geom_point(alpha = 0.5, color = "steelblue") +
-  theme_minimal() + 
-  labs(
-    title = "Does Tag Accuracy Predict Success?",
-    subtitle = "Higher tag accuracy scores show a strong correlation with season performance",
-    x = "Tag Accuracy Score (0-100)",
-    y = "Total Season Score",
-    caption = "Source: Laser League Player Performance Data (Session 03)"
-  )
-```
-
-## Step 6: Faceting Small Multiples 🧪
-Don't cram everything into one messy plot. Split it into "Small Multiples."
-
-```{r}
-#| echo: true
-#| eval: true
-ggplot(players, aes(x = tag_accuracy_pct, y = season_score)) +
-  geom_point(alpha = 0.4) +
-  facet_wrap(~role) + # One mini-plot per player role
-  theme_bw()
-```
-
-# Wrapping Up ✅
-**The Professional Visual Checklist**  
-  - Zero Baseline: Do my bars start at zero?   
-  - Plain Language: Are titles and axes free of code-speak?   
-  - Accessibility: Is my color choice readable (Viridis/Colorblind friendly)?   
-  - Transparency: If I have many points, did I use alpha?   
-  - The "So What?": Does the plot answer a specific policy question?   
+* Duplicate keys create **row multiplication**.
+* A 1→Many join can become Many→Many if both sides repeat.
+* Result: inflated counts, fake totals, incorrect ratios.
 
 ---
 
-# Next Steps 🚀
-- Open Lab 03: The Commissioner's Visual Briefing (Advanced Storytelling) in RStudio.
-- Load the laser_league_players.csv dataset.
+## ⚠️ Join Pitfall #2: Missing Keys
+
+* Missing foreign keys drop rows in inner joins.
+* If missingness is meaningful, use a left or full join.
+* Always count dropped rows and inspect what was lost.
+
+---
+
+## ⚠️ Join Pitfall #3: Dirty Strings
+
+* “Seattle” ≠ “seattle” ≠ “Seattle ”.
+* Casing, whitespace, and punctuation break matches.
+* Standardize text before joining
+
+---
+
+## 🧩 Aggregate Before Joining
+
+* Summarize first to avoid duplication.
+* Example: count by city, then join on city.
+* This preserves 1 row per key and prevents inflation.
+
+---
+
+## 📊 Counts vs. Ratios
+
+* **Counts** answer “how many”.
+* **Ratios** answer “how pressured” or “how available”.
+* **Why here?** Joins bring demand and supply into one row so a ratio is even possible.
+* Ratios are often the fairer comparison across regions.
+
+---
+
+## ⚠️ Ratio Guardrails
+
+* Never divide by zero → define a safe rule.
+* Watch for missing denominators.
+* Always interpret ratios with context and base counts.
+
+---
+
+## 📉 Pivoting: Wide ↔ Long
+
+* **Wide:** Many columns, fewer rows (good for tables).
+* **Long:** One column for values, one for labels (good for analysis).
+* Most plots and group operations prefer **long** format.
+
+---
+
+## 🧭 Why Long Format Wins
+
+* Easy grouping and filtering.
+* One aesthetic mapping handles all categories.
+* Cleaner legends and faceting in charts.
+
+---
+
+## ✅ Post-Join Quality Checks
+
+* Check row counts before and after joins.
+* Validate key uniqueness.
+* Spot-check totals and missingness.
+* Confirm the story still makes sense.
+
+---
+
+## 🧰 Integration Checklist
+
+1. **Keys defined?** Primary + foreign confirmed.
+2. **Join chosen?** Matches the policy question.
+3. **Duplicates handled?** No row explosions.
+4. **Missingness reviewed?** Losses understood.
+5. **Ratios safe?** Denominator protected.
+6. **Pivot correct?** Shape supports analysis.
+
+---
+
+## 🏁 Wrap-Up
+
+* Integration is where most analysis succeeds or fails.
+* Keys, joins, pivots, and ratios are the core toolkit.
+* Every join should be justified and verified.

@@ -26,28 +26,30 @@ You are part of a state policy team auditing **EV demand vs. charging supply** i
 library(tidyverse)
 library(maps)
 library(plotly)
+library(ggplot2)
 
 # Define file paths (adjust if your folder structure differs)
-ev_pop_path <- file.path("../../../data", "wa_ev_population.csv")
-ev_stations_path <- file.path("../../../data", "wa_ev_charge_stations.csv")
+ev_pop_path = file.path("../../../data", "wa_ev_population.csv")
+ev_stations_path = file.path("../../../data", "wa_ev_charge_stations.csv")
 ```
 
 ## 1. The Evidence Intake: Load the Data
 
 ### 1.1 Load and Inspect
+We load both datasets and confirm the structure is as expected.
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `read_csv()` – Load CSV files into tibbles.  
+- `head()` – Preview the first rows.  
+- `glimpse()` – Inspect column types and structure.
 
 **logic steps:**  
-Load both CSV files into `ev_pop` and `ev_stations`.  
-Preview each table with ``head()`` to verify columns.  
-Use ``glimpse()`` to confirm data types and spot obvious issues.
+- Read the EV population CSV into `ev_pop` and the stations CSV into `ev_stations`.  
+- Check the first few rows of each table to confirm expected columns and basic formatting.  
+- Inspect column types with `glimpse()` to ensure dates, numerics, and character fields are parsed correctly.
 
 ```{r}
-ev_pop <- read_csv(ev_pop_path)
-ev_stations <- read_csv(ev_stations_path)
+ev_pop = read_csv(ev_pop_path)
+ev_stations = read_csv(ev_stations_path)
 
 head(ev_pop)
 head(ev_stations)
@@ -61,21 +63,23 @@ glimpse(ev_stations)
 ---
 
 ## 2. Data Types and Categorical Adjustments
-We clean strings and convert data types so summaries and plots behave correctly.
+We standardize data types and station group labels for consistent summaries and plots.
 
 ### 2.1 Clean Stations Table
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `mutate()` – Create cleaned columns.  
+- `as.character()` – Treat ZIP codes as strings.  
+- `case_when()` + `str_detect()` – Recode station groups.  
+- `as.factor()` – Store station groups as a factor.
 
 **logic steps:**  
-Convert `zip` to character for consistency.  
-Recode `station_group` into Public/Private/Unknown for grouping/plotting.
+- Convert `zip` to character so leading zeros are preserved and joins/labels are reliable.  
+- Use `case_when()` with `str_detect()` to collapse raw station labels into Public/Private/Unknown.  
+- Store the cleaned `station_group` as a factor for stable ordering and legend display.
 
 ```{r}
 
-ev_stations <- ev_stations %>%
+ev_stations = ev_stations %>%
   mutate(
     zip = as.character(zip),
     station_group = case_when(
@@ -92,19 +96,21 @@ ev_stations <- ev_stations %>%
 ---
 
 ## 3. EV Counts by City (Demand)
+We summarize EV registrations by city and visualize the top 15.
 
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `group_by()` + `summarize()` – Count EVs by city.  
+- `arrange()` – Sort by EV count.  
+- `ggplot()` + `geom_col()` + `coord_flip()` – Plot top cities.  
+- `reorder()` – Order bars by count.
 
 **logic steps:**  
-Count EVs by city.  
-Sort to identify the highest-demand cities.  
-Plot the top 15 to visualize concentration.
+- Group registrations by `city` and count rows to get `ev_count`.  
+- Sort cities in descending order to surface highest-demand locations.  
+- Plot the top 15 cities, ordering bars by count to make rank comparisons clear.
 
 ```{r}
-city_demand <- ev_pop %>%
+city_demand = ev_pop %>%
   group_by(city) %>%
   summarize(ev_count = n()) %>%
   arrange(desc(ev_count))
@@ -112,7 +118,7 @@ city_demand <- ev_pop %>%
 city_demand
 
 ggplot(head(city_demand, 15), aes(x = reorder(city, ev_count), y = ev_count)) +
-  `geom_col()` +
+  geom_col() +
   coord_flip() +
   labs(title = "Top 15 Cities by EV Count", x = "City", y = "EVs") +
   theme_minimal()
@@ -123,19 +129,21 @@ ggplot(head(city_demand, 15), aes(x = reorder(city, ev_count), y = ev_count)) +
 ---
 
 ## 4. EV Station Counts by City (Supply)
+We count stations by city and visualize the top 15 supply locations.
 
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `group_by()` + `summarize()` – Count stations by city.  
+- `arrange()` – Sort by station count.  
+- `ggplot()` + `geom_col()` + `coord_flip()` – Plot top cities.  
+- `reorder()` – Order bars by count.
 
 **logic steps:**  
-Count stations by city.  
-Sort to find the most supplied cities.  
-Plot the top 15 station counts for comparison.
+- Group stations by `city` and count rows to get `station_count`.  
+- Sort cities in descending order to identify the most supplied locations.  
+- Plot the top 15 station counts, ordering bars by count for quick comparison.
 
 ```{r}
-city_supply <- ev_stations %>%
+city_supply = ev_stations %>%
   group_by(city) %>%
   summarize(station_count = n()) %>%
   arrange(desc(station_count))
@@ -157,24 +165,26 @@ ggplot(head(city_supply, 15), aes(x = reorder(city, station_count), y = station_
 We test how different joins change the number of cities we observe.
 
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `left_join()` – Keep all EV cities.  
+- `inner_join()` – Keep only cities with both EVs and stations.  
+- `full_join()` – Keep all cities from either table.  
+- `mutate()` + `ifelse()` – Replace missing station counts with 0.  
+- `nrow()` – Compare row counts.
 
 **logic steps:**  
-Try left, inner, and full joins.  
-Compare row counts across joins to see what each keeps/drops.  
-Create a **city audit** table with EV counts and station counts.
+- Create left, inner, and full joins on `city` to see which cities are retained.  
+- Compare `nrow()` outputs to understand what each join includes or excludes.  
+- Use the left join as the audit base, then replace missing `station_count` with 0.
 
 ```{r}
 # Try Left Join: Keeps all cities in Washington with EVs
-test_left <- left_join(city_demand, city_supply, by = "city")
+test_left = left_join(city_demand, city_supply, by = "city")
 
 # Try Inner Join: Keeps only cities that have BOTH EVs and Stations
-test_inner <- inner_join(city_demand, city_supply, by = "city")
+test_inner = inner_join(city_demand, city_supply, by = "city")
 
 # Try Full Join: Keeps every city mentioned in either dataset
-test_full <- full_join(city_demand, city_supply, by = "city")
+test_full = full_join(city_demand, city_supply, by = "city")
 
 city_data = test_left %>%
   mutate(
@@ -196,17 +206,18 @@ nrow(test_full)
 We estimate how many EVs compete per public station.
 
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `mutate()` – Compute EV-to-station ratios.  
+- `arrange()` – Sort by ratio.  
+- `slice_head()` – Keep the 20 lowest ratios.  
+- `ggplot()` + `geom_col()` + `coord_flip()` – Visualize ratios.
 
 **logic steps:**  
-Compute EV-to-station ratios.  
-Take the bottom 20 cities with the lowest EV-to-station ratio.  
-Plot cities by ratio to identify where stations are most available per EV.
+- Add a `ratio` column as `ev_count / station_count` to measure load per station.  
+- Sort by the ratio and keep the 20 lowest values to find best-served cities.  
+- Plot the ratios with ordered bars to highlight relative availability.
 
 ```{r}
-city_data <- city_data %>%
+city_data = city_data %>%
   mutate(
     ratio = ev_count / station_count
   ) %>%
@@ -232,27 +243,28 @@ ggplot(city_data, aes(x = reorder(city, -ratio), y = ratio)) +
 We compare **Public vs Private** station ownership in high-demand cities.
 
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `slice_max()` – Select top EV-demand cities.  
+- `group_by()` + `summarize()` – Count stations by city and group.  
+- `left_join()` – Attach station groups to top cities.  
+- `ggplot()` + `geom_bar()` + `coord_flip()` – Plot group totals.
 
 **logic steps:**  
-Select the top 10 cities by EV count.  
-Count stations by city and station group.  
-Left join with the top-demand cities.  
-Plot station groups with a cleaner legend placement.
+- Select the top 10 EV-demand cities using `slice_max()`.  
+- Count stations by `city` and `station_group` to get group totals.  
+- Left join those totals onto the top-city list so only high-demand cities appear.  
+- Plot grouped totals with a flipped axis and simplified legend.
 
 ```{r}
-top_cities <- city_demand %>%
+top_cities = city_demand %>%
   slice_max(ev_count, n = 10)
 
-grouped_ev_stations <- ev_stations %>%
+grouped_ev_stations = ev_stations %>%
   group_by(city, station_group) %>%
   summarize(station_count = n())
 
 grouped_ev_stations
 
-stations_by_group <- top_cities %>%
+stations_by_group = top_cities %>%
   left_join(grouped_ev_stations, by = "city")
 
 stations_by_group
@@ -276,19 +288,22 @@ ggplot(stations_by_group, aes(x = city, y = station_count, fill = station_group)
 We compare the **share of Level 1 / Level 2 / DC Fast** ports by ownership group.
 
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `select()` – Keep charger columns.  
+- `pivot_longer()` – Reshape wide to long.  
+- `filter()` – Keep positive, non-missing counts.  
+- `group_by()` + `summarize()` – Total ports by group and level.  
+- `ggplot()` + `geom_col(position = "fill")` – Plot proportional shares.
 
 **logic steps:**  
-Pivot charger-level columns into a long table.  
-Sum total ports by `station_group` and `level`.  
-Plot proportional shares to compare technology mix.
+- Reshape Level 1/Level 2/DC fast columns into a long `level`/`count` format.  
+- Filter out missing or zero counts to avoid diluting totals.  
+- Aggregate total ports by `station_group` and `level`.  
+- Plot stacked proportions to compare technology mix across ownership types.
 
 ```{r}
-ev_stations
+ev_stations[c('id','station_group','ev_lvl_1','ev_lvl_2', 'ev_dc_fast_count')]
 
-tech_long <- ev_stations %>%
+tech_long = ev_stations %>%
   select(id, station_group, ev_lvl_1, ev_lvl_2, ev_dc_fast_count) %>%
   pivot_longer(
     cols = c(ev_lvl_1, ev_lvl_2, ev_dc_fast_count),
@@ -299,14 +314,14 @@ tech_long <- ev_stations %>%
 
 tech_long
 
-tech_summary <- tech_long %>%
+tech_summary = tech_long %>%
   group_by(station_group, level) %>%
   summarize(total_ports = sum(count))
 
 tech_summary
 
 ggplot(tech_summary, aes(x = station_group, y = total_ports, fill = level)) +
-  `geom_col(position = "fill")` +
+  geom_col(position = "fill") +
   scale_y_continuous(labels = scales::percent) +
   coord_flip() +
   labs(
@@ -328,18 +343,22 @@ ggplot(tech_summary, aes(x = station_group, y = total_ports, fill = level)) +
 We map **EV density vs. station density** by latitude and longitude.
 
 **functions:**  
-``mutate()`` – Compute ratios.  
-`arrange()` / `slice_`head()`` – Select lowest ratios.  
-``geom_col()`` + `coord_flip()` – Visualize ratios.
+- `mutate()` + `round()` – Round coordinates for aggregation.  
+- `group_by()` + `summarize()` – Count EVs and stations by location.  
+- `full_join()` – Combine EV and station locations.  
+- `replace_na()` + `ifelse()` – Handle missing counts and zero stations.  
+- `ggplot()` + `borders()` + `geom_point()` – Map demand and supply.  
+- `plotly::ggplotly()` – Make the map interactive.
 
 **logic steps:**  
-Count EVs by latitude/longitude.  
-Count stations by latitude/longitude.  
-Join the two tables and compute the EV/station ratio.  
-Plot the ratio on a WA map to see gaps.
+- Round lat/long to 2 decimals to create consistent location bins.  
+- Count EVs and stations within each rounded coordinate pair.  
+- Full-join the location tables and replace missing counts with zero.  
+- Compute the EV-per-station ratio, guarding against zero stations.  
+- Map station counts (color) and EV counts (size) over WA counties to spot gaps.
 
 ```{r}
-ev_loc <- ev_pop %>%
+ev_loc = ev_pop %>%
   mutate(
     longitude = round(longitude, 2),
     latitude = round(latitude, 2)
@@ -347,7 +366,7 @@ ev_loc <- ev_pop %>%
   group_by(longitude, latitude) %>%
   summarize(ev_count = n())
 
-station_loc <- ev_stations %>%
+station_loc = ev_stations %>%
   mutate(
     longitude = round(longitude, 2),
     latitude = round(latitude, 2)
@@ -355,16 +374,16 @@ station_loc <- ev_stations %>%
   group_by(longitude, latitude) %>%
   summarize(station_count = n())
 
-loc_ratio <- full_join(ev_loc, station_loc, by = c("longitude", "latitude")) %>%
+loc_ratio = full_join(ev_loc, station_loc, by = c("longitude", "latitude")) %>%
   mutate(
     ev_count = replace_na(ev_count, 0),
     station_count = replace_na(station_count, 0),
-    ratio = ev_count / ifelse(station_count == 0, 1, station_count)
+    ratio = ifelse(ev_count / station_count == Inf, 0, ev_count / station_count)
   )
 
 loc_ratio
 
-p_map <- ggplot() +
+p_map = ggplot() +
   borders("county", "washington", colour = "grey80", fill = "grey95") +
   geom_point(
     data = loc_ratio,
@@ -373,7 +392,7 @@ p_map <- ggplot() +
   ) +
   scale_color_viridis_c(option = "C", name = "Stations") +
   scale_size_continuous(name = "EVs") +
-  `coord_quickmap()` +
+  coord_quickmap() +
   theme_void() +
   labs(title = "WA EV Demand (size) and Station Supply (color)")
 
@@ -388,8 +407,4 @@ plotly::ggplotly(p_map)
 
 ## 10. Lab Conclusion
 Final Reflection: If you were advising policymakers, which 1–2 cities would you prioritize for new public charging stations, and why?
-
-
-
-
 
