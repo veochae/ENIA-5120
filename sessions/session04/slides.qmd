@@ -185,6 +185,7 @@ $$
 This is saying:
 
 > King County's 50 chargers is 3 standard deviations away from the **average of average** number of chargers in each county.
+
 ---
 
 ## 🧭 Interpreting Z-scores
@@ -275,8 +276,11 @@ Means:
 
 ## 🗂️ Data We’ll Use Today
 
-```{r, label="r_setup", echo=TRUE, eval=FALSE}
-library(tidyverse)
+```{r, label="r_setup", echo=TRUE}
+library(dplyr)
+library(readr)
+library(stringr)
+library(tidyr)
 
 ev_pop <- read_csv("../../data/wa_ev_population.csv")
 ev_stations <- read_csv("../../data/wa_ev_charge_stations.csv")
