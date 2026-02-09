@@ -57,6 +57,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
 
+      - name: Render dataset PDFs
+        run: |
+          quarto render data/air_quality_sites.md --to pdf
+          quarto render data/policy_actions.md --to pdf
+
       - name: Render PDF handouts
         run: |
           python scripts/render_handouts.py

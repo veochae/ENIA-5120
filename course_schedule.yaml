@@ -54,7 +54,7 @@ labs:
     submission_types: ["online_upload"]
   - key: lab04
     session: session04
-    name: "Lab 04 – Feature Engineering & Transformation"
+    name: "Lab 04 – Proving the Pattern"
     due_at: "2026-02-16T23:59:00-05:00"
     points: 20
     submission_types: ["online_upload"]

@@ -1,39 +1,163 @@
 ---
-title: "Lab 04 – Joining & Reshaping"
-author: "Your Name"
-output: html_document
+title: "Lab 04 – Proving the Pattern"
+subtitle: "Hypothesis Testing with EV Infrastructure"
+author: "ENIA-5120"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
 ---
 
-```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
-library(dplyr)
-library(tidyr)
-library(stringr)
-knitr::opts_chunk$set(echo = TRUE)
+## 🧭 Mission Background
+You are a policy analyst evaluating whether observed EV patterns are likely to reflect **real differences** or just **random variation**.
+
+**Your Goal:** Use hypothesis tests to compare EV demand and charging infrastructure patterns across groups.
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+
+# Load data
+ev_pop <- read_csv("../../../data/wa_ev_population.csv") 
+ev_stations <- read_csv("../../../data/wa_ev_charge_stations.csv") 
+
+# Clean station groups
+stations_clean <- ev_stations %>%
+  mutate(
+    zip = as.character(zip),
+    station_group = case_when(
+      str_detect(station_group, "Public") ~ "Public",
+      str_detect(station_group, "Private") ~ "Private",
+      TRUE ~ "Unknown"
+    ),
+    station_group = as.factor(station_group)
+  )
 ```
 
-## Load data
-```{r}
-players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-events <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_events.csv"))
-```
+---
 
-## Duplicate keys
+## 1. Distribution Check (Normality & CLT)
+
+**functions:**
+- `ggplot()` + `geom_histogram()` – Visualize distribution.
+
+**logic steps:**
+- Plot the distribution of `electric_range` and identify skewness.
+- Explain why CLT still supports testing with large samples.
+
 ```{r}
 "<write your code here>"
 ```
 
-## Join tables
+**Question 1.1.1:** Is this distribution approximately normal or skewed?  
+**Question 1.1.2:** Why can we still use a t-test with a very large sample?
+
+---
+
+## 2. Standardizing with Z-scores
+
+**Scenario:** A local official claims a station with 15 Level 2 ports is “unusually large.” Use a z-score to check that claim.
+
+**functions:**
+- `mean()` / `sd()` – compute average and spread.
+
+**logic steps:**
+- Compute the statewide mean and standard deviation for `ev_lvl_2`.
+- Calculate the z-score for 15 ports.
+- Interpret how unusual that value is.
+
 ```{r}
 "<write your code here>"
 ```
 
-## Reshape monthly sales
+**Question 2.1.1:** What is the z-score for 15 ports?  
+**Question 2.1.2:** Is this typical, somewhat unusual, or extreme?
+
+---
+
+## 3. Comparing Two Means (t-test)
+
+**Scenario:** A policymaker believes BEVs have a higher average range than PHEVs. Test whether the averages differ.
+
+**Hypotheses:**  
+$H_0$: $\mu_{BEV} = \mu_{PHEV}$  
+$H_a$: $\mu_{BEV} \neq \mu_{PHEV}$  
+
+**functions:**
+- `filter()` – remove obvious missing values.
+- `t.test()` – compare means.
+
+**logic steps:**
+- Filter out zero ranges (treated as missing).
+- Run a two-sample t-test by `ev_type`.
+- Use the p-value and confidence interval to interpret the result.
+
 ```{r}
 "<write your code here>"
 ```
 
-## Compare wellbeing
+**Question 3.1.1:** What is the p-value?  
+**Question 3.1.2:** Does the 95% confidence interval include 0?  
+**Question 3.1.3:** At $\alpha = 0.05$, what decision would you make?  
+**Question 3.1.4:** Which group appears to have the higher average range?
+
+---
+
+## 4. Comparing Multiple Groups (ANOVA)
+
+**Scenario:** Are Level 2 ports distributed differently across Public, Private, and Unknown station groups?
+
+**Hypotheses:**  
+$H_0$: $\mu_{Public} = \mu_{Private} = \mu_{Unknown}$  
+$H_a$: At least one group mean differs  
+
+**functions:**
+- `ggplot()` + `geom_boxplot()` – visualize group differences.
+- `aov()` – run ANOVA.
+
+**logic steps:**
+- Make a boxplot to compare distributions by station group.
+- Run ANOVA to test whether any group mean differs.
+- Interpret the F statistic and p-value.
+
 ```{r}
 "<write your code here>"
 ```
+
+**Question 4.1.1:** What is the F value?  
+**Question 4.1.2:** What does the p-value imply at $\alpha = 0.05$?  
+**Question 4.1.3:** What can ANOVA not tell you?
+
+---
+
+## 5. Testing Relationships (Chi-square)
+
+**Scenario:** Do the top 3 counties have the same mix of EV types, or different mixes?
+
+**Hypotheses:**  
+$H_0$: EV type and county are independent  
+$H_a$: They are associated  
+
+**functions:**
+- `count()` – find top counties.
+- `filter()` – keep top counties.
+- `table()` – create contingency table.
+- `chisq.test()` – test association.
+
+**logic steps:**
+- Find the top 3 counties by EV count.
+- Build a county × EV type table.
+- Run a chi-square test and interpret the p-value.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 5.1.1:** What is the $\chi^2$ statistic?  
+**Question 5.1.2:** What does the p-value suggest?  
+**Question 5.1.3:** If expected counts are very small, what should you do?
+
+---

@@ -1,0 +1,212 @@
+---
+title: "HW02 Model Answer – Data Cleaning, Merging, and EDA"
+author: "Instructor"
+date: "2026-02-09"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    df_print: paged
+---
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+# 1. Understand the data
+
+```{r load-data}
+sites_raw <- read_csv("../../../data/air_quality_sites.csv", show_col_types = FALSE)
+policy_raw <- read_csv("../../../data/policy_actions.csv", show_col_types = FALSE)
+
+glimpse(sites_raw)
+glimpse(policy_raw)
+
+summary(sites_raw)
+summary(policy_raw)
+```
+
+**Quick notes:**
+- Two datasets: monitoring sites (air quality + context) and policy actions (programs + outcomes).
+- Key join variable: `site_id`.
+- Expect a mix of numeric, categorical, and logical fields.
+
+# 2. Clean the data / correct data types / log transformation
+
+## 2.1 Standardize keys and categories
+
+```{r clean-sites}
+sites <- sites_raw %>%
+  mutate(
+    site_id = str_trim(str_to_upper(site_id)),
+    region = str_trim(str_to_title(region)),
+    monitor_type = str_trim(str_to_title(monitor_type)),
+    county_code = str_pad(county_code, width = 3, side = "left", pad = "0"),
+    development_pressure = factor(
+      development_pressure,
+      levels = c("Low", "Medium", "High", "Severe"),
+      ordered = TRUE
+    )
+  ) %>%
+  mutate(
+    ozone = if_else(ozone < 0, NA_real_, ozone)
+  )
+```
+
+```{r clean-policy}
+policy <- policy_raw %>%
+  mutate(
+    policy_id = str_trim(str_to_upper(policy_id)),
+    site_id = str_trim(str_to_upper(site_id)),
+    policy_strength = str_trim(str_to_title(policy_strength)),
+    policy_strength = factor(
+      policy_strength,
+      levels = c("None", "Pilot", "Partial", "Full"),
+      ordered = TRUE
+    ),
+    start_date = as.Date(start_date),
+    grant_amount = suppressWarnings(as.numeric(grant_amount)),
+    compliance_score = if_else(compliance_score < 0 | compliance_score > 100, NA_real_, compliance_score)
+  )
+```
+
+## 2.2 Log transform skewed variables
+
+```{r log-transform}
+# Log-transform PM2.5 and grant amount
+sites <- sites %>% mutate(log_pm25 = log(pm25))
+policy <- policy %>% mutate(log_grant = log(grant_amount))
+
+# Check distributions (before/after)
+par(mfrow = c(1, 2))
+hist(sites$pm25, main = "PM2.5 (raw)", xlab = "pm25")
+hist(sites$log_pm25, main = "PM2.5 (log)", xlab = "log(pm25)")
+par(mfrow = c(1, 1))
+```
+
+# 3. Merge the data
+
+```{r merge}
+# Check duplicates in keys before merging
+sites %>% count(site_id, sort = TRUE) %>% filter(n > 1) %>% head()
+policy %>% count(policy_id, sort = TRUE) %>% filter(n > 1) %>% head()
+
+# Left join: keep all monitoring sites
+merged <- left_join(sites, policy, by = "site_id")
+
+# Basic verification
+nrow(sites)
+nrow(merged)
+
+merged %>%
+  summarize(
+    missing_policy = sum(is.na(policy_id)),
+    missing_policy_pct = mean(is.na(policy_id))
+  )
+```
+
+**Join choice:** A left join keeps all sites, which is appropriate for an audit of monitoring areas even if no policy exists.
+
+# 4. EDA 1 – Single-variable analysis
+
+```{r eda-single}
+# Summary statistics
+sites %>%
+  summarize(
+    pm25_mean = mean(pm25, na.rm = TRUE),
+    pm25_median = median(pm25, na.rm = TRUE),
+    ozone_mean = mean(ozone, na.rm = TRUE),
+    income_mean = mean(median_income, na.rm = TRUE)
+  )
+
+# Univariate visual: PM2.5 distribution
+sites %>%
+  ggplot(aes(pm25)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "white") +
+  labs(title = "PM2.5 Distribution", x = "PM2.5 (ug/m3)", y = "Count")
+```
+
+# 5. EDA 2 – Two-variable analysis
+
+```{r eda-two}
+# Relationship between PM2.5 and industrial activity
+sites %>%
+  ggplot(aes(industrial_index, pm25)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+  labs(title = "PM2.5 vs Industrial Index", x = "Industrial Index", y = "PM2.5")
+
+# Relationship between traffic and population density
+sites %>%
+  ggplot(aes(traffic_index, population_density)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "darkgreen") +
+  labs(title = "Traffic Index vs Population Density", x = "Traffic Index", y = "Population Density")
+```
+
+# 6. EDA 3 – Multi-variable analysis (multicollinearity)
+
+```{r eda-multi}
+vars <- sites %>%
+  select(traffic_index, population_density, industrial_index, pm25, ozone) %>%
+  drop_na()
+
+corr_mat <- cor(vars)
+
+# Correlation heatmap
+corr_df <- as.data.frame(as.table(corr_mat))
+
+corr_df %>%
+  ggplot(aes(Var1, Var2, fill = Freq)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "navy", mid = "white", high = "firebrick", midpoint = 0) +
+  labs(title = "Correlation Matrix", x = NULL, y = NULL) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**Interpretation:** Several predictors are strongly correlated (e.g., traffic and population density), signaling multicollinearity concerns for modeling.
+
+# 7. Ratio construction
+
+```{r ratios}
+# Policies per monitoring station (after merge)
+ratio_df <- merged %>%
+  group_by(site_id) %>%
+  summarize(
+    station_count = first(station_count),
+    policy_count = sum(!is.na(policy_id)),
+    policies_per_station = policy_count / station_count
+  )
+
+ratio_df %>%
+  summarize(
+    mean_ratio = mean(policies_per_station, na.rm = TRUE),
+    median_ratio = median(policies_per_station, na.rm = TRUE)
+  )
+
+ratio_df %>%
+  ggplot(aes(policies_per_station)) +
+  geom_histogram(bins = 30, fill = "slateblue", color = "white") +
+  labs(title = "Policies per Station", x = "Policies per Station", y = "Count")
+```
+
+# 8. Advanced visualization (storytelling)
+
+```{r advanced-viz}
+# Map-style scatter: PM2.5 levels by location
+sites %>%
+  ggplot(aes(longitude, latitude, color = pm25)) +
+  geom_point(alpha = 0.7, size = 2) +
+  scale_color_viridis_c(option = "C") +
+  coord_quickmap() +
+  labs(
+    title = "Air Quality Hotspots by Monitoring Site",
+    x = "Longitude",
+    y = "Latitude",
+    color = "PM2.5"
+  )
+```
+
+# Conclusion
+
+This analysis demonstrates data cleaning, log transformations, merging strategy validation, and EDA across single, bivariate, and multivariate contexts. The visual story highlights spatial hotspots and suggests where policies may need to be strengthened or better targeted.

@@ -1,11 +1,14 @@
 total_points: 20
 criteria:
-  - id: joins
-    description: "Correctly joins tables and documents duplicates"
-    max_points: 8
-  - id: reshape
-    description: "Reshapes data into tidy long format"
+  - id: distribution_clt
+    description: "Plots distribution and explains skew + CLT implication."
+    max_points: 4
+  - id: zscore
+    description: "Computes and interprets z-scores correctly."
+    max_points: 4
+  - id: mean_tests
+    description: "Runs t-test and ANOVA correctly with interpretation."
     max_points: 6
-  - id: interpretation
-    description: "Explains why join/reshape decisions were made"
+  - id: chi_square
+    description: "Runs chi-square test correctly and interprets results."
     max_points: 6

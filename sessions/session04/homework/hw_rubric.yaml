@@ -1,14 +1,94 @@
 total_points: 30
 criteria:
-  - id: eda_quality
-    description: "Uses appropriate summaries and visuals for key variables"
-    max_points: 9
-  - id: hypothesis_test
-    description: "Chooses a valid test, checks assumptions, interprets results"
-    max_points: 10.5
-  - id: visualization_clarity
-    description: "Plots have clear labels/titles and support the story"
+  - id: data_understanding
+    description: "Introduces both datasets with purpose, units, and structure; identifies key variables and initial summaries."
+    max_points: 4
+    levels:
+      - score: 4
+        description: "Accurate dataset purpose + context; clear structure summary (rows/cols/types); identifies key variables with correct units and basic distributions."
+      - score: 3
+        description: "Mostly correct description; minor omissions in units or structure; summaries are present but incomplete."
+      - score: 2
+        description: "General description only; limited structure or variable detail; summaries are minimal."
+      - score: 1
+        description: "Superficial description with unclear variables or structure."
+      - score: 0
+        description: "No meaningful dataset understanding shown."
+  - id: cleaning_types_logs
+    description: "Applies necessary cleaning, corrects types/categories, and performs justified log transform(s)."
     max_points: 6
-  - id: writing_quality
-    description: "Conclusions are concise and free of unnecessary jargon"
-    max_points: 4.5
+    levels:
+      - score: 6
+        description: "Comprehensive cleaning pipeline; data types corrected; categories standardized; missing/invalid values handled with rationale; log transform justified and interpreted."
+      - score: 5
+        description: "Strong cleaning with minor gaps (e.g., one issue not addressed or rationale thin)."
+      - score: 3
+        description: "Partial cleaning; some types corrected; limited handling of invalid/missing data; log transform applied but weak justification."
+      - score: 1
+        description: "Minimal cleaning; incorrect types remain; log transform missing or incorrect."
+      - score: 0
+        description: "No cleaning shown."
+  - id: merge_strategy
+    description: "Chooses an appropriate join, verifies results, and discusses merge implications."
+    max_points: 5
+    levels:
+      - score: 5
+        description: "Join choice is justified; key alignment verified (types/format); row counts checked; missingness after join explained."
+      - score: 4
+        description: "Join is appropriate and verified with some checks; discussion of implications is brief."
+      - score: 2
+        description: "Join performed but limited verification; missingness or key issues not discussed."
+      - score: 1
+        description: "Join type appears arbitrary; no verification."
+      - score: 0
+        description: "No merge performed."
+  - id: eda_single_two
+    description: "Single‑ and two‑variable EDA with correct summaries, plots, and interpretations."
+    max_points: 6
+    levels:
+      - score: 6
+        description: "Clear univariate summaries and visuals; at least two bivariate relationships analyzed with correct plots and thoughtful interpretation."
+      - score: 5
+        description: "Good EDA; minor issues in plot choice/interpretation or limited bivariate depth."
+      - score: 3
+        description: "Basic summaries and plots; interpretations are brief or partially incorrect."
+      - score: 1
+        description: "Minimal EDA; plots or summaries are missing/incorrect."
+      - score: 0
+        description: "No EDA evidence."
+  - id: multivariable_collinearity
+    description: "Multi‑variable analysis addresses multicollinearity with appropriate diagnostics/visuals."
+    max_points: 4
+    levels:
+      - score: 4
+        description: "Uses appropriate diagnostic (correlation matrix, scatter matrix, or VIF) and correctly interprets multicollinearity."
+      - score: 3
+        description: "Diagnostic used but interpretation is limited or partially incorrect."
+      - score: 2
+        description: "Multi‑variable analysis present but weak diagnostic/interpretation."
+      - score: 1
+        description: "Mentions multicollinearity without evidence."
+      - score: 0
+        description: "No multi‑variable analysis."
+  - id: visualization_story
+    description: "Visualizations are clear, labeled, and the advanced graphic supports the story."
+    max_points: 3
+    levels:
+      - score: 3
+        description: "All visuals labeled and readable; advanced visualization is well‑designed and strengthens the narrative."
+      - score: 2
+        description: "Most visuals are clear; advanced visualization exists but is weakly connected to the story."
+      - score: 1
+        description: "Visuals are cluttered or lack labels; advanced visualization is missing or confusing."
+      - score: 0
+        description: "No meaningful visualizations."
+  - id: ratio_construction
+    description: "Constructs and interprets meaningful ratios derived from merged data."
+    max_points: 2
+    levels:
+      - score: 2
+        description: "Ratio(s) correctly constructed, explained, and used in analysis or visualization."
+      - score: 1
+        description: "Ratio constructed but interpretation or use is weak."
+      - score: 0
+        description: "No ratio construction."

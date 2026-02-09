@@ -1,8 +1,8 @@
 session: 4
-title: "Session 4 – Joining & Reshaping Data"
+title: "Session 4 – The Logic of Inference"
 module:
-  name: "Week 4 – Joining & Reshaping"
-  description: "Combining multiple tables and pivoting between wide and long tidy formats."
+  name: "Week 4 – The Logic of Inference"
+  description: "From descriptive patterns to defensible claims using hypothesis tests."
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -21,11 +21,15 @@ lab:
 homework:
   assignment_key: hw02
   files:
-    - path: homework/hw_prompt.md
-      display_name: "HW 02 – EDA & Hypothesis Testing.md"
     - path: homework/hw_prompt.pdf
-      display_name: "HW 02 – EDA & Hypothesis Testing.pdf"
-    - path: homework/hw_rubric.yaml
-      display_name: "HW 02 – Rubric.yaml"
+      display_name: "HW 02 – Prompt.pdf"
     - path: homework/hw_rubric.pdf
       display_name: "HW 02 – Rubric.pdf"
+    - path: ../../data/air_quality_sites.csv
+      display_name: "air_quality_sites.csv"
+    - path: ../../data/policy_actions.csv
+      display_name: "policy_actions.csv"
+    - path: ../../data/air_quality_sites.pdf
+      display_name: "air_quality_sites.pdf"
+    - path: ../../data/policy_actions.pdf
+      display_name: "policy_actions.pdf"
