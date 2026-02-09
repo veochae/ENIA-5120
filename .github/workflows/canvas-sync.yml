@@ -36,7 +36,7 @@ jobs:
 
       - name: Install R package dependencies
         run: |
-          Rscript -e 'pkgs <- c("jsonlite","dplyr","readr","ggplot2","tidyr","httr","stringr","purrr","lubridate","htmltools","rmarkdown","knitr"); inst <- rownames(installed.packages()); to_install <- setdiff(pkgs, inst); if (length(to_install)) install.packages(to_install, repos = "https://cloud.r-project.org")'
+          Rscript -e 'pkgs <- c("tidyverse","jsonlite","dplyr","readr","ggplot2","tidyr","httr","stringr","purrr","lubridate","htmltools","rmarkdown","knitr"); inst <- rownames(installed.packages()); to_install <- setdiff(pkgs, inst); if (length(to_install)) install.packages(to_install, repos = "https://cloud.r-project.org")'
 
       - name: Render slides
         run: |

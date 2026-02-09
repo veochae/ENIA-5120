@@ -110,9 +110,9 @@ labs:
 homework:
   - key: hw01
     session: session03
-    release_session: session03
+    release_session: session04
     name: "Homework 01 – Data Foundations & Cleaning"
-    due_at: "2026-02-16T23:59:00-05:00"
+    due_at: "2026-02-22T23:59:00-05:00"
     points: 30
     submission_types: ["online_upload"]
   - key: hw02
