@@ -29,7 +29,3 @@ homework:
       display_name: "air_quality_sites.csv"
     - path: ../../data/policy_actions.csv
       display_name: "policy_actions.csv"
-    - path: ../../data/air_quality_sites.pdf
-      display_name: "air_quality_sites.pdf"
-    - path: ../../data/policy_actions.pdf
-      display_name: "policy_actions.pdf"
