@@ -275,7 +275,7 @@ Means:
 
 ## 🗂️ Data We’ll Use Today
 
-```{r}
+```{r, label="r_setup", echo=TRUE, eval=FALSE}
 library(tidyverse)
 
 ev_pop <- read_csv("../../data/wa_ev_population.csv")
