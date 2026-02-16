@@ -1,42 +1,199 @@
-title: "Lab 05 – Feature Engineering & Transformation"
+---
+title: "Lab 05 – Linear Regression in Practice"
+subtitle: "Agricultural Yield: Simple, Expanded, and Trimmed Models"
 author: "Your Name"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
 ---
 
-```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
-library(readr)
-library(dplyr)
-library(tidyr)
-library(janitor)
-library(stringr)
-knitr::opts_chunk$set(echo = TRUE)
+## 🧭 Mission Background
+You are an analyst studying what drives crop yield.
+
+**Your Goal:** Build three regression versions (simple -> expanded -> trimmed) and defend your final model using both interpretability and prediction evidence.
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+# Data path
+yield_path <- "../../../data/agricultural_yield_combined.csv"
 ```
 
-```{r}
-# 1. Load players dataset
-league_players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-glimpse(league_players)
-```
+---
+
+## Dataset Variables
+
+- `soil_quality`: Soil quality index (50 to 100)
+- `seed_variety`: Binary indicator (1 = high-yield variety)
+- `fertilizer_amount_kg_per_hectare`: Fertilizer amount
+- `sunny_days`: Number of sunny days
+- `rainfall_mm`: Total rainfall during growing season
+- `irrigation_schedule`: Number of irrigations
+- `soil_ph`: Soil acidity/alkalinity indicator
+- `farm_size_hectares`: Farm size in hectares
+- `pest_management_score`: Operational pest-management score
+- `harvest_delay_days`: Days delayed before harvest
+- `yield_kg_per_hectare`: Target outcome
+
+---
+
+## 0. Policy Question
+
+> How is crop yield associated with fertilizer use, weather, and seed variety?
+
+---
+
+## 1. Data Cleaning
+
+**functions:**
+- `read_csv()` – load data.
+- `filter()` – remove invalid rows.
+- `mutate()` – set data types.
+
+**logic steps:**
+- Load the combined dataset.
+- Keep rows with valid outcome and predictor values.
+- Set `seed_variety` as the only categorical predictor.
+- Create `ag_clean`.
 
 ```{r}
 "<write your code here>"
 ```
 
-```{r}
-"<write your code here>"
-```
+---
+
+## 2. Train/Test Split (70/30)
+
+**functions:**
+- `set.seed()` – reproducible split.
+- `sample.int()` – random row split.
+
+**logic steps:**
+- Set seed.
+- Assign 70% to training and 30% to testing.
+- Save as `train_df` and `test_df`.
 
 ```{r}
 "<write your code here>"
 ```
 
-```{r}
-"<write your code here>"
-```
+**Question 2.1:** Why is random splitting necessary before you compare model versions?
+
+---
+
+## 3. Model Version 1 (Simple Baseline)
+
+V1 should be intentionally simple.
+
+**Required rule:**
+- Use only one predictor in V1.
+
+**functions:**
+- `lm()`
+- `summary()`
+- `confint()`
+
+**logic steps:**
+- Fit `model_v1` with `fertilizer_amount_kg_per_hectare` only.
+- Interpret direction and magnitude.
 
 ```{r}
 "<write your code here>"
 ```
 
-Add a short narrative here describing which features you believe will help future predictive models and why.
+**Question 3.1:** Interpret the fertilizer coefficient in one sentence with units.
+
+**Question 3.2:** What does the V1 confidence interval for fertilizer imply about uncertainty?
+
+---
+
+## 4. Model Version 2 (Expanded)
+
+V2 adds extra predictors to test whether they add value.
+
+**Required rule:**
+- Include all predictor columns in the dataset **except** `soil_quality` and `yield_kg_per_hectare`.
+
+**functions:**
+- `lm()`
+- `summary()`
+
+**logic steps:**
+- Fit `model_v2` with all listed predictors.
+- Compare V2 fit against V1 fit.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 4.1:** Compared with V1, how much do V2's `R²` and adjusted `R²` change? Is that increase meaningful?
+
+**Question 4.2 (Hypothesis Test on One Variable):**  
+Using the `soil_ph` coefficient in V2:
+- Write the null hypothesis ($H_0$) and alternative hypothesis ($H_a$).
+- State whether you reject or fail to reject $H_0$ at $\alpha = 0.05$.
+- Explain your decision using the reported p-value.
+
+---
+
+## 5. Model Version 3 (Trimmed)
+
+V3 should be between V1 and V2 in complexity.
+
+**Required rule:**
+- Keep more predictors than V1.
+- Keep fewer predictors than V2.
+
+**functions:**
+- `lm()`
+- `summary()`
+
+**logic steps:**
+- Remove weak predictors from V2.
+- Fit `model_v3`.
+- Compare V3 vs V2 on adjusted R² and clarity.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 5.1:** Why is V3 a better compromise (or not) than V2 for practical use?
+
+---
+
+## 6. Model Comparison (Train + Test Evidence)
+
+**functions:**
+- `predict()` – out-of-sample predictions.
+- `mean()`, `abs()`, `sqrt()` – MAE/RMSE/MAPE.
+- `summary()` – extract R² and Adjusted R².
+- `data.frame()` – store model comparison results in a simple table.
+- `rbind()` – stack per-model rows into one comparison table.
+- `order()` – rank models by lowest RMSE.
+
+**logic steps:**
+- Define one helper function that takes a model and test data, then returns all metrics.
+- Apply the same function to V1, V2, and V3 so comparison is fair.
+- Build one `data.frame` with one row per model.
+- Rank by RMSE (lowest first), then inspect MAE/MAPE and adjusted R² to break close ties.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 6.1:** Which model has the best RMSE? Does it also have the best adjusted R²?
+
+**Question 6.2:** If V2 and V3 have very similar metrics, why might you still prefer V3?
+
+**Question 6.3:** Which model would you recommend to farm planners and why? Use at least two metrics and one interpretation argument.
+
+---
+
+## 7. Summary Question
+
+**Summary Question 7.1:**  
+If you had to brief farm planners in two minutes, which model would you recommend, what is the single most useful predictor, and what is one limitation of your recommendation?

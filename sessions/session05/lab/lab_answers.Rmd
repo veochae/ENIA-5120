@@ -1,89 +1,259 @@
-title: "Lab 05 – Feature Engineering & Transformation"
+---
+title: "Lab 05 – Linear Regression in Practice"
+subtitle: "Agricultural Yield: Simple, Expanded, and Trimmed Models"
 author: "Your Name"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
 ---
 
-```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
-library(readr)
-library(dplyr)
-library(tidyr)
-library(janitor)
-library(stringr)
-knitr::opts_chunk$set(echo = TRUE)
+## 🧭 Mission Background
+You are an analyst studying what drives crop yield.
+
+**Your Goal:** Build three regression versions (simple -> expanded -> trimmed) and defend your final model using both interpretability and prediction evidence.
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+# Data path
+yield_path <- "../../../data/agricultural_yield_combined.csv"
 ```
 
-```{r}
-# 1. Load players dataset
-league_players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-glimpse(league_players)
-```
+---
+
+## Dataset Variables
+
+- `soil_quality`: Soil quality index (50 to 100)
+- `seed_variety`: Binary indicator (1 = high-yield variety)
+- `fertilizer_amount_kg_per_hectare`: Fertilizer amount
+- `sunny_days`: Number of sunny days
+- `rainfall_mm`: Total rainfall during growing season
+- `irrigation_schedule`: Number of irrigations
+- `soil_ph`: Soil acidity/alkalinity indicator
+- `farm_size_hectares`: Farm size in hectares
+- `pest_management_score`: Operational pest-management score
+- `harvest_delay_days`: Days delayed before harvest
+- `yield_kg_per_hectare`: Target outcome
+
+---
+
+## 0. Policy Question
+
+> How is crop yield associated with fertilizer use, weather, and seed variety?
+
+---
+
+## 1. Data Cleaning
+
+**functions:**
+- `read_csv()` – load data.
+- `filter()` – remove invalid rows.
+- `mutate()` – set data types.
+
+**logic steps:**
+- Load the dataset.
+- Keep rows with valid outcome and predictor values.
+- Set `seed_variety` as the only categorical predictor.
+- Create `ag_clean`.
 
 ```{r}
-# Helper to get most common value
-mode_char <- function(x) {
-  x <- x[!is.na(x)]
-  if (length(x) == 0) {
-    return(NA_character_)
-  }
-  names(which.max(table(x)))
-}
+ag_raw <- read_csv(yield_path)
+
+ag_clean <- ag_raw %>%
+  filter(
+    !is.na(soil_quality),
+    !is.na(seed_variety),
+    !is.na(fertilizer_amount_kg_per_hectare),
+    !is.na(sunny_days),
+    !is.na(rainfall_mm),
+    !is.na(irrigation_schedule),
+    !is.na(soil_ph),
+    !is.na(farm_size_hectares),
+    !is.na(pest_management_score),
+    !is.na(harvest_delay_days),
+    !is.na(yield_kg_per_hectare)
+  ) %>%
+  mutate(seed_variety = as.factor(seed_variety))
+
+glimpse(ag_clean)
 ```
 
-```{r}
-# 2. Engineer player-level features
-players_engineered <- league_players %>%
-  clean_names() %>%
-  mutate(
-    season_score = replace_na(season_score, median(season_score, na.rm = TRUE)),
-    assists = replace_na(assists, median(assists, na.rm = TRUE)),
-    stamina_score = replace_na(stamina_score, median(stamina_score, na.rm = TRUE)),
-    score_per_match = season_score / pmax(matches_played, 1),
-    assist_rate = assists / pmax(matches_played, 1),
-    stamina_adjusted_score = score_per_match * (stamina_score / 100),
-    high_glow = glow_rating >= 8,
-    accuracy_bucket = case_when(
-      tag_accuracy_pct >= 80 ~ "Elite",
-      tag_accuracy_pct >= 65 ~ "Solid",
-      TRUE ~ "Needs Work"
-    ),
-    energy_balance = energy_delta_pct - shield_uptime_pct
-  )
-players_engineered
-```
+---
+
+## 2. Train/Test Split (70/30)
+
+**functions:**
+- `set.seed()` – reproducible split.
+- `sample.int()` – random row split.
+
+**logic steps:**
+- Set seed.
+- Assign 70% to training and 30% to testing.
+- Save as `train_df` and `test_df`.
 
 ```{r}
-# 3. Squad-level features
-squad_features <- players_engineered %>%
-  group_by(squad_id, squad_name) %>%
-  summarise(
-    avg_score_per_match = mean(score_per_match, na.rm = TRUE),
-    pct_high_glow = mean(high_glow, na.rm = TRUE),
-    top_loadout = mode_char(preferred_loadout),
-    .groups = "drop"
-  )
-squad_features
+set.seed(5120)
+idx <- sample.int(nrow(ag_clean), size = floor(0.7 * nrow(ag_clean)))
+
+train_df <- ag_clean[idx, ]
+test_df <- ag_clean[-idx, ]
+
+cat("Train rows:", nrow(train_df), "\n")
+cat("Test rows:", nrow(test_df), "\n")
+cat("Train share:", round(nrow(train_df) / nrow(ag_clean), 3), "\n")
 ```
 
-```{r}
-# 4. Join back to players
-players_with_context <- players_engineered %>%
-  left_join(squad_features, by = c("squad_id", "squad_name"))
-players_with_context
-```
+**Question 2.1:** Why is random splitting necessary before you compare model versions?
+
+---
+
+## 3. Model Version 1 (Simple Baseline)
+
+V1 should be intentionally simple.
+
+**Required rule:**
+- Use only one predictor in V1.
+
+**functions:**
+- `lm()`
+- `summary()`
+- `confint()`
+
+**logic steps:**
+- Fit `model_v1` with `fertilizer_amount_kg_per_hectare` only.
+- Interpret direction and magnitude.
 
 ```{r}
-# 5. Feature glossary
-feature_glossary <- tibble::tribble(
-  ~feature_name, ~description,
-  "score_per_match", "Season score divided by matches_played to normalize for volume.",
-  "assist_rate", "Assists per match, highlights supportive roles.",
-  "stamina_adjusted_score", "Score_per_match scaled by stamina to capture endurance.",
-  "high_glow", "Boolean flag for glow_rating >= 8 (top performers).",
-  "accuracy_bucket", "Categorical bucket describing accuracy tiers.",
-  "energy_balance", "Difference between energy_delta_pct and shield_uptime_pct."
+model_v1 <- lm(
+  yield_kg_per_hectare ~ fertilizer_amount_kg_per_hectare,
+  data = train_df
 )
-feature_glossary
+
+summary(model_v1)
+confint(model_v1)
 ```
 
-Add a short narrative here describing which features you believe will help future predictive models and why.
+**Question 3.1:** Interpret the fertilizer coefficient in one sentence with units.
+
+**Question 3.2:** What does the V1 confidence interval for fertilizer imply about uncertainty?
+
+---
+
+## 4. Model Version 2 (Expanded)
+
+V2 adds extra predictors to test whether they add value.
+
+**Required rule:**
+- Include all predictor columns in the dataset **except** `soil_quality` and `yield_kg_per_hectare`.
+
+**functions:**
+- `lm()`
+- `summary()`
+
+**logic steps:**
+- Fit `model_v2` with broader predictor set.
+- Compare V2 fit against V1 fit.
+
+```{r}
+model_v2 <- lm(
+  yield_kg_per_hectare ~ fertilizer_amount_kg_per_hectare + sunny_days + rainfall_mm + irrigation_schedule + soil_ph + farm_size_hectares + pest_management_score + harvest_delay_days + seed_variety,
+  data = train_df
+)
+
+summary(model_v2)
+```
+
+**Question 4.1:** Compared with V1, how much do V2's `R²` and adjusted `R²` change? Is that increase meaningful?
+
+**Question 4.2 (Hypothesis Test on One Variable):**  
+Using the `soil_ph` coefficient in V2:
+- Write the null hypothesis ($H_0$) and alternative hypothesis ($H_a$).
+- State whether you reject or fail to reject $H_0$ at $\alpha = 0.05$.
+- Explain your decision using the reported p-value.
+
+---
+
+## 5. Model Version 3 (Trimmed)
+
+V3 should be between V1 and V2 in complexity.
+
+**functions:**
+- `lm()`
+- `summary()`
+
+**logic steps:**
+- Remove weak predictors from V2.
+- Fit `model_v3`.
+- Compare V3 vs V2 on adjusted R² and clarity.
+
+```{r}
+model_v3 <- lm(
+  yield_kg_per_hectare ~ fertilizer_amount_kg_per_hectare + soil_quality + sunny_days + rainfall_mm + irrigation_schedule + seed_variety,
+  data = train_df
+)
+
+summary(model_v3)
+```
+
+**Question 5.1:** Why is V3 a better compromise (or not) than V2 for practical use?
+
+---
+
+## 6. Model Comparison (Train + Test Evidence)
+
+**functions:**
+- `predict()` – out-of-sample predictions.
+- `mean()`, `abs()`, `sqrt()` – MAE/RMSE/MAPE.
+- `summary()` – extract R² and Adjusted R².
+- `data.frame()` – store model comparison results in a simple table.
+- `rbind()` – stack per-model rows into one comparison table.
+- `order()` – rank models by lowest RMSE.
+
+**logic steps:**
+- Define one helper function that takes a model and test data, then returns all metrics.
+- Apply the same function to V1, V2, and V3 so comparison is fair.
+- Build one `data.frame` with one row per model.
+- Rank by RMSE (lowest first), then inspect MAE/MAPE and adjusted R² to break close ties.
+
+```{r}
+compute_metrics <- function(model, test_data, model_name) {
+  pred <- predict(model, newdata = test_data)
+  err <- test_data$yield_kg_per_hectare - pred
+
+  return(data.frame(
+    model = model_name,
+    MAE = mean(abs(err), na.rm = TRUE),
+    RMSE = sqrt(mean(err^2, na.rm = TRUE)),
+    MAPE = mean(abs(err / pmax(test_data$yield_kg_per_hectare, 1)), na.rm = TRUE) * 100,
+    R2 = summary(model)$r.squared,
+    Adjusted_R2 = summary(model)$adj.r.squared
+  ))
+}
+
+model_performance <- rbind(
+  compute_metrics(model_v1, test_df, "V1: simple"),
+  compute_metrics(model_v2, test_df, "V2: expanded"),
+  compute_metrics(model_v3, test_df, "V3: trimmed")
+)
+
+model_performance <- model_performance[order(model_performance$RMSE), ]
+
+model_performance
+```
+
+**Question 6.1:** Which model has the best RMSE? Does it also have the best adjusted R²?
+
+**Question 6.2:** If V2 and V3 have very similar metrics, why might you still prefer V3?
+
+**Question 6.3:** Which model would you recommend to farm planners and why? Use at least two metrics and one interpretation argument.
+
+---
+
+## 7. Summary Question
+
+**Summary Question 7.1:**  
+If you had to brief farm planners in two minutes, which model would you recommend, what is the single most useful predictor, and what is one limitation of your recommendation?

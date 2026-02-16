@@ -1,147 +1,654 @@
-title: "Session 5 – Feature Engineering & Transformation"
-format:
+---
+title: "Session 5: Linear Regression"
+subtitle: "From Patterns to Defensible Policy Relationships"
+format: 
   revealjs:
     slide-number: true
-    toc: true
-    incremental: true
-    self-contained: true
+    smaller: true
+    scrollable: true    
     footer: "ENIA-5120 · Veo Chae · Georgetown University"
+    self-contained: true
+    theme: serif
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: false
 ---
 
-# Agenda
+## ⚙️ Live Setup (Run Once)
 
-- Why feature engineering matters
-- Review of handy transformation verbs (`mutate`, `across`, `case_when`)
-- Building new predictors from Laser League data
-- Documenting assumptions + storing engineered tables for modeling
+```{r setup-data, eval=TRUE, include=FALSE}
+library(dplyr)
+library(ggplot2)
 
----
+resolve_data_path <- function(filename) {
+  candidates <- c(
+    file.path("data", filename),
+    file.path("..", "..", "data", filename)
+  )
+  hit <- candidates[file.exists(candidates)][1]
+  if (is.na(hit)) stop("Could not find data file: ", filename)
+  hit
+}
 
-# Why Feature Engineering?
+ev <- read.csv(resolve_data_path("wa_ev_population.csv"), stringsAsFactors = FALSE)
 
-- Raw data rarely captures the true signal
-- Transformations expose relationships models can learn
-- Helps normalize scale, reduce skew, encode categories
-- Often the highest-leverage step between “EDA” and “Modeling”
-
-> “Better data beats better algorithms” — Andrew Ng
-
----
-
-# Feature Workflow
-
-```{mermaid}
-flowchart LR
-  A[Raw columns] --> B[Transform / clean]
-  B --> C[Engineer new features]
-  C --> D[Validate + document]
-  D --> E[Model-ready table]
-```
-
-- Keep transformations reproducible in R scripts/Rmd
-- Version engineered tables or rebuild from scratch each run
-
----
-
-# Laser League Ingredients
-
-```r
-ENIA_ROOT <- "~/ENIA-5120"
-players <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-```
-
-Key columns for features:
-
-- Volumetrics: `season_score`, `assists`, `matches_played`
-- Rates: `tag_accuracy_pct`, `shield_uptime_pct`, `energy_delta_pct`
-- Physical/mental: `stamina_score`, `reflex_score`, `reaction_time_sec`
-- Context: `role`, `home_arena`, `preferred_loadout`, `favorite_drink`
-
----
-
-# Mutate + Across
-
-```r
-players_transformed <- players %>%
-  mutate(
-    score_per_match = season_score / matches_played,
-    assist_rate = assists / matches_played,
-    high_accuracy = tag_accuracy_pct >= 80
+df <- ev %>%
+  filter(
+    !is.na(electric_range),
+    electric_range > 0,
+    !is.na(model_year),
+    !is.na(ev_type),
+    !is.na(county),
+    county != ""
   ) %>%
-  mutate(across(
-    c(season_score, assists, stamina_score),
-    ~ replace_na(., median(., na.rm = TRUE))
-  )) %>%
   mutate(
-    stamina_adjusted_score = score_per_match * (stamina_score / 100)
+    bev = ifelse(grepl("BEV", ev_type), 1, 0),
+    make = as.factor(make)
   )
+
+set.seed(5120)
+idx <- sample.int(nrow(df), size = floor(0.7 * nrow(df)))
+df_train <- df[idx, ]
+df_test <- df[-idx, ]
 ```
 
-- Use `mutate()` for ratios + boolean flags
-- `across()` lets you treat multiple numeric columns similarly
-- Always guard against divide-by-zero and missing values
+---
+
+## 🧭 What's Happening Today
+
+- Last Week: 
+
+> Is there evidence to show that there is a relationship?
+
+- This Week
+  
+> What is the magnitude of the relationship? 
+
+## 🧭 What Is Data Modeling?
+
+Plain definition:
+
+* A model is a simplified version of reality.
+* Reality is too complex to capture fully.
+* So we use a model like a map.
+  * Not perfect
+  * Not complete
+  * But useful for navigation
+
+Key idea:
+
+> A model is judged by usefulness, not perfection.
 
 ---
 
-# Binning & Buckets
+## ❓ Question Before We Begin
 
-```r
-players_binned <- players_transformed %>%
-  mutate(
-    score_bucket = case_when(
-      score_per_match >= 80 ~ "Elite",
-      score_per_match >= 60 ~ "Competitive",
-      TRUE ~ "Needs Coaching"
-    ),
-    accuracy_bucket = cut(tag_accuracy_pct,
-      breaks = c(0, 60, 75, 90, 100),
-      labels = c("Low", "Medium", "High", "Pro")
-    )
-  )
+Question:
+
+> How much impact does the car's make year have on the Electric Range of the car?
+
+* A scatterplot might show a pattern.
+* But is the pattern real?
+* Or could it be random noise?
+
+---
+
+## 📉 Live Pattern Check
+
+```{r hook-plot, eval=TRUE, fig.width=8, fig.height=4.5}
+
+df_sample = df %>% filter(model_year > 2010) %>% filter(model_year < 2021)
+
+ggplot(df_sample, aes(x = model_year, y = electric_range)) +
+  geom_point(alpha = 0.07, color = "#1f5c8b") +
+  geom_smooth(method = "lm", se = FALSE, color = "#b22222", linewidth = 1) +
+  labs(
+    x = "Model Year",
+    y = "Electric Range (miles)",
+    title = "Newer EV model years tend to have longer electric range"
+  ) +
+  theme_minimal(base_size = 13)
 ```
 
-- Bucketing helps with interpretability + logistic models
-- Store bucket definitions in one place so homework writeups stay consistent
+---
+
+## 📈 What Is Regression?
+
+So how do we actually quantify the impact we see? Regression helps us answer:
+
+> When $X$ changes, what usually happens to $Y$?
+
+Use regression when outcome $Y$ is numeric:
+
+* EV adoption rate
+* Emissions
+* Income
+* Temperature
+
+Why it matters:
+
+* It turns patterns into measurable relationships.
 
 ---
 
-# Interactions + Aggregations
+## ⚖️ Explanation vs Prediction
 
-```r
-players_features <- players_binned %>%
-  group_by(squad_id) %>%
-  mutate(
-    squad_avg_score = mean(season_score, na.rm = TRUE),
-    squad_rank = dense_rank(desc(squad_avg_score))
-  ) %>%
-  ungroup() %>%
-  mutate(
-    score_gap_vs_squad = season_score - squad_avg_score,
-    assist_x_accuracy = assist_rate * tag_accuracy_pct,
-    energy_balance = energy_delta_pct - shield_uptime_pct
-  )
+Regression has two jobs:
+
+* **Explanation (policy story)**  
+  Which factors are associated with Electric Range?
+* **Prediction (forecasting)**  
+  What electric range should we expect in a car produced in 2026?
+
+Key line:
+
+> Explaining is understanding relationships. Predicting is accuracy on new data.
+
+---
+
+## ➗ What Is Linear Regression?
+
+Linear regression draws the best straight-line summary:
+
+$$
+y = \beta_0 + \beta_1 x + \epsilon
+$$
+
+Where:
+
+* $y$: outcome we care about
+* $x$: predictor
+* $\beta_0$: baseline level
+* $\beta_1$: expected change in $y$ when $x$ increases by 1
+* $\epsilon$: everything else we did not measure
+
+---
+
+## 🧩 Why $\epsilon$ Matters
+
+* The model never explains everything (because it's a simplified reality).
+* Even a good model has misses.
+* That leftover part is not failure, it is uncharted reality.
+
+> Regression is not about perfect certainty.  
+> It is about useful approximation.
+
+---
+
+## 🧮 OLS: How the Best Line Is Chosen
+
+Residual:
+
+$$
+\text{residual} = y - \hat{y}
+$$
+
+OLS chooses the line that minimizes:
+
+$$
+\sum (y - \hat{y})^2
+$$
+
+---
+
+## ❓ Why Squared Errors?
+
+* Positive and negative errors cannot cancel out (square makes everything positive).
+* Big misses are penalized more than small misses.
+* The optimization is mathematically tractable.
+
+So OLS is not random.
+It is a clear, consistent rule for "best fit."
+
+---
+
+## 🏛️ Multi-Variable Regression
+
+But reality is not impacted by a "singular" variable. It's a combination of multiple aspects:
+
+* Model year
+* EV type
+* Vehicle make
+* Other policy/context variables
+
+Model:
+
+$$
+Electric Range = \beta_0 + \beta_1(\text{model year}) + \beta_2(\text{BEV}) + \beta_3(\text{make})
+$$
+
+---
+
+## 🧠 What's Happening in the Background
+
+- If there are **2 x variables** + **1 y variable**, we are essentially drawing a best fitted line in a **3 dimensional space**, and calculating the OLS.
+- Starting 4 dimension, humans can't visualize it, but we can certainly imagine!
+
+---
+
+## 💻 How Results Look in R
+
+Function:
+$$
+Electric Range = \beta_0 + \beta_1(\text{model year}) + \beta_2(\text{BEV}) + \beta_3(\text{make})
+$$
+
+Coefficients:
+```{r multiple-results, eval=TRUE, echo = TRUE}
+m_multi <- lm(electric_range ~ model_year + bev + make, data = df_train)
+
+round(coef(summary(m_multi))[1:10, ], 3)
 ```
 
-- Interaction terms capture combined effects (assists * accuracy)
-- Group-level aggregates provide context (player vs squad average)
+Adjusted R-Squared:
+```{r, eval=TRUE, echo = TRUE}
+round(summary(m_multi)$adj.r.squared, 4)
+```
 
 ---
 
-# Feature Checklist
+## 🧷 Holding All Else Constant
 
-- [ ] Every new column has a clear name + definition
-- [ ] No engineered column introduces NAs accidentally
-- [ ] Ratios protect against divide-by-zero
-- [ ] Buckets include all edge cases (>= vs >)
-- [ ] Save engineered tibble (e.g., `players_features`) for future labs/homework
+Without controls (variables), regression can confuse relationships.
+
+Multiple regression asks:
+
+> What is the relationship between model year and electric range, holding EV type and make constant?
+
+That "holding constant" phrase is the core value.
 
 ---
 
-# Lab 05 Preview
+## 🔍 Interpreting Coefficients (Numeric)
 
-- Build a reusable transformation pipeline
-- Produce engineered columns: `score_per_match`, `assist_rate`, `high_glow`, `accuracy_bucket`
-- Create at least one interaction or group-level feature
-- Write 2–3 sentences describing how these features could help modeling
+Rule:
 
-Submit the `.Rmd` with code + short reflections on Canvas.
+> For a 1-unit increase in $X$, $Y$ is expected to change by $\beta$ units, holding other variables constant.
+
+Example:
+
+* $\beta = 5.631$ for model year
+
+Interpretation:
+
+* One newer model year is associated with about +5.631 miles of electric range, holding other variables constant.
+
+---
+
+## 🏷️ Interpreting Coefficients (Categorical)
+
+For categories, regression sets one group as baseline.
+
+Example:
+
+* Baseline make = one reference make (alphabetically first in factor coding)
+* Coefficient for another make = difference from baseline make
+
+Interpretation:
+
+* Each make coefficient tells how much higher/lower expected electric range is relative to the baseline make, all else equal.
+
+---
+
+## 🧪 Coefficient p-values
+
+For each predictor, test:
+
+$$
+H_0: \beta_j = 0 \qquad H_a: \beta_j \neq 0
+$$
+
+Meaning:
+
+* $H_0$: predictor has no relationship with outcome
+* $H_a$: predictor has a non-zero association
+
+---
+
+## ❓ Interpreting the p-value
+
+Plain language:
+
+> If this predictor truly had no relationship, how likely is a coefficient this large just by chance?
+
+* Small p-value: evidence coefficient is not just noise.
+* Large p-value: data cannot distinguish effect from zero.
+
+Warning:
+
+> Significant does not mean important.  
+> It only means "probably not zero."
+
+---
+
+## 📏 Confidence Intervals
+
+Suppose:
+
+* $\beta = 2.5$
+* 95% CI = [0.5, 4.5]
+
+Common mistake:
+
+* "The coefficient randomly moves between 0.5 and 4.5."
+
+Correct idea:
+
+* The true effect is one fixed number.
+* We just do not know it perfectly.
+
+---
+
+## 🎯 What CI Actually Means
+
+Interpretation:
+
+> Based on our data, the true effect is plausibly as low as 0.5 or as high as 4.5.
+
+Analogy:
+
+* Coefficient = best guess
+* CI = uncertainty band around that guess
+
+Why CIs matter:
+
+* p-value gives yes/no evidence.
+* CI gives effect size and uncertainty.
+
+---
+
+## 📊 $R^2$ vs Adjusted $R^2$
+
+**$R^2$**
+
+* Percent of outcome variation explained.
+* Always increases when you add predictors.
+
+**Adjusted $R^2$**
+
+* Penalizes unnecessary complexity.
+* Better honesty check in multiple regression.
+
+---
+
+## 🧭 Which One Should You Use?
+
+* Simple one-predictor model -> $R^2$ is usually fine.
+* Multiple regression with many predictors -> Adjusted $R^2$ is more informative.
+
+Question to ask:
+
+> Did this variable truly help, or just add complexity?
+
+---
+
+## 🧱 Regression Assumptions: L.I.N.E.
+
+These are not trivia.
+They tell us when conclusions can break.
+
+* **L — Linearity**
+* **I — Independence**
+* **N — Normal residuals**
+* **E — Equal variance**
+
+---
+
+## 🧱 L.I.N.E.: Why Each Matters
+
+* **Linearity**: if truth is curved, straight-line model misleads.
+* **Independence**: if observations are not independent, p-values are too confident.
+* **Normal residuals**: improves reliability of p-values and CIs.
+* **Equal variance**: if errors fan out, uncertainty estimates are wrong.
+
+---
+
+## 🩺 Residuals: Most Important Diagnostic
+
+Plain definition:
+
+$$
+\text{residual} = \text{actual} - \text{predicted}
+$$
+
+Residuals are what the model got wrong.
+
+They reveal:
+
+* Missing variables
+* Wrong model shape
+* Groups where model underperforms
+
+---
+
+## 🩺 Residual Plot (Live Output)
+
+```{r residual-plot, eval=TRUE, fig.width=8, fig.height=4.5}
+plot(
+  fitted(m_multi), resid(m_multi),
+  xlab = "Fitted values",
+  ylab = "Residuals",
+  pch = 16,
+  col = "#1f5c8b",
+  main = "Residuals vs Fitted (Multiple Regression)"
+)
+abline(h = 0, lty = 2, col = "firebrick")
+```
+
+---
+
+## 🧠 Reading Residual Patterns
+
+Good residuals:
+
+* Random cloud around zero
+
+Bad residuals:
+
+* Curve pattern -> nonlinearity
+* Funnel pattern -> unequal variance
+* One-sided pattern -> systematic bias
+
+---
+
+```{r bad-residual-examples, eval=TRUE, fig.width=10, fig.height=4.5, fig.show='hold', out.width='49%'}
+set.seed(42)
+x <- runif(250, 0, 10)
+y_curve <- 3 + 2 * x + 0.8 * x^2 + rnorm(250, 0, 3)
+m_curve <- lm(y_curve ~ x)
+
+y_funnel <- 5 + 4 * x + rnorm(250, 0, 0.5 + x / 1.5)
+m_funnel <- lm(y_funnel ~ x)
+
+par(mfrow = c(1, 2))
+plot(fitted(m_curve), resid(m_curve), pch = 16, cex = 0.7, col = "#1f5c8b",
+     main = "Bad Pattern: Curve", xlab = "Fitted", ylab = "Residual")
+abline(h = 0, lty = 2, col = "firebrick")
+plot(fitted(m_funnel), resid(m_funnel), pch = 16, cex = 0.7, col = "#1f5c8b",
+     main = "Bad Pattern: Funnel", xlab = "Fitted", ylab = "Residual")
+abline(h = 0, lty = 2, col = "firebrick")
+par(mfrow = c(1, 1))
+```
+
+Key line:
+
+> Residuals are the model's blind spots.
+
+---
+
+## 🔮 Prediction Using Data Models
+
+Up to this point, we looked at **Explainability**.
+What about **Prediction**?
+
+> How do we know if the model is a good "predictor"?
+
+---
+
+## ✂️ Train-Test Split
+
+- We want to know whether the model we created is good at "prediction"
+- Then the **"test"** data should never be seen by the model
+
+* **Training set**: model learns the relationship.
+* **Test set**: model is evaluated on unseen data.
+* If test performance drops a lot, that is overfitting risk.
+* We generally take **70/30 Rule** where we take 70% as training, 30% as testing
+
+```{r split-check, eval=TRUE}
+cat("Train rows:", nrow(df_train), "\n")
+cat("Test rows:", nrow(df_test), "\n")
+cat("Train share:", round(nrow(df_train) / nrow(df), 3), "\n")
+```
+
+---
+
+## 📐 Model Evaluation on New Data
+Use test-set performance, not training set only.
+
+Three core metrics:
+
+* **MAE**: average absolute miss
+* **RMSE**: penalizes large misses more
+* **MAPE**: average percent error¬
+
+---
+
+## 📐 MAE, RMSE, MAPE
+
+MAE:
+
+$$
+\text{MAE} = \frac{1}{n}\sum |y - \hat{y}|
+$$
+
+RMSE:
+
+$$
+\text{RMSE} = \sqrt{\frac{1}{n}\sum (y - \hat{y})^2}
+$$
+
+MAPE:
+
+$$
+\text{MAPE} = \frac{100}{n}\sum \left(\frac{|y-\hat{y}|}{|y|}\right)
+$$
+
+---
+
+## ⚠️ Metric Use Cases
+
+* Use **MAE** for stakeholder-friendly average error.
+* Use **RMSE** when large errors are especially costly.
+* Use **MAPE** for relative percent error comparisons.
+
+Warning:
+
+* MAPE breaks when actual values are near zero.
+
+```{r metrics-live, eval=TRUE}
+pred_test <- predict(m_multi, newdata = df_test)
+resid_test <- df_test$electric_range - pred_test
+
+mae <- mean(abs(resid_test))
+rmse <- sqrt(mean(resid_test^2))
+mape <- mean(abs(resid_test / pmax(df_test$electric_range, 1))) * 100
+
+round(c(MAE = mae, RMSE = rmse, MAPE = mape), 2)
+```
+
+---
+
+## 🧪 Underfitting vs Overfitting
+
+**Underfitting**
+
+* Model is too simple.
+* Misses structure.
+* Bad even on training data.
+
+**Overfitting**
+
+* Model is too complex.
+* Memorizes noise.
+* Looks great on training, fails on new data.
+
+---
+
+## 🎯 Model Goal: Generalization
+
+Goal:
+
+* Balance simplicity and predictive power.
+* Perform well on unseen data, not just seen data.
+
+Tool:
+
+* Train-test split helps detect overfitting.
+
+---
+
+## ⚖️ How to Compare Models
+
+```{r model-compare, eval=TRUE}
+m1 <- lm(electric_range ~ model_year, data = df_train)
+m2 <- lm(electric_range ~ model_year + bev, data = df_train)
+m3 <- lm(electric_range ~ model_year + bev + make, data = df_train)
+
+score_model <- function(mod, test_df) {
+  p <- predict(mod, newdata = test_df)
+  e <- test_df$electric_range - p
+  c(
+    adj_r2 = summary(mod)$adj.r.squared,
+    MAE = mean(abs(e)),
+    RMSE = sqrt(mean(e^2))
+  )
+}
+
+out <- rbind(
+  `Model 1: year` = score_model(m1, df_test),
+  `Model 2: year + bev` = score_model(m2, df_test),
+  `Model 3: year + bev + make` = score_model(m3, df_test)
+)
+
+round(out, 3)
+```
+
+Pick models using both:
+
+* Inference quality (coefficients, CIs, assumptions)
+* Out-of-sample performance (MAE/RMSE on test set)
+
+---
+
+## 🚫 Regression Is Not Causation
+
+Regression shows association, not policy impact.
+
+Causal claims require:
+
+* Experiments, or
+* Stronger research designs, and
+* Explicit assumptions
+
+This is the most common project mistake.
+
+---
+
+## ✅ Final Workflow Checklist
+
+Every regression analysis should:
+
+1. Plot the relationship first.
+2. Fit model.
+3. Interpret coefficients in words.
+4. Read p-values as evidence about $\beta \neq 0$.
+5. Use CI for plausible effect size.
+6. Check residuals for blind spots.
+7. Evaluate MAE/RMSE/MAPE on test data.
+8. Avoid causal language unless justified.
+
+---

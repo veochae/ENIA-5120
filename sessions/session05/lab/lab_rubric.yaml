@@ -1,11 +1,17 @@
 total_points: 20
 criteria:
-  - id: engineered_features
-    description: "Implements all required engineered columns with correct logic and NA handling."
-    max_points: 10
-  - id: squad_context
-    description: "Creates meaningful squad-level summaries and correctly joins them back to players."
-    max_points: 6
-  - id: documentation
-    description: "Completes feature_glossary and narrative explaining why the engineered fields matter."
+  - id: question_and_cleaning
+    description: "Defines a clear agricultural-yield regression question and performs correct, minimal cleaning without unnecessary transformations."
     max_points: 4
+  - id: split_and_selection
+    description: "Implements reproducible 70/30 splitting and correct column selection (including seed_variety as the only categorical variable)."
+    max_points: 4
+  - id: model_progression
+    description: "Builds V1 simple baseline, V2 expanded model, and V3 trimmed model with coherent progression."
+    max_points: 5
+  - id: interpretation_quality
+    description: "Interprets coefficients, p-values, confidence intervals, and R2/Adjusted R2 with correct reasoning."
+    max_points: 4
+  - id: performance_comparison
+    description: "Compares MAE/RMSE/MAPE across all three models and defends a final choice with evidence."
+    max_points: 3
