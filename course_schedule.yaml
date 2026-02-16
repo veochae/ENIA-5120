@@ -60,50 +60,38 @@ labs:
     submission_types: ["online_upload"]
   - key: lab05
     session: session05
-    name: "Lab 05 – Feature Engineering & Transformation"
+    name: "Lab 05 – Linear Regression"
     due_at: "2026-02-22T23:59:00-05:00"
     points: 20
     submission_types: ["online_upload"]
   - key: lab06
     session: session06
-    name: "Lab 06 – Hypothesis Testing"
+    name: "Lab 06 – Logistic Regression"
     due_at: "2026-03-08T23:59:00-05:00"
-    points: 20
-    submission_types: ["online_upload"]
-  - key: lab07
-    session: session07
-    name: "Lab 07 – Linear Regression"
-    due_at: "2026-03-15T23:59:00-04:00"
     points: 20
     submission_types: ["online_upload"]
   - key: lab08
     session: session08
-    name: "Lab 08 – Logistic Regression"
+    name: "Lab 08 – Clustering"
     due_at: "2026-03-22T23:59:00-04:00"
     points: 20
     submission_types: ["online_upload"]
   - key: lab09
     session: session09
-    name: "Lab 09 – Clustering"
+    name: "Lab 09 – APIs"
     due_at: "2026-03-29T23:59:00-04:00"
     points: 20
     submission_types: ["online_upload"]
   - key: lab10
     session: session10
-    name: "Lab 10 – Model Evaluation"
+    name: "Lab 10 – Storytelling and Dashboards"
     due_at: "2026-04-12T23:59:00-04:00"
     points: 20
     submission_types: ["online_upload"]
   - key: lab11
     session: session11
-    name: "Lab 11 – APIs & Scraping"
+    name: "Lab 11 – Generative AI"
     due_at: "2026-04-19T23:59:00-04:00"
-    points: 20
-    submission_types: ["online_upload"]
-  - key: lab12
-    session: session12
-    name: "Lab 12 – Storytelling"
-    due_at: "2026-04-27T23:59:00-04:00"
     points: 20
     submission_types: ["online_upload"]
 
@@ -116,31 +104,24 @@ homework:
     points: 30
     submission_types: ["online_upload"]
   - key: hw02
-    session: session05
-    release_session: session05
-    name: "Homework 02 – EDA & Hypothesis Testing"
-    due_at: "2026-02-24T23:59:00-05:00"
+    session: session06
+    release_session: session06
+    name: "Homework 02 – Data Visualizations"
+    due_at: "2026-03-15T23:59:00-05:00"
     points: 30
     submission_types: ["online_upload"]
   - key: hw03
-    session: session06
-    release_session: session06
-    name: "Homework 03 – Wrangling & Narrative Viz"
-    due_at: "2026-03-09T23:59:00-04:00"
+    session: session08
+    release_session: session08
+    name: "Homework 03 – Hypothesis Testing"
+    due_at: "2026-03-29T23:59:00-04:00"
     points: 30
     submission_types: ["online_upload"]
   - key: hw04
-    session: session08
-    release_session: session08
-    name: "Homework 04 – Predictive Modeling"
-    due_at: "2026-03-30T23:59:00-04:00"
-    points: 30
-    submission_types: ["online_upload"]
-  - key: hw05
     session: session10
     release_session: session10
-    name: "Homework 05 – Executive Summary"
-    due_at: "2026-04-06T23:59:00-04:00"
+    name: "Homework 04 – Predictive Modeling"
+    due_at: "2026-04-19T23:59:00-04:00"
     points: 30
     submission_types: ["online_upload"]
 
