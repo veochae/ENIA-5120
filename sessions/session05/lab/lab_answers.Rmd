@@ -203,7 +203,43 @@ summary(model_v3)
 
 ---
 
-## 6. Model Comparison (Train + Test Evidence)
+## 6. Residual Diagnostics (Model V3)
+
+**functions:**
+- `predict()` – generate fitted values.
+- `ggplot()` + `geom_point()` – visualize residual pattern.
+- `geom_hline()` – add zero-reference line.
+
+**logic steps:**
+- Compute residuals from `model_v3` as `actual - predicted`.
+- Plot residuals against fitted values.
+- Check whether residuals look like a random cloud around 0.
+
+```{r}
+fitted_v3 <- predict(model_v3, newdata = train_df)
+resid_v3 <- train_df$yield_kg_per_hectare - fitted_v3
+
+resid_df <- data.frame(
+  fitted = fitted_v3,
+  residual = resid_v3
+)
+
+ggplot(resid_df, aes(x = fitted, y = residual)) +
+  geom_point(alpha = 0.45, color = "steelblue") +
+  geom_hline(yintercept = 0, color = "firebrick", linetype = "dashed", linewidth = 1) +
+  labs(
+    title = "Residual Plot for Model V3",
+    x = "Fitted values (V3)",
+    y = "Residuals (actual - predicted)"
+  ) +
+  theme_minimal()
+```
+
+**Question 6.1:** Based on your residual plot for V3, explain why this is (or is not) a good residual pattern.
+
+---
+
+## 7. Model Comparison (Train + Test Evidence)
 
 **functions:**
 - `predict()` – out-of-sample predictions.
@@ -245,15 +281,15 @@ model_performance <- model_performance[order(model_performance$RMSE), ]
 model_performance
 ```
 
-**Question 6.1:** Which model has the best RMSE? Does it also have the best adjusted R²?
+**Question 7.1:** Which model has the best RMSE? Does it also have the best adjusted R²?
 
-**Question 6.2:** If V2 and V3 have very similar metrics, why might you still prefer V3?
+**Question 7.2:** If V2 and V3 have very similar metrics, why might you still prefer V3?
 
-**Question 6.3:** Which model would you recommend to farm planners and why? Use at least two metrics and one interpretation argument.
+**Question 7.3:** Which model would you recommend to farm planners and why? Use at least two metrics and one interpretation argument.
 
 ---
 
-## 7. Summary Question
+## 8. Summary Question
 
-**Summary Question 7.1:**  
+**Summary Question 8.1:**  
 If you had to brief farm planners in two minutes, which model would you recommend, what is the single most useful predictor, and what is one limitation of your recommendation?

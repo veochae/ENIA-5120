@@ -165,7 +165,27 @@ V3 should be between V1 and V2 in complexity.
 
 ---
 
-## 6. Model Comparison (Train + Test Evidence)
+## 6. Residual Diagnostics (Model V3)
+
+**functions:**
+- `predict()` – generate fitted values.
+- `ggplot()` + `geom_point()` – visualize residual pattern.
+- `geom_hline()` – add zero-reference line.
+
+**logic steps:**
+- Compute residuals from `model_v3` as `actual - predicted`.
+- Plot residuals against fitted values.
+- Check whether residuals look like a random cloud around 0.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 6.1:** Based on your residual plot for V3, explain why this is (or is not) a good residual pattern.
+
+---
+
+## 7. Model Comparison (Train + Test Evidence)
 
 **functions:**
 - `predict()` – out-of-sample predictions.
@@ -185,15 +205,15 @@ V3 should be between V1 and V2 in complexity.
 "<write your code here>"
 ```
 
-**Question 6.1:** Which model has the best RMSE? Does it also have the best adjusted R²?
+**Question 7.1:** Which model has the best RMSE? Does it also have the best adjusted R²?
 
-**Question 6.2:** If V2 and V3 have very similar metrics, why might you still prefer V3?
+**Question 7.2:** If V2 and V3 have very similar metrics, why might you still prefer V3?
 
-**Question 6.3:** Which model would you recommend to farm planners and why? Use at least two metrics and one interpretation argument.
+**Question 7.3:** Which model would you recommend to farm planners and why? Use at least two metrics and one interpretation argument.
 
 ---
 
-## 7. Summary Question
+## 8. Summary Question
 
-**Summary Question 7.1:**  
+**Summary Question 8.1:**  
 If you had to brief farm planners in two minutes, which model would you recommend, what is the single most useful predictor, and what is one limitation of your recommendation?

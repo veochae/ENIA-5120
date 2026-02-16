@@ -15,5 +15,6 @@
 4. Fit **Model V1 (simple)** with one numeric predictor.
 5. Fit **Model V2 (expanded)** using all available predictor columns **except** `soil_quality`.
 6. Fit **Model V3 (trimmed)** using only the original predictors from the pre-fabrication dataset.
-7. Compare V1/V2/V3 using **MAE, RMSE, MAPE, R², Adjusted R²**.
-8. Answer interpretation questions about coefficient meaning, uncertainty, and model tradeoffs.
+7. Create a residual plot for **Model V3** and interpret whether the residual pattern looks appropriate.
+8. Compare V1/V2/V3 using **MAE, RMSE, MAPE, R², Adjusted R²**.
+9. Answer interpretation questions about coefficient meaning, uncertainty, and model tradeoffs.
