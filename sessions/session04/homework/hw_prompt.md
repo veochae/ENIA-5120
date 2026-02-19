@@ -1,4 +1,4 @@
-# Homework 02 – Data Cleaning, Merging, and EDA
+# Homework 01 – Data Cleaning, Merging, and EDA
 
 You will analyze two provided datasets:
 - `data/air_quality_sites.csv`
