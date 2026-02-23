@@ -19,12 +19,12 @@ lab:
     - path: lab/lab_rubric.pdf
       display_name: "Lab 04 – Rubric.pdf"
 homework:
-  assignment_key: hw02
+  assignment_key: hw01
   files:
     - path: homework/hw_prompt.pdf
-      display_name: "HW 02 – Prompt.pdf"
+      display_name: "HW 01 – Prompt.pdf"
     - path: homework/hw_rubric.pdf
-      display_name: "HW 02 – Rubric.pdf"
+      display_name: "HW 01 – Rubric.pdf"
     - path: ../../data/air_quality_sites.csv
       display_name: "air_quality_sites.csv"
     - path: ../../data/policy_actions.csv
