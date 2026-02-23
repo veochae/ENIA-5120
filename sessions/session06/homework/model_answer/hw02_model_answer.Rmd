@@ -1,0 +1,196 @@
+---
+title: "HW02 Model Answer – Advanced Data Visualization Storytelling"
+author: "Instructor"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    code_folding: hide
+---
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+# Optional package for bonus interactivity
+has_plotly <- requireNamespace("plotly", quietly = TRUE)
+```
+
+# 0. Load, Clean, and Join Data
+
+```{r load-clean-join}
+sites_raw <- read_csv("../../../../data/air_quality_sites.csv")
+policy_raw <- read_csv("../../../../data/policy_actions.csv")
+
+sites <- sites_raw %>%
+  mutate(
+    site_id = str_trim(str_to_upper(site_id)),
+    region = str_trim(str_to_title(region))
+  )
+
+policy <- policy_raw %>%
+  mutate(
+    site_id = str_trim(str_to_upper(site_id)),
+    policy_strength = factor(str_trim(str_to_title(policy_strength)), levels = c("None", "Pilot", "Partial", "Full"), ordered = TRUE),
+    policy_type = str_trim(str_to_title(policy_type)),
+    policy_adopted = as.character(policy_adopted),
+    grant_amount = as.numeric(grant_amount),
+    compliance_score = as.numeric(compliance_score),
+    estimated_reduction_pct = as.numeric(estimated_reduction_pct)
+  )
+
+policy_site <- policy %>%
+  filter(!is.na(policy_strength), !is.na(policy_type)) %>%
+  arrange(site_id, start_date) %>%
+  group_by(site_id) %>%
+  summarize(
+    policy_strength = max(policy_strength),
+    policy_type = first(policy_type),
+    grant_amount = sum(grant_amount, na.rm = TRUE),
+    compliance_score = mean(compliance_score, na.rm = TRUE),
+    estimated_reduction_pct = mean(estimated_reduction_pct, na.rm = TRUE),
+    policy_adopted = as.character(any(policy_adopted == "TRUE" | policy_adopted == "True")),
+    .groups = "drop"
+  )
+
+analysis_df <- left_join(sites, policy_site, by = "site_id") %>%
+  filter(
+    !is.na(pm25),
+    !is.na(policy_strength),
+    !is.na(traffic_index),
+    !is.na(compliance_score),
+    !is.na(estimated_reduction_pct),
+    !is.na(grant_amount)
+  )
+
+glimpse(analysis_df)
+```
+
+# Q1 (Violin Plot)
+
+**Question this chart answers:** How does PM2.5 distribution differ across policy strength levels?
+
+```{r q1-violin, fig.width=8, fig.height=5}
+p1 <- analysis_df %>%
+  ggplot(aes(x = policy_strength, y = pm25, fill = policy_strength)) +
+  geom_violin(alpha = 0.75, trim = FALSE, color = "gray35") +
+  stat_summary(fun = median, geom = "point", color = "black", size = 2) +
+  labs(
+    title = "PM2.5 Distribution by Policy Strength",
+    x = "Policy Strength",
+    y = "PM2.5",
+    fill = "Policy Strength"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none")
+
+p1
+```
+
+**Why this visual:** A violin plot shows distribution shape, spread, and center in one chart.
+
+**What it shows:** PM2.5 distributions differ by policy strength. The median markers help compare central tendency while the violin width shows where values are concentrated.
+
+**Caveat:** This is descriptive and does not establish a causal policy effect.
+
+# Q2 (Facet Wrap)
+
+**Question this chart answers:** Does the traffic-PM2.5 relationship look different across policy types?
+
+```{r q2-facet-wrap, fig.width=10, fig.height=6}
+p2 <- analysis_df %>%
+  ggplot(aes(x = traffic_index, y = pm25, color = policy_strength)) +
+  geom_point(alpha = 0.45, size = 1.2) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.8) +
+  facet_wrap(~policy_type) +
+  labs(
+    title = "Traffic vs PM2.5 by Policy Type",
+    x = "Traffic Index",
+    y = "PM2.5",
+    color = "Policy Strength"
+  ) +
+  theme_minimal(base_size = 12)
+
+p2
+```
+
+**Why this visual:** Faceting isolates subgroup patterns without mixing them into one panel.
+
+**What it shows:** The traffic-pollution relationship is positive across most panels, but slope/dispersion vary by policy type.
+
+**Caveat:** Differences across facets can reflect sample composition, not only policy dynamics.
+
+# Q3 (Bubble Scatter Plot)
+
+**Question this chart answers:** Which site-policy combinations look high priority for funding and reduction potential?
+
+```{r q3-bubble, fig.width=8, fig.height=5}
+p3 <- analysis_df %>%
+  ggplot(
+    aes(
+      x = compliance_score,
+      y = estimated_reduction_pct,
+      size = grant_amount,
+      color = policy_adopted
+    )
+  ) +
+  geom_point(alpha = 0.65) +
+  scale_size_continuous(range = c(1.5, 10)) +
+  labs(
+    title = "Policy Reduction Potential vs Compliance (Bubble Size = Grant Amount)",
+    x = "Compliance Score",
+    y = "Estimated Reduction (%)",
+    size = "Grant Amount",
+    color = "Policy Adopted"
+  ) +
+  theme_minimal(base_size = 12)
+
+p3
+```
+
+**Why this visual:** Bubble scatter allows 4 dimensions in one view (x, y, size, color).
+
+**What it shows:** Larger grants and higher reduction potential are visible simultaneously; adopted vs non-adopted clusters can be compared directly.
+
+**Caveat:** Bubble size can dominate attention, so scale choices affect interpretation.
+
+# Q4 (Ridgeline Density Plot)
+
+**Question this chart answers:** How does the full PM2.5 distribution shift across regions?
+
+```{r q4-ridgeline, fig.width=9, fig.height=5}
+if (requireNamespace("ggridges", quietly = TRUE)) {
+  p4 <- analysis_df %>%
+    ggplot(aes(x = pm25, y = region, fill = region)) +
+    ggridges::geom_density_ridges(alpha = 0.7, scale = 1.1, color = "gray20") +
+    labs(
+      title = "Ridgeline Density of PM2.5 by Region",
+      x = "PM2.5",
+      y = "Region"
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(legend.position = "none")
+
+  p4
+} else {
+  ggplot(analysis_df, aes(x = pm25, fill = region)) +
+    geom_density(alpha = 0.35) +
+    facet_wrap(~region, ncol = 1) +
+    labs(
+      title = "Fallback View (Install ggridges for Ridgeline): PM2.5 Density by Region",
+      x = "PM2.5",
+      y = "Density"
+    ) +
+    theme_minimal(base_size = 12)
+}
+```
+
+**Why this visual:** Ridgeline plots compare multiple full distributions compactly.
+
+**What it shows:** Regions differ not only in mean PM2.5 but in spread and tail behavior.
+
+**Caveat:** Requires `ggridges`; fallback density facets are less compact.
+
+# Final Summary
+
+If briefing leadership: (1) distribution differences suggest uneven exposure across policy contexts, and (2) the bubble plot reveals where high-reduction opportunities align with funding and compliance. Main caution: these visuals are associational; they should guide prioritization, not claim causal impact by themselves.

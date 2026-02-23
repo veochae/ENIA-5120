@@ -1,13 +1,31 @@
-# Lab 06 – Distributions & Hypothesis Testing
+# Lab 06 – Logistic Regression in Practice
 
 ## Goals
-- Visualize distributions
-- Run t-tests and chi-square tests in R
-- Interpret p-values and confidence intervals
+- Build and compare logistic regression models for policy adoption.
+- Interpret coefficients, odds ratios, ROC, AUC, and threshold tradeoffs.
+- Select and justify a best cutoff using Youden's J.
+
+## Scenario
+You are advising a state climate office on likely policy adoption by county.
+
+## Data
+Use `~/ENIA-5120/data/climate_policy_adoption_synthetic.csv`.
 
 ## Tasks
-1. Load `~/ENIA-5120/data/laser_league_players.csv`.
-2. Create histograms of `tag_accuracy_pct` split by whether players commute via Hover Tram (`hover_commuter` flag).
-3. Run a two-sample t-test comparing `tag_accuracy_pct` between Hover Tram commuters and everyone else (`ttest_result`).
-4. Build a contingency table of `preferred_channel` vs `favorite_drink` and run `chisq.test`, saving to `chi_result`.
-5. Summarize findings in text.
+1. Load synthetic policy dataset.
+2. Clean data and set variable types.
+3. Build Logistic Regression V1 (simple baseline).
+4. Assess V1 with ROC, AUC, accuracy, precision, and recall.
+5. Build Logistic Regression V2 (expanded model).
+6. Find best cutoff for V2 from ROC (Youden's J).
+7. Build V3 by applying V2 with best cutoff.
+8. Build confusion matrix for V3.
+9. Compare V1, V2, and V3 metrics.
+
+## Required Interpretation Questions
+- Coefficient interpretation (including odds ratio).
+- ROC interpretation.
+- AUC interpretation.
+- Why the best cutoff is selected.
+- Precision vs recall preference in this context.
+- Interpretation of V3 confusion matrix.

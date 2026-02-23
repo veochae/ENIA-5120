@@ -1,14 +1,60 @@
 total_points: 30
+bonus_points: 2
 criteria:
-  - id: wrangling_accuracy
-    description: "Correct joins/reshapes with clear explanation and no unexplained duplicates"
-    max_points: 12
-  - id: visualization_quality
-    description: "Visuals are purposeful, well-labeled, and drive the story"
-    max_points: 7.5
-  - id: narrative_insight
-    description: "Explains what the wrangled data reveals and which factors might matter later"
-    max_points: 6
-  - id: technical_cleanliness
-    description: "Code runs without errors, steps are commented and organized"
-    max_points: 4.5
+  - id: q1_violin
+    description: "Q1 Violin plot communicates distribution differences clearly and accurately"
+    max_points: 9
+    levels:
+      - score: 9
+        description: "Well-constructed violin plot with clear labels, appropriate grouping, and strong interpretation of distribution differences."
+      - score: 7
+        description: "Good violin plot with minor clarity or interpretation gaps."
+      - score: 5
+        description: "Basic violin plot; partial interpretation."
+      - score: 3
+        description: "Plot present but weakly executed or weakly interpreted."
+      - score: 0
+        description: "Missing or not interpretable."
+  - id: q2_facet_wrap
+    description: "Q2 Facet wrap reveals subgroup relationships and is interpreted correctly"
+    max_points: 9
+    levels:
+      - score: 9
+        description: "Facet design is effective; subgroup comparisons are clear and accurately explained."
+      - score: 7
+        description: "Good faceted visual with minor issues in readability or interpretation."
+      - score: 4
+        description: "Subgroup view is present but interpretation is limited."
+      - score: 2
+        description: "Faceting used weakly or comparison is unclear."
+      - score: 0
+        description: "Missing."
+  - id: q3_bubble_scatter
+    description: "Q3 Bubble scatter supports a policy story with size/color encoding"
+    max_points: 9
+    levels:
+      - score: 9
+        description: "Bubble scatter is well-encoded (x, y, size, color), readable, and tied to a clear decision narrative."
+      - score: 7
+        description: "Good plot and interpretation with minor design or explanation gaps."
+      - score: 5
+        description: "Plot exists with partial encoding clarity or limited interpretation."
+      - score: 2
+        description: "Weak design choice or unclear story."
+      - score: 0
+        description: "Missing."
+  - id: q4_ridgeline
+    description: "Q4 Ridgeline density plot is correctly built and interpreted"
+    max_points: 3
+    levels:
+      - score: 3
+        description: "Ridgeline plot is correct, readable, and interpretation is clear."
+      - score: 2
+        description: "Ridgeline plot is present with minor technical or interpretation issues."
+      - score: 1
+        description: "Attempt made but plot is unclear or interpretation is minimal."
+      - score: 0
+        description: "Missing."
+bonus:
+  description: "Q3 bubble scatter is meaningfully converted to interactive Plotly using ggplotly()"
+  max_points: 2

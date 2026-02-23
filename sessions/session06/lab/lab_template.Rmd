@@ -1,32 +1,279 @@
 ---
-title: "Lab 06 – Hypothesis Testing"
+title: "Lab 06 – Logistic Regression in Practice"
+subtitle: "Climate Policy Adoption: Baseline, Expanded Model, and Cutoff Tuning"
 author: "Your Name"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
 ---
 
-```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
-library(readr)
-library(ggplot2)
-knitr::opts_chunk$set(echo = TRUE)
+## 🧭 Mission Background
+You are advising a state climate office on which counties are likely to adopt a policy package.
+
+**Your Goal:** Build and compare three logistic workflows:
+- V1: simple baseline model
+- V2: expanded model with more predictors
+- V3: V2 with ROC-based best cutoff
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(pROC)
+
+# Data path (works from lab folder or repo root)
+policy_path_candidates <- c(
+  "../../../data/climate_policy_adoption_synthetic.csv",
+  "data/climate_policy_adoption_synthetic.csv"
+)
+policy_path <- policy_path_candidates[file.exists(policy_path_candidates)][1]
 ```
 
+---
+
+## Dataset Variables (Used in This Lab)
+
+- `policy_adopted`: Binary outcome (1 = adopted, 0 = not adopted)
+- `compliance_score`: Compliance readiness score
+- `public_support_pct`: Public support percentage
+- `inspection_count`: Number of inspections
+- `grants_million`: Grant amount (millions)
+- `emissions_baseline_index`: Baseline emissions index
+- `region_type`: Categorical county type
+- `policy_type`: Categorical policy program type
+
+---
+
+## 0. Decision Question
+
+> Which counties are likely to adopt the policy package, and what probability cutoff should be used to classify likely adoption?
+
+---
+
+## 1. Load Raw Data
+
+**functions:**
+- `read_csv()` – load dataset.
+- `glimpse()` – inspect column types.
+
+**logic steps:**
+- Load county-level policy dataset.
+- Verify variables needed for logistic regression.
+
 ```{r}
-league_df <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv")) %>%
-  mutate(hover_commuter = if_else(commute_mode == "Hover Tram", "Hover", "Other"))
+policy_raw <- read_csv(policy_path, show_col_types = FALSE)
+glimpse(policy_raw)
 ```
+
+---
+
+## 2. Clean Data
+
+**functions:**
+- `mutate()` – set variable types.
+- `filter()` / `drop_na()` – keep usable rows.
+
+**logic steps:**
+- Keep modeling columns only.
+- Convert `region_type` and `policy_type` to factors.
+- Ensure outcome is numeric 0/1.
+
+```{r}
+policy_clean <- policy_raw %>%
+  transmute(
+    policy_adopted = as.integer(policy_adopted),
+    compliance_score,
+    public_support_pct,
+    inspection_count,
+    grants_million,
+    emissions_baseline_index,
+    region_type = as.factor(region_type),
+    policy_type = as.factor(policy_type)
+  ) %>%
+  drop_na()
+
+table(policy_clean$policy_adopted)
+```
+
+---
+
+## 3. Train/Test Split (70/30)
+
+**functions:**
+- `set.seed()` – reproducible split.
+- `sample.int()` – random row selection.
+
+**logic steps:**
+- Split data into 70% training and 30% testing.
+- Save as `train_df` and `test_df`.
+
+```{r}
+set.seed(5120)
+idx <- sample.int(nrow(policy_clean), size = floor(0.7 * nrow(policy_clean)))
+train_df <- policy_clean[idx, ]
+test_df <- policy_clean[-idx, ]
+
+cat("Train rows:", nrow(train_df), "\n")
+cat("Test rows:", nrow(test_df), "\n")
+```
+
+---
+
+## 4. Model V1: Simple Baseline Logistic Regression
+
+**functions:**
+- `glm(..., family = binomial())`
+- `summary()`
+- `exp(coef())`
+
+**logic steps:**
+- Fit V1 with one predictor: `compliance_score`.
+- Interpret direction and odds-ratio meaning.
 
 ```{r}
 "<write your code here>"
 ```
 
+**Question 4.1:** Interpret the `compliance_score` coefficient in V1 using odds-ratio language.
+
+---
+
+## 5. Evaluate V1 (ROC, AUC, Accuracy, Precision, Recall)
+
+**functions:**
+- `predict(type = "response")`
+- `roc()` / `auc()` from `pROC`
+- `ggplot()`
+
+**logic steps:**
+- Generate V1 test probabilities.
+- Compute ROC and AUC.
+- Compute accuracy, precision, and recall at cutoff 0.50.
+
 ```{r}
+compute_metrics <- function(actual, p_hat, cutoff) {
+  pred <- ifelse(p_hat >= cutoff, 1L, 0L)
+
+  TP <- sum(pred == 1 & actual == 1)
+  FP <- sum(pred == 1 & actual == 0)
+  TN <- sum(pred == 0 & actual == 0)
+  FN <- sum(pred == 0 & actual == 1)
+
+  data.frame(
+    accuracy = (TP + TN) / length(actual),
+    precision = ifelse((TP + FP) == 0, 0, TP / (TP + FP)),
+    recall = ifelse((TP + FN) == 0, 0, TP / (TP + FN))
+  )
+}
+
+roc_to_df <- function(roc_obj, model_name) {
+  data.frame(
+    fpr = 1 - roc_obj$specificities,
+    tpr = roc_obj$sensitivities,
+    model = model_name
+  )
+}
+
 "<write your code here>"
 ```
+
+**Question 5.1:** Interpret the ROC curve for V1 in plain language.
+
+**Question 5.2:** Interpret the AUC value for V1 in plain language.
+
+---
+
+## 6. Model V2: Expanded Logistic Regression
+
+**functions:**
+- `glm(..., family = binomial())`
+- `summary()`
+- `exp(coef())`
+- `predict(type = "response")`
+
+**logic steps:**
+- Add multiple predictors and categorical controls.
+- Fit V2 and evaluate at cutoff 0.50.
 
 ```{r}
 "<write your code here>"
 ```
 
-## Notes
-Briefly explain what the p-values tell you.
+**Question 6.1:** Which variable in V2 appears most influential, and why?
+
+**Question 6.2:** Choose one numeric coefficient in V2 and interpret it as an odds ratio.
+
+---
+
+## 7. Best Cutoff for V2 (Using ROC)
+
+Use Youden's J:
+
+$$
+J = TPR - FPR
+$$
+
+**functions:**
+- `coords()` from `pROC` with `x = "best"` and `best.method = "youden"`.
+
+**logic steps:**
+- Extract the best threshold from V2 ROC.
+- Save as `best_cutoff_v2`.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 7.1:** Why is this cutoff better than 0.50 for this model?
+
+---
+
+## 8. Model V3: V2 with Best Cutoff + Confusion Matrix
+
+**functions:**
+- `compute_metrics()`
+- `table()`
+
+**logic steps:**
+- Keep model form same as V2.
+- Reclassify predictions using `best_cutoff_v2`.
+- Build confusion matrix for V3.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 8.1:** Interpret the V3 confusion matrix: what do false positives and false negatives mean in this policy context?
+
+---
+
+## 9. Compare V1 vs V2 vs V3
+
+**functions:**
+- `rbind()`
+- `order()` / `arrange()`
+- `ggplot()`
+
+**logic steps:**
+- Build one comparison table with cutoff, accuracy, precision, recall, and AUC.
+- Include AUC for all three versions (V3 has same ranking as V2).
+- Compare model tradeoffs and recommend one setup.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 9.1:** Which model setup is best for this context, and why?
+
+**Question 9.2:** Should the policy team prioritize precision or recall here? Explain with context.
+
+**Question 9.3:** Is accuracy alone enough in this dataset? Briefly justify your answer.
+
+---
+
+## 10. Final Reflection
+
+**Summary Question 10.1:**
+If you had to brief leadership in two minutes, which model/cutoff would you deploy, and what is one limitation they should remember?

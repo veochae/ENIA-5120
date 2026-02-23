@@ -1,11 +1,17 @@
-total_points: 20
+total_points: 30
 criteria:
-  - id: viz
-    description: "Visualizes distributions by group"
+  - id: prep
+    description: "Loads and cleans data correctly; creates binary target and train/test split"
     max_points: 6
-  - id: tests
-    description: "Runs and interprets t-test and chi-square"
-    max_points: 10
-  - id: reflection
-    description: "Explains findings clearly"
+  - id: modeling
+    description: "Builds logistic models V1, V2, and V3 with correct logic"
+    max_points: 8
+  - id: metrics
+    description: "Computes ROC/AUC, accuracy, precision, recall, and best cutoff correctly"
+    max_points: 8
+  - id: confusion
+    description: "Builds and interprets confusion matrices"
+    max_points: 4
+  - id: interpretation
+    description: "Explains coefficients, ROC/AUC, cutoff, and precision-vs-recall choice clearly"
     max_points: 4

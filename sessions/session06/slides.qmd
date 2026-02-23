@@ -1,36 +1,775 @@
 ---
-title: "Session 6 – Distributions & Hypothesis Testing"
-format:
+title: "Session 6: Logistic Regression"
+subtitle: "From Probability to Policy Decisions"
+format: 
   revealjs:
     slide-number: true
-    toc: true
+    smaller: true
+    scrollable: true    
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
+    theme: serif
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: false
 ---
 
-# Agenda
-- Distribution families
-- Central Limit Theorem demo
-- Hypothesis testing workflow
+## 🧭 Opening Decision Problem
+
+Question:
+
+> Is this car a BEV or HPEV? **Yes or No**
+
+
+This is not a "how much" question.
+It is a **decision** question.
+
+What we really need:
+
+* Is this car a BEV? **Yes**.
 
 ---
 
-# Distributions
-- Normal vs skewed
-- Binomial, Poisson
-- Why shape matters
+## 🎯 Core Idea
+
+But how do we get to **"Yes"** or **"No"**?
+
+* Calculate **Probabilities** first
+* See what level of probability you are comfortable with
+* Then labels (Yes/No) using a threshold
+
+Key line:
+
+> Logistic regression predicts probabilities, not labels.
 
 ---
 
-# Hypothesis Tests
-1. Define H0 / H1
-2. Choose test statistic
-3. Compute p-value
-4. Interpret in context
+## 🚫 Why Linear Regression Fails for Yes/No
+
+Linear regression can output values like:
+
+* 1.3
+* -0.2
+
+But probabilities must stay between 0 and 1.
+
+Plain language:
+
+* A straight line has no boundaries.
+* Probability must have boundaries.
 
 ---
 
-# R Functions
-```r
-t.test(metric ~ group, data = df)
-chisq.test(table(segment, converted))
+## ✅ What We Need Instead
+
+We need a model that:
+
+* Uses predictors linearly
+* But always returns valid probabilities (bounded between 0 and 1)
+* Works naturally for binary outcomes
+
+That model is **logistic regression**.
+
+---
+
+## 🤔 No..? But You Said..?
+
+- Yes, I did say regressions are for **Numeric Outputs** 
+- But if the **outcome** is binary, it's not numeric, it's categorical!
+- But, notice that **outcome** is binary, but **output** is numeric (probability)
+- So logistic regression, although may seem like non-regression, is classified as a "regression".
+
+
+## 🧮 Logistic Regression: Step 1 (Linear Score)
+
+Build a score:
+
+$$
+z = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots
+$$
+
+This score:
+
+* Can be any real number
+* Is **not** a probability yet
+* Think of **Y** as a temporary score for the actual binary outcome
+* Think of $/beta$ as just a random point (for now)
+
+---
+
+## 🧮 Logistic Regression: Step 2 (Sigmoid)
+
+Convert score to probability:
+
+$$
+p = \frac{1}{1 + e^{-z}}
+$$
+
+This is the logistic (sigmoid) function.
+
+---
+
+## 📉 From Linear Score to Sigmoid
+
+```{r sigmoid-demo, eval=TRUE, fig.width=8, fig.height=4.5}
+library(dplyr)
+library(ggplot2)
+
+b0 <- -4
+b1 <- 0.18
+
+df <- tibble(x = seq(0, 50, by = 0.1)) %>%
+  mutate(
+    z = b0 + b1 * x,
+    p = 1 / (1 + exp(-z))
+  )
+
+anchors <- df %>%
+  filter(round(x) %in% c(5, 15, 25, 35, 45)) %>%
+  mutate(id = paste0("x=", round(x)))
+
+ggplot(df, aes(x = x, y = z)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_point(data = anchors, aes(color = id), size = 3) +
+  labs(
+    title = "Step 1: Linear Score",
+    x = "x",
+    y = "z = b0 + b1x"
+  ) +
+  theme_minimal(base_size = 12)
+
+ggplot(df, aes(x = x, y = p)) +
+  geom_line(color = "darkgreen", linewidth = 1) +
+  geom_point(data = anchors, aes(color = id), size = 3) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "firebrick") +
+  labs(
+    title = "Step 2: Sigmoid Probability",
+    x = "x",
+    y = "p = 1/(1+e^-z)"
+  ) +
+  theme_minimal(base_size = 12)
 ```
+
+---
+
+## 📈 What Sigmoid Does
+
+$$
+p = \frac{1}{1 + e^{-z}}
+$$
+
+**Quick checkpoints:**
+
+* If $z$ is very negative -> $p$ is near 0.
+* If $z = 0$ -> $p = 0.5$.
+* If $z$ is very positive -> $p$ is near 1.
+
+**Why:**
+
+* Large negative $z$ makes $e^{-z}$ very large, so denominator is large -> probability shrinks.
+* At $z=0$, $e^0=1$, so $p=1/(1+1)=0.5$.
+* Large positive $z$ makes $e^{-z}$ very small, so denominator approaches 1 -> probability approaches 1.
+
+**Why the S-shape matters:**
+
+* Middle is steep: small score changes can move decisions.
+* Extremes are flat: probabilities stabilize near 0 or 1.
+
+---
+
+## 🧠 Plain Summary
+
+> Logistic regression is a straight line fed through an S-curve.
+
+---
+
+## 🌐 Three Languages You Must Know
+
+Logistic regression is discussed in:
+
+1. Probability
+2. Odds
+3. Log-odds (logit)
+
+---
+
+## 📊 1. Probability
+
+$$
+p = P(Y=1)
+$$
+
+Interpretation:
+
+* Out of 100 similar cases, how many are expected to be Yes?
+
+---
+
+## ⚖️ 2. Odds
+
+$$
+\text{odds} = \frac{p}{1-p}
+$$
+
+Odds compare:
+
+* How much more likely is Yes than No?
+
+Example:
+
+* If $p=0.20$, then odds $= 0.20/0.80 = 0.25$
+* Meaning: 1 Yes for every 4 No.
+
+---
+
+## 🧮 3. Log-Odds (Logit)
+
+$$
+\log\left(\frac{p}{1-p}\right)
+$$
+
+So what is the **z** that we saw in the original regression like function?
+
+$$
+\log(\text{odds}) = \beta_0 + \beta_1 x
+$$
+
+---
+
+## ❓ Why Log-Odds?
+
+Some of you may have noticed that sigmoid function looks **Logarithmic**
+
+Because:
+
+* Probability space is curved
+* Log-odds space becomes linear
+
+Key line:
+
+> Logistic regression is linear in log-odds space.
+
+---
+
+## 📉 Why Log-Odds?
+
+```{r logodds-demo, eval=TRUE, fig.width=8, fig.height=4.5}
+library(dplyr)
+library(ggplot2)
+
+b0 <- -4
+b1 <- 0.18
+
+df <- tibble(x = seq(0, 50, by = 0.1)) %>%
+  mutate(
+    z = b0 + b1 * x,
+    p = 1 / (1 + exp(-z)),
+    odds = p / (1 - p),
+    log_odds = log(odds)
+  )
+
+ggplot(df, aes(x = x, y = p)) +
+  geom_line(color = "darkgreen", linewidth = 1) +
+  labs(
+    title = "Probability (Sigmoid): Curved",
+    x = "x",
+    y = "p"
+  ) +
+  theme_minimal(base_size = 12)
+
+ggplot(df, aes(x = x, y = log_odds)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_abline(intercept = b0, slope = b1, linetype = "dashed", color = "firebrick") +
+  labs(
+    title = "Log-Odds: Linear",
+    subtitle = "Dashed line is b0 + b1x",
+    x = "x",
+    y = "log(p/(1-p))"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+## 🔍 Two Views of Same Model
+
+Linear-score view:
+
+$$
+z = \beta_0 + \beta_1 x
+$$
+
+Probability view:
+
+$$
+p(x) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}}
+$$
+
+Same model, different lens.
+
+---
+
+## ⚙️ How Logistic Regression Is Fit
+
+Linear regression:
+
+* Minimizes squared errors
+
+Logistic regression:
+
+* Maximizes likelihood (MLE)
+
+Meaning:
+
+* Choose coefficients that make observed Yes/No outcomes most probable.
+
+---
+
+## 📉 Log-Loss Intuition
+
+MLE behavior:
+
+* Rewards confident correct predictions
+* Punishes confident wrong predictions heavily
+
+Log-likelihood (maximize):
+
+$$
+\ell(\beta)=\sum_{i=1}^{n}\left[y_i\log(p_i)+(1-y_i)\log(1-p_i)\right]
+$$
+
+Equivalent log-loss / negative log-likelihood (minimize):
+
+$$
+\text{LogLoss} = -\frac{1}{n}\sum_{i=1}^{n}\left[y_i\log(p_i)+(1-y_i)\log(1-p_i)\right]
+$$
+
+This objective is equivalent to minimizing log-loss.
+
+---
+
+## 💻 Logistic Output Example
+```{r logit-output-demo, eval=TRUE}
+set.seed(5120)
+n <- 300
+
+demo_df <- data.frame(
+  chargers = rnorm(n, mean = 10, sd = 3),
+  income = rnorm(n, mean = 65, sd = 12)
+)
+
+z <- -6 + 0.35 * demo_df$chargers + 0.04 * demo_df$income
+p <- 1 / (1 + exp(-z))
+demo_df$funded_yes <- rbinom(n, size = 1, prob = p)
+
+m_logit <- glm(funded_yes ~ chargers + income, data = demo_df, family = binomial())
+
+summary(m_logit)
+
+exp(coef(m_logit))
+```
+
+---
+
+## 🧾 Coefficient Interpretation
+
+Raw logistic coefficient:
+
+* Change in **log-odds** (hard to explain directly)
+
+So we exponentiate:
+
+$$
+OR = e^{\beta}
+$$
+
+This gives the **odds ratio (OR)**.
+
+---
+
+## 🔁 Odds Ratio Meaning
+
+If OR = 2:
+
+* Odds of Yes are multiplied by 2 for a 1-unit increase in X
+
+If OR = 0.7:
+
+* Odds are multiplied by 0.7 (30% decrease)
+
+Important:
+
+* OR talks about odds, not direct probability change.
+
+---
+
+## 🔢 Odds to Probability Example
+
+Suppose:
+$$
+p(x_1) = \frac{1}{1 + e^{-(-1.386 + 0.693 x_1)}}
+$$
+
+Step 1: Baseline probability at \(x_1=0\)
+
+$$
+p_0 = \frac{1}{1 + e^{-(-1.386 + 0.693 \cdot 0)}}
+= \frac{1}{1 + e^{1.386}}
+= 0.20
+$$
+
+Step 2: Convert baseline probability to odds
+
+$$
+\text{odds}_0 = \frac{p_0}{1-p_0} = \frac{0.20}{0.80} = 0.25
+$$
+
+Step 3: Increase \(x_1\) by 1 -> odds multiply by OR
+
+$$
+\text{odds}_1 = \text{odds}_0 \times OR = 0.25 \times 2 = 0.50
+$$
+
+Step 4: Convert updated odds back to probability
+
+$$
+p_1 = \frac{\text{odds}_1}{1+\text{odds}_1}
+= \frac{0.50}{1.50}
+= 0.333
+$$
+
+Step 5: Probability impact of a +1 increase in \(x_1\)
+
+$$
+\Delta p = p_1 - p_0 = 0.333 - 0.20 = 0.133
+$$
+
+Result summary:
+
+* A +1 increase in \(x_1\) moves probability from **0.20 -> 0.333**.
+* That is a **+13.3 percentage-point** increase in this baseline scenario.
+
+---
+
+## ⚠️ Key Lesson
+
+> Doubling odds does not double probability.
+
+---
+
+
+## 🧪 Coefficient Significance
+
+For each coefficient, test:
+
+$$
+H_0: \beta = 0
+$$
+
+Meaning:
+
+* Predictor has no association with outcome
+
+If p-value is small:
+
+* Evidence of association
+
+Reminder:
+
+* Significant != large effect
+* Significant != causal
+
+---
+
+## 📏 Confidence Intervals for OR
+
+Example:
+
+* OR = 1.5
+* 95% CI = [1.1, 2.1]
+
+Interpretation:
+
+* Odds likely increase between 10% and 110%
+
+If CI includes 1:
+
+* Effect may be indistinguishable from no effect
+
+CI gives magnitude uncertainty, not just yes/no.
+
+---
+
+## 🧩 Confusion Matrix
+
+|               | Pred Yes | Pred No |
+|---|---:|---:|
+| Actual Yes | TP | FN |
+| Actual No  | FP | TN |
+
+---
+
+## 📐 Derived Metrics
+
+Accuracy (overall percent correct):
+
+$$
+\text{Accuracy} = \frac{TP + TN}{\text{Total}}
+$$
+
+Precision (out of predicted Yes, how many were truly Yes):
+
+$$
+\text{Precision} = \frac{TP}{TP + FP}
+$$
+
+Recall (out of actual Yes, how many we caught):
+
+$$
+\text{Recall} = \frac{TP}{TP + FN}
+$$
+
+---
+
+## 🧭 Precision vs Recall in Practice
+
+| Context | Usually prioritize | Why |
+|---|---|---|
+| Medical screening | Recall | Missing a true case is costly |
+| Fraud enforcement | Precision | False accusations are costly |
+
+From the example:
+
+* Precision = 60% -> 40% of flagged counties were false alarms.
+* Recall = 75% -> model caught 3 out of 4 counties that truly needed funding.
+
+---
+
+## 🎚️ Thresholds: 0.5 Is Not Sacred
+
+Model gives probability $p$.
+You choose threshold $t$:
+
+* If $p \ge t$ -> Yes
+* Else -> No
+
+Lower threshold:
+
+* Higher recall, lower precision
+
+Higher threshold:
+
+* Higher precision, lower recall
+
+---
+
+## 🏛️ Policy Interpretation of Threshold
+
+Threshold is not only technical.
+It reflects cost of mistakes.
+
+* If FN is very costly -> lower threshold
+* If FP is very costly -> higher threshold
+
+---
+
+## 📈 ROC
+
+ROC stands for **Receiver Operating Characteristic**.
+
+Think of ROC as:
+
+> A report card of model behavior at every possible threshold.
+
+| Piece | Meaning |
+|---|---|
+| X-axis | False Positive Rate (how many No cases are wrongly flagged) |
+| Y-axis | True Positive Rate / Recall (how many Yes cases are correctly caught) |
+| Better curve | Closer to top-left corner |
+| Diagonal line | Random guessing baseline |
+| Stronger model | Stays farther above the diagonal |
+
+> Furthest point from the diagonal line is considered the best cutoff!
+
+---
+
+## 📉 ROC Plot
+
+```{r roc-demo, eval=TRUE, fig.width=8, fig.height=5}
+library(ggplot2)
+
+set.seed(5120)
+n <- 350
+
+# Simulated true labels
+y_true <- rbinom(n, size = 1, prob = 0.35)
+
+# Three score sets with different quality
+score_weak <- 0.30 + 0.18 * y_true + rnorm(n, 0, 0.28)   # weak model
+score_mid  <- 0.25 + 0.45 * y_true + rnorm(n, 0, 0.24)   # medium model
+score_strong <- 0.20 + 0.80 * y_true + rnorm(n, 0, 0.20) # strong model
+
+to_prob <- function(s) pmin(pmax(s, 0.001), 0.999)
+
+roc_from_probs <- function(p_hat, y, label) {
+  thresholds <- seq(0, 1, by = 0.01)
+  out <- data.frame(
+    threshold = thresholds,
+    TPR = NA_real_,
+    FPR = NA_real_
+  )
+
+  for (i in seq_along(thresholds)) {
+    t <- thresholds[i]
+    pred <- ifelse(p_hat >= t, 1, 0)
+    TP <- sum(pred == 1 & y == 1)
+    FP <- sum(pred == 1 & y == 0)
+    TN <- sum(pred == 0 & y == 0)
+    FN <- sum(pred == 0 & y == 1)
+    out$TPR[i] <- TP / (TP + FN)
+    out$FPR[i] <- FP / (FP + TN)
+  }
+
+  out <- out[order(out$FPR, out$TPR), ]
+  auc <- sum(diff(out$FPR) * (head(out$TPR, -1) + tail(out$TPR, -1)) / 2)
+  out$model <- paste0(label, " (AUC=", round(auc, 3), ")")
+  out
+}
+
+roc_all <- rbind(
+  roc_from_probs(to_prob(score_weak), y_true, "Weak"),
+  roc_from_probs(to_prob(score_mid), y_true, "Medium"),
+  roc_from_probs(to_prob(score_strong), y_true, "Strong")
+)
+
+ggplot(roc_all, aes(x = FPR, y = TPR, color = model)) +
+  geom_line(linewidth = 1.1) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "firebrick") +
+  labs(
+    title = "ROC Curves: Weak vs Medium vs Strong Models",
+    subtitle = "Higher curves and larger AUC indicate better ranking quality",
+    x = "False Positive Rate",
+    y = "True Positive Rate (Recall)",
+    color = "Model"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+## 📈 AUC
+
+AUC (Area Under the Curve) tells us how well the model separates Yes cases from No cases.
+
+Think of it like ranking:
+
+* The model sorts cases from highest risk to lowest risk.
+* AUC asks: how often does a true Yes case get ranked above a true No case?
+* Higher AUC means better separation between the two groups.
+
+Quick scale:
+
+* 0.50 -> random ranking
+* 0.70-0.80 -> useful discrimination
+* 0.80-0.90 -> strong discrimination
+* 1.00 -> perfect separation
+
+Important reminder:
+
+* AUC is about ranking quality.
+* AUC does not tell us if probabilities are calibrated.
+
+---
+
+## 🧪 AUC Example
+
+Concrete example:
+
+* A: actual Yes, predicted 0.90
+* B: actual No, predicted 0.80
+* C: actual Yes, predicted 0.60
+* D: actual No, predicted 0.20
+
+Compare each Yes with each No:
+
+* A vs B -> correct (Yes above No)
+* A vs D -> correct
+* C vs B -> incorrect
+* C vs D -> correct
+
+So 3 out of 4 pairwise comparisons are correct -> AUC = 0.75.
+
+---
+
+## ⚖️ Class Imbalance
+
+If Yes cases are rare:
+
+* Accuracy can be misleading
+
+So emphasize:
+
+* Precision
+* Recall
+* Threshold strategy
+
+Brief tools:
+
+* Class weights
+* Resampling
+* Threshold tuning
+
+---
+
+## 🔁 Bootstrapping (Brief)
+
+Bootstrapping:
+
+* Resample data many times with replacement
+* Recompute metrics repeatedly
+
+Used for:
+
+* AUC uncertainty
+* Metric stability checks
+
+Plain language:
+
+> Run the analysis many times on slightly different versions of the dataset.
+
+---
+
+## 🧪 Comparing Logistic Models
+
+If goal is prediction:
+
+* Compare AUC
+* Compare precision/recall at chosen threshold
+* Compare log-loss
+* Compare calibration
+
+If goal is explanation:
+
+* Coefficient stability
+* CI width
+* Interpretability
+* Prefer simpler model when performance is close
+
+---
+
+## ✅ Final Summary
+
+Logistic regression:
+
+* Builds a linear score
+* Converts score to probability via sigmoid
+* Fits coefficients using MLE
+* Interprets effects with odds ratios
+* Needs threshold choice for labels
+* Evaluates with confusion matrix + ROC/AUC
+* Needs calibration if probabilities are used operationally
+
+---

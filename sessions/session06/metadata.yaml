@@ -1,8 +1,8 @@
 session: 6
-title: "Session 6 – Distributions & Hypothesis Testing"
+title: "Session 6 – Logistic Regression"
 module:
-  name: "Week 6 – Distributions & Hypothesis Testing"
-  description: "Understanding distribution shapes and running foundational statistical tests."
+  name: "Week 6 – Logistic Regression"
+  description: "Model binary outcomes, interpret odds ratios, and evaluate classification decisions."
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -19,13 +19,13 @@ lab:
     - path: lab/lab_rubric.pdf
       display_name: "Lab 06 – Rubric.pdf"
 homework:
-  assignment_key: hw03
+  assignment_key: hw02
   files:
     - path: homework/hw_prompt.md
-      display_name: "HW 03 – Wrangling & Narrative.md"
-    - path: homework/hw_prompt.pdf
-      display_name: "HW 03 – Wrangling & Narrative.pdf"
+      display_name: "HW 02 – Prompt.md"
     - path: homework/hw_rubric.yaml
-      display_name: "HW 03 – Rubric.yaml"
-    - path: homework/hw_rubric.pdf
-      display_name: "HW 03 – Rubric.pdf"
+      display_name: "HW 02 – Rubric.yaml"
+    - path: ../../data/air_quality_sites.csv
+      display_name: "air_quality_sites.csv"
+    - path: ../../data/policy_actions.csv
+      display_name: "policy_actions.csv"
