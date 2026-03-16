@@ -1,11 +1,17 @@
 total_points: 20
 criteria:
-  - id: model
-    description: "Fits logistic model and reports coefficients"
-    max_points: 8
-  - id: evaluation
-    description: "Builds confusion matrix + accuracy"
-    max_points: 8
-  - id: interpretation
-    description: "Explains odds/probabilities"
+  - id: feature_setup
+    description: "Selects appropriate numeric clustering features, keeps Type only for comparison, and standardizes the data correctly."
     max_points: 4
+  - id: kmeans_workflow
+    description: "Builds the elbow workflow, chooses and justifies K, and fits a defensible final K-means model with clear cluster visualization."
+    max_points: 5
+  - id: hierarchical_workflow
+    description: "Computes Euclidean-distance hierarchical clustering with complete linkage, cuts the dendrogram coherently, and visualizes the result."
+    max_points: 4
+  - id: comparison_reasoning
+    description: "Compares both clustering methods to M/F/I with evidence rather than treating the observed labels as automatic truth."
+    max_points: 4
+  - id: interpretation_quality
+    description: "Explains scaling, K choice, cluster meaning, and method tradeoffs in plain language with non-trivial reasoning."
+    max_points: 3

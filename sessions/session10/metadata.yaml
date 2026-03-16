@@ -1,7 +1,7 @@
 session: 10
-title: "Session 10 – Model Evaluation & Validation"
+title: "Session 10 - Model Evaluation & Validation"
 module:
-  name: "Week 10 – Model Evaluation"
+  name: "Week 10 - Model Evaluation"
   description: "Train/test splits, regression & classification metrics, and ethical considerations."
 slides:
   source: slides.qmd
@@ -11,21 +11,21 @@ lab:
   assignment_key: lab10
   files:
     - path: lab/lab_spec.pdf
-      display_name: "Lab 10 – Evaluation Spec.pdf"
+      display_name: "Lab 10 - Evaluation Spec.pdf"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 10 – Evaluation Template.Rmd"
+      display_name: "Lab 10 - Evaluation Template.Rmd"
     - path: lab/lab_answers.Rmd
-      display_name: "Lab 10 – Evaluation Answers.Rmd"
+      display_name: "Lab 10 - Evaluation Answers.Rmd"
     - path: lab/lab_rubric.pdf
-      display_name: "Lab 10 – Rubric.pdf"
+      display_name: "Lab 10 - Rubric.pdf"
 homework:
-  assignment_key: hw05
+  assignment_key: hw04
   files:
     - path: homework/hw_prompt.md
-      display_name: "HW 05 – Executive Summary.md"
+      display_name: "HW 04 - Executive Summary.md"
     - path: homework/hw_prompt.pdf
-      display_name: "HW 05 – Executive Summary.pdf"
+      display_name: "HW 04 - Executive Summary.pdf"
     - path: homework/hw_rubric.yaml
-      display_name: "HW 05 – Rubric.yaml"
+      display_name: "HW 04 - Rubric.yaml"
     - path: homework/hw_rubric.pdf
-      display_name: "HW 05 – Rubric.pdf"
+      display_name: "HW 04 - Rubric.pdf"

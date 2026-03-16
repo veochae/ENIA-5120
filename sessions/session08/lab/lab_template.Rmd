@@ -1,33 +1,251 @@
 ---
-title: "Lab 08 – Logistic Regression"
+title: "Lab 08 - Clustering with Abalone"
+subtitle: "K-means, Elbow Plot, and Hierarchical Clustering"
 author: "Your Name"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
 ---
 
-```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
-knitr::opts_chunk$set(echo = TRUE)
-```
+## Mission Background
+You are exploring whether abalone measurements naturally form groups. The observed `Type` labels (`M`, `F`, `I`) will be used only for comparison after clustering.
 
-```{r}
-library(readr)
+**Your Goal:** Build one K-means workflow and one hierarchical workflow, then compare what each method discovers.
+
+```{r setup, message=FALSE, warning=FALSE}
 library(dplyr)
+library(ggplot2)
 
-league_df <- read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv")) %>%
-  mutate(high_glow = if_else(glow_rating >= 8, 1, 0))
-
-glow_model <- glm(
-  high_glow ~ matches_played + tag_accuracy_pct + shield_uptime_pct,
-  data = league_df,
-  family = binomial()
+abalone_path_candidates <- c(
+  "../../../data/abalone.csv",
+  "data/abalone.csv"
 )
-summary(glow_model)
+abalone_path <- abalone_path_candidates[file.exists(abalone_path_candidates)][1]
 ```
+
+---
+
+## Dataset Variables (Used in This Lab)
+
+- `Type`: observed label for comparison only (`M`, `F`, `I`)
+- `LongestShell`, `Diameter`, `Height`: size measurements
+- `WholeWeight`, `ShuckedWeight`, `VisceraWeight`, `ShellWeight`: weight measurements
+- `Rings`: approximate age proxy
+
+---
+
+## 0. Clustering Question
+
+> Do the numeric abalone measurements naturally form a few groups, and do those groups line up with `M`, `F`, and `I` in a meaningful way?
+
+---
+
+## 1. Load Raw Data
+
+**functions:**
+- `read.csv()` - load dataset.
+- `glimpse()` - inspect column types.
+
+**logic steps:**
+- Load the abalone dataset.
+- Confirm that `Type` is present for later comparison and that the measurements are numeric.
+
+```{r}
+abalone_raw <- read.csv(abalone_path, stringsAsFactors = FALSE)
+glimpse(abalone_raw)
+```
+
+---
+
+## 2. Keep Numeric Features for Clustering
+
+**functions:**
+- `select()` - keep the columns needed for clustering.
+- `mutate()` - make `Type` a factor if needed.
+
+**logic steps:**
+- Keep `Type` in the main data frame for later comparison.
+- Create a numeric-only data frame for clustering.
+- Do not do extra cleaning beyond the needed column selection.
+
+```{r}
+abalone_df <- abalone_raw %>%
+  mutate(Type = as.factor(Type))
+
+abalone_numeric <- abalone_df %>%
+  select(-Type)
+
+glimpse(abalone_numeric)
+```
+
+**Question 2.1:** Why should `Type` be kept out of the clustering features but still be saved for later comparison?
+
+---
+
+## 3. Standardize the Clustering Variables
+
+**functions:**
+- `scale()` - standardize numeric columns.
+- `summary()` / `colMeans()` / `apply()` - check the result.
+
+**logic steps:**
+- Standardize all clustering variables.
+- Save the scaled matrix as `abalone_scaled`.
+- Verify that the variables are now on comparable scales.
+
+```{r}
+abalone_scaled <- scale(abalone_numeric)
+
+round(colMeans(abalone_scaled), 4)
+round(apply(abalone_scaled, 2, sd), 4)
+```
+
+**Question 3.1:** Why is standardization necessary before Euclidean-distance clustering on this dataset?
+
+---
+
+## 4. Candidate K-Means Solutions
+
+**functions:**
+- `kmeans()`
+- `map_dbl()` or `sapply()`
+- `set.seed()`
+
+**logic steps:**
+- Fit K-means for `K = 1` through `K = 8`.
+- Save total within-cluster sum of squares for each value of `K`.
+- Store the results in `wcss_df`.
 
 ```{r}
 "<write your code here>"
 ```
 
+---
+
+## 5. Elbow Plot and K Choice
+
+**functions:**
+- `ggplot()`
+- `geom_line()`
+- `geom_point()`
+
+**logic steps:**
+- Plot `K` against total within-cluster sum of squares.
+- Choose one final `K`.
+- Save your chosen value as `chosen_k`.
+
 ```{r}
 "<write your code here>"
 ```
+
+**Question 5.1:** Why did you choose this value of `K`? Your answer should refer to the elbow plot, not just preference.
+
+---
+
+## 6. Final K-Means Model
+
+**functions:**
+- `kmeans()`
+- `mutate()`
+- `prcomp()`
+
+**logic steps:**
+- Fit a final K-means model with `chosen_k` and multiple random starts.
+- Save the model as `kmeans_final`.
+- Add cluster assignments back to a plotting data frame.
+
+```{r}
+"<write your code here>"
+```
+
+---
+
+## 7. Plot K-Means Clusters and Centroids
+
+**functions:**
+- `ggplot()`
+- `geom_point()`
+- `labs()`
+
+**logic steps:**
+- Use the first two principal components for a 2D visualization.
+- Plot observations colored by K-means cluster.
+- Plot centroids on the same figure.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 7.1:** Looking at the K-means plot, what seems to be driving the cluster separation?
+
+---
+
+## 8. Hierarchical Clustering
+
+**functions:**
+- `dist()`
+- `hclust()`
+- `cutree()`
+
+**logic steps:**
+- Compute Euclidean distances on the standardized data.
+- Fit hierarchical clustering with complete linkage.
+- Cut the dendrogram into `chosen_k` clusters.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 8.1:** Why is it useful to use the same `K` here when comparing hierarchical clustering to K-means?
+
+---
+
+## 9. Dendrogram and Hierarchical Cluster Plot
+
+**functions:**
+- `plot()`
+- `rect.hclust()`
+- `ggplot()`
+
+**logic steps:**
+- Plot the dendrogram.
+- Build a second 2D plot using the same principal-component coordinates, now colored by hierarchical cluster.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 9.1:** Compared with K-means, what looks different about the hierarchical clustering result?
+
+---
+
+## 10. Compare Clusters to Type (`M`, `F`, `I`)
+
+**functions:**
+- `table()`
+- `prop.table()`
+- `as.data.frame()`
+
+**logic steps:**
+- Build one comparison table for K-means clusters vs `Type`.
+- Build one comparison table for hierarchical clusters vs `Type`.
+- Convert to row proportions to make interpretation easier.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 10.1:** Does either clustering method line up cleanly with `M`, `F`, and `I`? Explain with evidence from your comparison tables.
+
+**Question 10.2:** If the clusters do not match `Type` very well, what might the clusters be capturing instead?
+
+---
+
+## 11. Final Reflection
+
+**Summary Question 11.1:**
+If you had to explain this analysis to a non-technical audience, which method would you present first, and what is one limitation you would emphasize?

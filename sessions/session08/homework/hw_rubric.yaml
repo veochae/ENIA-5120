@@ -1,14 +1,68 @@
 total_points: 30
 criteria:
-  - id: model_construction
-    description: "Appropriate variable selection and correct use of lm()/glm() with necessary transformations"
+  - id: setup_and_variable_choice
+    description: "Merges the datasets correctly, performs needed cleaning, and chooses variables that are appropriate for each hypothesis test."
+    max_points: 4
+    levels:
+      - score: 4
+        description: "Join is correct and usable; selected variables fit each test well; setup choices are clearly justified."
+      - score: 3
+        description: "Mostly correct setup and variable choices with minor justification gaps."
+      - score: 2
+        description: "Basic setup is present but some variable choices are weak or only partly appropriate."
+      - score: 1
+        description: "Setup is incomplete or variable choices do not fit one or more tests well."
+      - score: 0
+        description: "No meaningful setup shown."
+  - id: t_test_analysis
+    description: "T-test includes motivation, hypotheses, correct implementation, output interpretation, and context-based conclusion."
     max_points: 9
-  - id: interpretation_quality
-    description: "Explains coefficients/significance in plain language"
+    levels:
+      - score: 9
+        description: "Clear research question, correct hypotheses, valid t-test, strong explanation of t-value/p-value/CI, and thoughtful contextual interpretation."
+      - score: 7
+        description: "Good t-test analysis with minor interpretation or justification gaps."
+      - score: 5
+        description: "Correct test attempted, but explanation of output or conclusion is limited."
+      - score: 2
+        description: "Test is incomplete, weakly justified, or partially misinterpreted."
+      - score: 0
+        description: "Missing or not interpretable."
+  - id: anova_analysis
+    description: "ANOVA includes motivation, hypotheses, correct implementation, output interpretation, and follow-up comparison when needed."
     max_points: 9
-  - id: evaluation_metrics
-    description: "Uses RMSE/MAE for linear and accuracy/recall or ROC/AUC for logistic with sound reasoning"
-    max_points: 7.5
-  - id: communication
-    description: "Report is well-structured with visuals integrated into the narrative"
-    max_points: 4.5
+    levels:
+      - score: 9
+        description: "Clear research question, correct hypotheses, valid ANOVA, strong explanation of F-value/p-value, and appropriate post-hoc follow-up if significant."
+      - score: 7
+        description: "Good ANOVA analysis with minor gaps in interpretation or follow-up."
+      - score: 5
+        description: "ANOVA is run correctly, but interpretation or post-hoc reasoning is limited."
+      - score: 2
+        description: "ANOVA is incomplete, weakly justified, or partially misinterpreted."
+      - score: 0
+        description: "Missing or not interpretable."
+  - id: chi_squared_analysis
+    description: "Chi-squared test includes motivation, hypotheses, correct implementation, output interpretation, and contextual conclusion."
+    max_points: 6
+    levels:
+      - score: 6
+        description: "Clear research question, correct hypotheses, valid contingency-table setup, strong explanation of chi-squared output, and thoughtful contextual interpretation."
+      - score: 5
+        description: "Good chi-squared analysis with minor gaps in interpretation or presentation."
+      - score: 3
+        description: "Correct test attempted, but explanation of output or conclusion is limited."
+      - score: 1
+        description: "Test is incomplete, weakly justified, or partially misinterpreted."
+      - score: 0
+        description: "Missing or not interpretable."
+  - id: communication_and_caution
+    description: "Writing is clear, plain-language, and includes limitations/assumptions rather than only reporting significance decisions."
+    max_points: 2
+    levels:
+      - score: 2
+        description: "Interpretations are clear, plain-language, and appropriately cautious across the report."
+      - score: 1
+        description: "Communication is understandable but uneven, overly brief, or light on cautions."
+      - score: 0
+        description: "Writing is unclear, highly mechanical, or lacks meaningful interpretation."

@@ -1,8 +1,8 @@
 session: 8
-title: "Session 8 – Logistic Regression"
+title: "Session 8 - Clustering"
 module:
-  name: "Week 8 – Logistic Regression"
-  description: "Modeling binary outcomes, interpreting odds, and evaluating classification performance."
+  name: "Week 8 - Clustering"
+  description: "Discover structure in unlabeled data, compare K-means and hierarchical clustering, and evaluate cluster quality."
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -11,21 +11,17 @@ lab:
   assignment_key: lab08
   files:
     - path: lab/lab_spec.pdf
-      display_name: "Lab 08 – Logistic Regression Spec.pdf"
+      display_name: "Lab 08 - Spec.pdf"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 08 – Logistic Regression Template.Rmd"
+      display_name: "Lab 08 - Template.Rmd"
     - path: lab/lab_answers.Rmd
-      display_name: "Lab 08 – Logistic Regression Answers.Rmd"
+      display_name: "Lab 08 - Answers.Rmd"
     - path: lab/lab_rubric.pdf
-      display_name: "Lab 08 – Rubric.pdf"
+      display_name: "Lab 08 - Rubric.pdf"
 homework:
-  assignment_key: hw04
+  assignment_key: hw03
   files:
     - path: homework/hw_prompt.md
-      display_name: "HW 04 – Predictive Modeling.md"
-    - path: homework/hw_prompt.pdf
-      display_name: "HW 04 – Predictive Modeling.pdf"
+      display_name: "HW 03 - Prompt.md"
     - path: homework/hw_rubric.yaml
-      display_name: "HW 04 – Rubric.yaml"
-    - path: homework/hw_rubric.pdf
-      display_name: "HW 04 – Rubric.pdf"
+      display_name: "HW 03 - Rubric.yaml"

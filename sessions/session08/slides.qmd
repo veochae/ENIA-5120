@@ -1,28 +1,616 @@
 ---
-title: "Session 8 – Logistic Regression"
+title: "Session 8: Clustering"
+subtitle: "Finding Structure When No Labels Exist"
 format:
   revealjs:
     slide-number: true
-    toc: true
+    smaller: true
+    scrollable: true
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
+    theme: serif
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: false
 ---
 
-# Agenda
-- Odds & probabilities
-- Fitting logistic models
-- Evaluating classification
+## Live Setup (Run Once)
 
----
+```{r setup-data, eval=TRUE, include=FALSE}
+library(dplyr)
+library(ggplot2)
 
-# Model Syntax
-```r
-model <- glm(churn ~ tenure + usage, data = df, family = binomial())
-predict(model, type = "response")
+resolve_data_path <- function(filename) {
+  candidates <- c(
+    file.path("data", filename),
+    file.path("..", "..", "data", filename)
+  )
+  hit <- candidates[file.exists(candidates)][1]
+  if (is.na(hit)) stop("Could not find data file: ", filename)
+  hit
+}
+
+aq <- read.csv(resolve_data_path("air_quality_sites.csv"), stringsAsFactors = FALSE)
+
+cluster_df <- aq %>%
+  select(
+    site_id,
+    region,
+    traffic_index,
+    population_density,
+    industrial_index,
+    pm25,
+    ozone,
+    asthma_rate,
+    median_income,
+    green_space_pct
+  ) %>%
+  filter(complete.cases(.))
+
+cluster_scaled <- cluster_df %>%
+  select(-site_id, -region) %>%
+  scale()
+
+set.seed(5120)
+km3 <- kmeans(cluster_scaled, centers = 3, nstart = 25)
+
+pcs <- prcomp(cluster_scaled)
+
+plot_df <- data.frame(
+  PC1 = pcs$x[, 1],
+  PC2 = pcs$x[, 2],
+  cluster = factor(km3$cluster),
+  region = cluster_df$region
+)
+
+centroid_df <- data.frame(
+  PC1 = tapply(plot_df$PC1, km3$cluster, mean),
+  PC2 = tapply(plot_df$PC2, km3$cluster, mean),
+  cluster = factor(sort(unique(km3$cluster)))
+)
+
+wcss_df <- data.frame(
+  k = 1:8,
+  wcss = sapply(1:8, function(k) {
+    kmeans(cluster_scaled, centers = k, nstart = 25)$tot.withinss
+  })
+)
+
+hc_sample_n <- min(250, nrow(cluster_scaled))
+hc_idx <- sample(seq_len(nrow(cluster_scaled)), hc_sample_n)
+hc_sample <- cluster_scaled[hc_idx, ]
+hc_complete <- hclust(dist(hc_sample), method = "complete")
 ```
 
 ---
 
-# Evaluation
-- Confusion matrix
-- Accuracy vs recall
-- ROC / AUC preview
+## What's Happening Today
+
+- Last Week:
+
+> We had labels, and we were trying to predict them.
+
+- This Week:
+
+> We do not have labels, and we are trying to discover structure.
+
+---
+
+## Why Do We Even Do Clustering?
+
+Sometimes the data is messy, large, and unlabeled.
+
+We still want to know:
+
+* Are there natural groupings here?
+* Which cases look similar to each other?
+* Are some places meaningfully different from the rest?
+
+Plain idea:
+
+> Clustering is a way to organize observations into groups based on similarity.
+
+---
+
+## What Is Clustering Used For?
+
+Common use cases:
+
+* Group neighborhoods with similar pollution patterns
+* Segment customers with similar behavior
+* Find schools, hospitals, or counties with similar profiles
+* Detect unusual cases that do not fit the rest
+
+Why that matters:
+
+* It helps us summarize complex data before making decisions.
+
+---
+
+## Clustering vs Classification
+
+**Classification**
+
+* We already know the labels
+* Example: funded vs not funded
+* Goal: predict the correct category
+
+**Clustering**
+
+* We do not know the labels
+* Goal: discover possible groupings
+
+Key line:
+
+> Classification answers "Which known group is this?"  
+> Clustering answers "Are there groups here at all?"
+
+---
+
+## A Practical Difference
+
+With classification:
+
+* There is usually a right answer in the training data.
+
+With clustering:
+
+* There may not be one single "correct" answer.
+
+That means clustering is more exploratory.
+
+It is often the start of analysis, not the end.
+
+---
+
+## What Does "Similar" Mean?
+
+Clustering depends on a similarity rule.
+
+Most of the time, that means a **distance** rule.
+
+Simple intuition:
+
+* Small distance -> observations are similar
+* Large distance -> observations are different
+
+If the distance rule changes, the clusters can change too.
+
+---
+
+## Euclidean Distance
+
+The most common distance rule is **Euclidean distance**.
+
+Plain idea:
+
+* Draw a straight line from one point to another
+* The length of that line is the distance
+
+Formula:
+
+$$
+d(x, y) = \sqrt{\sum_{j=1}^{p}(x_j - y_j)^2}
+$$
+
+What matters for us:
+
+* Bigger differences across variables mean bigger distance
+* Variables on large scales can dominate unless we standardize first
+
+---
+
+## Why Scaling Matters So Much
+
+Suppose one variable runs from 0 to 10000, and another runs from 0 to 10.
+
+Without scaling:
+
+* The large-scale variable dominates the distance calculation.
+
+So before clustering, we often standardize variables so they are on comparable scales.
+
+> In clustering, preprocessing is not optional. It often determines the answer.
+
+---
+
+## K-Means: The Basic Idea
+
+K-means asks us to choose a number of clusters, called **K**.
+
+Then it tries to:
+
+1. Place K centers in the data
+2. Assign each point to its nearest center
+3. Recompute each center as the mean of the observations assigned to it
+4. Repeat until assignments stop changing much
+
+Plain language:
+
+> K-means keeps redrawing group centers until the groups settle down.
+
+---
+
+## What K-Means Is Optimizing
+
+K-means tries to make points within a cluster as close as possible to that cluster's center.
+
+The objective is:
+
+$$
+\sum_{k=1}^{K}\sum_{i \in C_k} ||x_i - \mu_k||^2
+$$
+
+You do not need to memorize the formula.
+
+The idea is enough:
+
+* Tight clusters are good
+* Large within-cluster spread is bad
+
+---
+
+## K-Means Live Example
+
+```{r kmeans-plot, eval=TRUE, fig.width=8, fig.height=4.8}
+ggplot(plot_df, aes(x = PC1, y = PC2, color = cluster)) +
+  geom_point(alpha = 0.75, size = 2) +
+  geom_point(
+    data = centroid_df,
+    aes(x = PC1, y = PC2),
+    inherit.aes = FALSE,
+    shape = 4,
+    size = 5,
+    stroke = 1.4,
+    color = "black"
+  ) +
+  labs(
+    title = "K-means example on scaled air-quality features",
+    subtitle = "Colors show 3 clusters; black X marks the cluster centroids",
+    x = "Principal Component 1",
+    y = "Principal Component 2",
+    color = "Cluster"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+## K-Means Limitations
+
+K-means is useful, but it has strong assumptions built in.
+
+Main limits:
+
+* You must choose K ahead of time
+* It works best when clusters are fairly round and compact
+* It is sensitive to outliers
+* Different starting points can give different results
+
+Important reminder:
+
+> K-means will always return clusters, even if the data does not truly have clean clusters.
+
+---
+
+## Hierarchical Clustering: The Basic Idea
+
+Hierarchical clustering does not start with a fixed K.
+
+Instead, it builds a tree of merges:
+
+1. Start with every observation as its own cluster
+2. Merge the two closest clusters
+3. Repeat until everything is merged
+
+Output:
+
+* A hierarchy of possible groupings
+
+---
+
+## The Dendrogram
+
+A dendrogram is the tree diagram from hierarchical clustering.
+
+What it shows:
+
+* Which observations merge early
+* Which groups stay separate for a long time
+
+Interpretation:
+
+* Lower merge height -> more similar
+* Higher merge height -> less similar
+
+---
+
+## Hierarchical Clustering Live Example
+
+```{r hclust-plot, eval=TRUE, fig.width=9, fig.height=4.8}
+plot(
+  hc_complete,
+  labels = FALSE,
+  hang = -1,
+  main = "Hierarchical clustering dendrogram",
+  xlab = "Air-quality sites (sample)",
+  ylab = "Merge height"
+)
+rect.hclust(hc_complete, k = 3, border = "firebrick")
+```
+
+---
+
+## Linkage Choice Changes the Tree
+
+When hierarchical clustering decides which clusters to merge, it needs a rule.
+
+Common linkage choices:
+
+* **Single linkage**: nearest two points
+* **Complete linkage**: farthest two points
+* **Average linkage**: average pairwise distance
+
+This matters because:
+
+* Different linkage rules can produce different dendrograms
+
+In this example, we used **complete linkage**:
+
+> The distance between two clusters is defined by the two points that are farthest apart.
+
+That tends to prefer tighter, more compact clusters than single linkage.
+
+---
+
+## Hierarchical Clustering Limitations
+
+Main limits:
+
+* It can be sensitive to the distance rule and linkage choice
+* Early bad merges cannot be undone
+* It can become slow on very large datasets
+* Outliers can distort the tree
+
+Plain language:
+
+> Hierarchical clustering is flexible, but it is not neutral.  
+> Your design choices shape the result.
+
+---
+
+## When Do We Use K-Means?
+
+K-means is usually a good choice when:
+
+* You want a quick, simple baseline
+* You have a rough idea of how many clusters you want
+* The dataset is fairly large
+* Variables are numeric and scaled
+
+Good fit:
+
+* Fast segmentation tasks
+* First pass exploration
+
+---
+
+## When Do We Use Hierarchical Clustering?
+
+Hierarchical clustering is often better when:
+
+* You do not want to commit to one K immediately
+* You want to inspect the structure visually
+* The dataset is not huge
+* You care about nested relationships
+
+Good fit:
+
+* Exploratory analysis
+* Smaller datasets where interpretation matters
+
+---
+
+## Trade-Offs: K-Means vs Hierarchical
+
+| Question | K-means | Hierarchical |
+|---|---|---|
+| Need to choose K first? | Yes | Not at first |
+| Fast on larger data? | Usually yes | Usually less scalable |
+| Easy to explain? | Yes | Fairly yes, with dendrogram |
+| Handles weird cluster shapes well? | Not usually | Sometimes better, but depends |
+| Sensitive to setup choices? | Yes | Yes |
+
+There is no universal winner.
+
+> The best method depends on the data and the goal.
+
+---
+
+## Choosing the Number of Clusters
+
+This is one of the hardest parts.
+
+Because in real data:
+
+* There may not be one perfect answer
+
+Common tools:
+
+* Elbow plot
+* Silhouette score
+* Domain knowledge
+
+---
+
+## Elbow Plot Example
+
+```{r elbow-plot, eval=TRUE, fig.width=8, fig.height=4.8}
+ggplot(wcss_df, aes(x = k, y = wcss)) +
+  geom_line(color = "#1f5c8b", linewidth = 1) +
+  geom_point(color = "firebrick", size = 2) +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    title = "Elbow plot for K-means",
+    subtitle = "Look for the point where improvement starts slowing down",
+    x = "Number of clusters (K)",
+    y = "Total within-cluster sum of squares"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+## How Do We Evaluate Clustering?
+
+This is different from regression or classification.
+
+Why?
+
+* We often do not have known labels
+* So we cannot always talk about accuracy
+
+Instead, we usually use three kinds of evaluation:
+
+1. Internal evaluation
+2. External evaluation
+3. Substantive evaluation
+
+---
+
+## 1. Internal Evaluation
+
+Internal evaluation asks:
+
+> Are the clusters tight and well separated?
+
+Examples:
+
+* Within-cluster sum of squares
+* Silhouette score
+
+Good internal performance means:
+
+* Members of the same cluster look similar
+* Different clusters look meaningfully apart
+
+---
+
+## Silhouette Score
+
+Silhouette score gives each point a simple report card.
+
+It compares:
+
+* How close the point is to its own cluster
+* How close the point is to the nearest other cluster
+
+Interpretation:
+
+* Near **1** -> well matched to its own cluster
+* Near **0** -> sitting near a boundary
+* Below **0** -> may be in the wrong cluster
+
+Plain takeaway:
+
+> Higher average silhouette score usually means cleaner cluster separation.
+
+---
+
+## 2. External Evaluation
+
+External evaluation is possible only if we have known labels somewhere.
+
+Question:
+
+> Do the discovered clusters line up with something real that we already know?
+
+Examples:
+
+* Known region types
+* Known risk categories
+* Previously defined site classes
+
+This is not always available, but when it is, it helps.
+
+---
+
+## 3. Substantive Evaluation
+
+Substantive evaluation asks:
+
+> Are these clusters actually useful?
+
+That means:
+
+* Can we describe them clearly?
+* Do they support a real policy or management decision?
+* Do they reveal something we did not already know?
+
+This is the evaluation step students often skip.
+
+---
+
+## A Big Warning About Interpretation
+
+Clusters are not automatically "real" natural categories.
+
+They are the result of:
+
+* Variable choices
+* Scaling choices
+* Distance choices
+* Algorithm choices
+
+So be careful with language.
+
+Better phrasing:
+
+> "The algorithm identified three groups with different profiles."
+
+Be cautious with:
+
+> "There are truly three types of counties."
+
+---
+
+## Common Clustering Mistakes
+
+The most common problems:
+
+* Forgetting to scale variables
+* Treating clusters as truth instead of a model output
+* Choosing K with no justification
+* Ignoring outliers
+* Interpreting clusters without checking whether they are useful
+
+---
+
+## A Reasonable Workflow
+
+When you do clustering:
+
+1. Choose variables carefully
+2. Scale them if distance is being used
+3. Try more than one clustering setup
+4. Check cluster quality
+5. Interpret clusters in plain language
+6. Ask whether the result helps a real decision
+
+---
+
+## Final Summary
+
+Clustering:
+
+* Finds patterns when labels are missing
+* Depends heavily on similarity rules and scaling
+* Uses K-means for fast partitioning
+* Uses hierarchical clustering for tree-based structure
+* Needs evaluation beyond "it made a plot"
+* Should be treated as a decision aid, not automatic truth
+
+---
