@@ -18,10 +18,3 @@ lab:
       display_name: "Lab 03: EV Infrastructure Audit – Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 03: EV Infrastructure Audit – Rubric.pdf"
-homework:
-  assignment_key: hw01
-  files:
-    - path: homework/hw_prompt.pdf
-      display_name: "HW 01 – Data Foundations.pdf"
-    - path: homework/hw_rubric.pdf
-      display_name: "HW 01 – Rubric.pdf"

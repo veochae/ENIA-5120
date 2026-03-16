@@ -1,20 +1,5 @@
 session: 7
-title: "Session 7 – Linear Regression"
+title: "Session 7 – Guest Lecturer"
 module:
-  name: "Week 7 – Linear Regression"
-  description: "Building and interpreting linear models with diagnostics."
-slides:
-  source: slides.qmd
-  rendered: slides.html
-  page_title: "Session 7 Slides"
-lab:
-  assignment_key: lab07
-  files:
-    - path: lab/lab_spec.pdf
-      display_name: "Lab 07 – Linear Regression Spec.pdf"
-    - path: lab/lab_template.Rmd
-      display_name: "Lab 07 – Linear Regression Template.Rmd"
-    - path: lab/lab_answers.Rmd
-      display_name: "Lab 07 – Linear Regression Answers.Rmd"
-    - path: lab/lab_rubric.pdf
-      display_name: "Lab 07 – Rubric.pdf"
+  name: "Week 7 – Guest Lecturer"
+  description: "Data Science in Policy Settings"
