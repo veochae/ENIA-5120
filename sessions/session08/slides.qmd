@@ -17,7 +17,7 @@ execute:
   eval: false
 ---
 
-## Live Setup (Run Once)
+## ⚙️ Live Setup (Run Once)
 
 ```{r setup-data, eval=TRUE, include=FALSE}
 library(dplyr)
@@ -87,7 +87,7 @@ hc_complete <- hclust(dist(hc_sample), method = "complete")
 
 ---
 
-## What's Happening Today
+## 🧭 What's Happening Today
 
 - Last Week:
 
@@ -99,7 +99,7 @@ hc_complete <- hclust(dist(hc_sample), method = "complete")
 
 ---
 
-## Why Do We Even Do Clustering?
+## ❓ Why Do We Even Do Clustering?
 
 Sometimes the data is messy, large, and unlabeled.
 
@@ -115,7 +115,7 @@ Plain idea:
 
 ---
 
-## What Is Clustering Used For?
+## 🧩 What Is Clustering Used For?
 
 Common use cases:
 
@@ -130,7 +130,7 @@ Why that matters:
 
 ---
 
-## Clustering vs Classification
+## ⚖️ Clustering vs Classification
 
 **Classification**
 
@@ -150,7 +150,7 @@ Key line:
 
 ---
 
-## A Practical Difference
+## 🧠 A Practical Difference
 
 With classification:
 
@@ -166,7 +166,7 @@ It is often the start of analysis, not the end.
 
 ---
 
-## What Does "Similar" Mean?
+## 📏 What Does "Similar" Mean?
 
 Clustering depends on a similarity rule.
 
@@ -181,7 +181,7 @@ If the distance rule changes, the clusters can change too.
 
 ---
 
-## Euclidean Distance
+## 📐 Euclidean Distance
 
 The most common distance rule is **Euclidean distance**.
 
@@ -203,7 +203,7 @@ What matters for us:
 
 ---
 
-## Why Scaling Matters So Much
+## 🔧 Why Scaling Matters So Much
 
 Suppose one variable runs from 0 to 10000, and another runs from 0 to 10.
 
@@ -217,7 +217,7 @@ So before clustering, we often standardize variables so they are on comparable s
 
 ---
 
-## K-Means: The Basic Idea
+## 🎯 K-Means: The Basic Idea
 
 K-means asks us to choose a number of clusters, called **K**.
 
@@ -234,7 +234,7 @@ Plain language:
 
 ---
 
-## What K-Means Is Optimizing
+## 📉 What K-Means Is Optimizing
 
 K-means tries to make points within a cluster as close as possible to that cluster's center.
 
@@ -253,7 +253,7 @@ The idea is enough:
 
 ---
 
-## K-Means Live Example
+## 📊 K-Means Live Example
 
 ```{r kmeans-plot, eval=TRUE, fig.width=8, fig.height=4.8}
 ggplot(plot_df, aes(x = PC1, y = PC2, color = cluster)) +
@@ -279,7 +279,7 @@ ggplot(plot_df, aes(x = PC1, y = PC2, color = cluster)) +
 
 ---
 
-## K-Means Limitations
+## ⚠️ K-Means Limitations
 
 K-means is useful, but it has strong assumptions built in.
 
@@ -296,7 +296,7 @@ Important reminder:
 
 ---
 
-## Hierarchical Clustering: The Basic Idea
+## 🌳 Hierarchical Clustering: The Basic Idea
 
 Hierarchical clustering does not start with a fixed K.
 
@@ -312,7 +312,7 @@ Output:
 
 ---
 
-## The Dendrogram
+## 🌿 The Dendrogram
 
 A dendrogram is the tree diagram from hierarchical clustering.
 
@@ -328,7 +328,7 @@ Interpretation:
 
 ---
 
-## Hierarchical Clustering Live Example
+## 📈 Hierarchical Clustering Live Example
 
 ```{r hclust-plot, eval=TRUE, fig.width=9, fig.height=4.8}
 plot(
@@ -344,7 +344,7 @@ rect.hclust(hc_complete, k = 3, border = "firebrick")
 
 ---
 
-## Linkage Choice Changes the Tree
+## 🔗 Linkage Choice Changes the Tree
 
 When hierarchical clustering decides which clusters to merge, it needs a rule.
 
@@ -366,7 +366,7 @@ That tends to prefer tighter, more compact clusters than single linkage.
 
 ---
 
-## Hierarchical Clustering Limitations
+## ⚠️ Hierarchical Clustering Limitations
 
 Main limits:
 
@@ -382,7 +382,7 @@ Plain language:
 
 ---
 
-## When Do We Use K-Means?
+## ✅ When Do We Use K-Means?
 
 K-means is usually a good choice when:
 
@@ -398,7 +398,7 @@ Good fit:
 
 ---
 
-## When Do We Use Hierarchical Clustering?
+## ✅ When Do We Use Hierarchical Clustering?
 
 Hierarchical clustering is often better when:
 
@@ -414,7 +414,7 @@ Good fit:
 
 ---
 
-## Trade-Offs: K-Means vs Hierarchical
+## ⚖️ Trade-Offs: K-Means vs Hierarchical
 
 | Question | K-means | Hierarchical |
 |---|---|---|
@@ -430,7 +430,7 @@ There is no universal winner.
 
 ---
 
-## Choosing the Number of Clusters
+## 🔢 Choosing the Number of Clusters
 
 This is one of the hardest parts.
 
@@ -446,7 +446,7 @@ Common tools:
 
 ---
 
-## Elbow Plot Example
+## 📉 Elbow Plot Example
 
 ```{r elbow-plot, eval=TRUE, fig.width=8, fig.height=4.8}
 ggplot(wcss_df, aes(x = k, y = wcss)) +
@@ -464,7 +464,7 @@ ggplot(wcss_df, aes(x = k, y = wcss)) +
 
 ---
 
-## How Do We Evaluate Clustering?
+## 🧪 How Do We Evaluate Clustering?
 
 This is different from regression or classification.
 
@@ -481,7 +481,7 @@ Instead, we usually use three kinds of evaluation:
 
 ---
 
-## 1. Internal Evaluation
+## 1. 🧱 Internal Evaluation
 
 Internal evaluation asks:
 
@@ -499,7 +499,7 @@ Good internal performance means:
 
 ---
 
-## Silhouette Score
+## 📏 Silhouette Score
 
 Silhouette score gives each point a simple report card.
 
@@ -520,7 +520,7 @@ Plain takeaway:
 
 ---
 
-## 2. External Evaluation
+## 2. 🌐 External Evaluation
 
 External evaluation is possible only if we have known labels somewhere.
 
@@ -538,7 +538,7 @@ This is not always available, but when it is, it helps.
 
 ---
 
-## 3. Substantive Evaluation
+## 3. 🏛️ Substantive Evaluation
 
 Substantive evaluation asks:
 
@@ -554,7 +554,7 @@ This is the evaluation step students often skip.
 
 ---
 
-## A Big Warning About Interpretation
+## 🚨 A Big Warning About Interpretation
 
 Clusters are not automatically "real" natural categories.
 
@@ -577,7 +577,7 @@ Be cautious with:
 
 ---
 
-## Common Clustering Mistakes
+## 🚫 Common Clustering Mistakes
 
 The most common problems:
 
@@ -589,7 +589,7 @@ The most common problems:
 
 ---
 
-## A Reasonable Workflow
+## 🛠️ A Reasonable Workflow
 
 When you do clustering:
 
@@ -602,7 +602,7 @@ When you do clustering:
 
 ---
 
-## Final Summary
+## ✅ Final Summary
 
 Clustering:
 
