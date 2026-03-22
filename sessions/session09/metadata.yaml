@@ -1,8 +1,8 @@
 session: 9
-title: "Session 9 – Clustering"
+title: "Session 9 – APIs in R"
 module:
-  name: "Week 9 – Clustering"
-  description: "Unsupervised learning with k-means and hierarchical clustering."
+  name: "Week 9 – APIs in R"
+  description: "Pull real-world data using APIs, parse JSON, and build analysis-ready tables in R."
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -11,10 +11,10 @@ lab:
   assignment_key: lab09
   files:
     - path: lab/lab_spec.pdf
-      display_name: "Lab 09 – Clustering Spec.pdf"
+      display_name: "Lab 09 – API Spec.pdf"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 09 – Clustering Template.Rmd"
+      display_name: "Lab 09 – API Template.Rmd"
     - path: lab/lab_answers.Rmd
-      display_name: "Lab 09 – Clustering Answers.Rmd"
+      display_name: "Lab 09 – API Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 09 – Rubric.pdf"

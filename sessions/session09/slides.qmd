@@ -1,28 +1,309 @@
 ---
-title: "Session 9 – Clustering"
-format:
+title: "Session 9: APIs in R"
+subtitle: "From Endpoints to Usable Policy Data"
+format: 
   revealjs:
     slide-number: true
-    toc: true
+    smaller: true
+    scrollable: true
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
+    theme: serif
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: false
 ---
 
-# Agenda
-- Unsupervised learning basics
-- k-means walkthrough
-- Choosing k & visualizing clusters
+## 🧭 Opening Hook
+
+Policy question:
+
+> "How do we pull up-to-date climate and policy indicators without manually downloading CSV files every week?"
+
+Today’s answer:
+
+* Use APIs
+* Pull data directly in R
+* Clean it into analysis-ready tables
 
 ---
 
-# k-means Steps
-1. Scale features
-2. Choose k
-3. Iterate: assign/update
-4. Evaluate WSS
+## 🎯 Session Goal
+
+By the end of this session, students will be able to:
+
+* Explain what an API is in plain language
+* Build and send API requests in R
+* Parse JSON into data frames
+* Handle common API errors
+* Pull data from 2-3 APIs for policy analysis
 
 ---
 
-# Hierarchical Clustering
-- `dist()` matrix
-- `hclust(method = "ward.D2")`
-- Dendrogram interpretation
+## 🌐 What Is an API?
+
+API = **Application Programming Interface**
+
+Plain language:
+
+* An API is a waiter between your code and someone else’s data system.
+* You send a request.
+* The server sends a response.
+
+---
+
+## 📦 API Request and Response
+
+Basic flow:
+
+1. You call an endpoint URL.
+2. You pass parameters (country, date, variable).
+3. Server returns data (usually JSON).
+4. You parse and analyze in R.
+
+---
+
+## 🧩 Terms You Must Know
+
+* **Endpoint**: API URL location
+* **Query parameters**: filters like `?country=US&year=2024`
+* **Status code**: server outcome (200, 404, 429, etc.)
+* **JSON**: common response format
+
+---
+
+## 🚫 Why This Matters for Policy Work
+
+Without APIs:
+
+* Manual downloads
+* Stale files
+* Hard-to-repeat workflows
+
+With APIs:
+
+* Fresh data
+* Reproducible pulls
+* Easy updates for reports/dashboards
+
+---
+
+## 🛠️ API Workflow in R
+
+Core pipeline:
+
+1. Build URL
+2. Send request
+3. Check status
+4. Parse JSON
+5. Convert to dataframe
+6. Validate columns and types
+
+---
+
+## 💻 Live Demo Pattern (Minimal)
+
+```{r api-pattern, eval=FALSE}
+library(jsonlite)
+
+url <- "https://api.example.com/data?country=US&year=2024"
+raw <- fromJSON(url)
+str(raw)
+```
+
+---
+
+## ☀️ API Demo 1: Open-Meteo (No Key)
+
+Use case:
+
+* Pull recent weather for a location
+* Connect weather to policy planning
+
+```{r open-meteo-demo, eval=TRUE}
+library(jsonlite)
+library(dplyr)
+
+lat <- 38.9072
+lon <- -77.0369
+
+meteo_url <- paste0(
+  "https://api.open-meteo.com/v1/forecast?",
+  "latitude=", lat,
+  "&longitude=", lon,
+  "&daily=temperature_2m_max,precipitation_sum",
+  "&timezone=auto"
+)
+
+meteo_raw <- fromJSON(meteo_url)
+weather_df <- as.data.frame(meteo_raw$daily)
+head(weather_df)
+```
+
+---
+
+## 🌋 API Demo 2: USGS Earthquake (No Key)
+
+Use case:
+
+* Pull events and summarize risk activity
+
+```{r usgs-demo, eval=TRUE}
+library(jsonlite)
+library(dplyr)
+
+usgs_url <- "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=200"
+usgs_raw <- fromJSON(usgs_url, flatten = TRUE)
+
+quake_df <- usgs_raw$features %>%
+  select(properties.mag, properties.place, properties.time) %>%
+  rename(magnitude = properties.mag, place = properties.place, timestamp = properties.time)
+
+head(quake_df)
+```
+
+---
+
+## 🔐 Authentication Basics
+
+Some APIs require keys/tokens.
+
+Where keys usually go:
+
+* Query string: `?api_key=...`
+* Header: `Authorization: Bearer ...`
+
+Best practice:
+
+* Store secrets in `.Renviron`, not in scripts.
+
+---
+
+## 🔑 Common Authentication Methods
+
+1. **No auth**
+   - Anyone can use this API.
+2. **API key**
+   - A password for your app.
+3. **Header key**
+   - Same key, just sent in a different place (request header).
+4. **Bearer token**
+   - A temporary access pass.
+5. **Basic auth**
+   - Username + password.
+6. **OAuth2**
+   - Login through another service (like Google), then get a token.
+
+---
+
+## 🗂️ Where to Store Secrets
+
+Use `.Renviron`:
+
+```{r env-example, eval=FALSE}
+MY_API_KEY=abc123
+MY_API_TOKEN=xyz456
+```
+
+Then in R:
+
+```{r env-use, eval=FALSE}
+Sys.getenv("MY_API_KEY")
+```
+
+Plain rule:
+
+* Keep keys out of your code.
+* Put keys in `.Renviron`.
+* Use `Sys.getenv()` to read them.
+* Never push keys to GitHub.
+
+---
+
+## ⚠️ Common Status Codes
+
+* `200` OK
+* `400` Bad request (wrong parameters)
+* `401/403` Unauthorized/Forbidden
+* `404` Endpoint not found
+* `429` Too many requests (rate limit)
+* `500` Server error
+
+---
+
+## 🧯 Debug Checklist
+
+When API call fails:
+
+1. Check URL and endpoint spelling
+2. Check required parameters
+3. Check authentication
+4. Check status code
+5. Test with small query first
+
+---
+
+## 📉 Rate Limits and Reliability
+
+Good habits:
+
+* Don’t spam endpoints
+* Cache raw pulls locally
+* Add short delays for loops
+* Log pull date/time
+
+---
+
+## 🧪 Clean API Function Pattern
+
+```{r api-function-pattern, eval=TRUE}
+get_weather <- function(lat, lon) {
+  url <- paste0(
+    "https://api.open-meteo.com/v1/forecast?",
+    "latitude=", lat, "&longitude=", lon,
+    "&daily=temperature_2m_max&timezone=auto"
+  )
+  raw <- jsonlite::fromJSON(url)
+  as.data.frame(raw$daily)
+}
+```
+
+---
+
+## 🧠 Policy Interpretation Reminder
+
+API pulls give data access, not automatic conclusions.
+
+You still need:
+
+* data checks
+* context
+* careful interpretation
+
+---
+
+## 🧪 Lab Transition
+
+In lab, you will:
+
+1. Connect to 2-3 APIs in R
+2. Parse JSON into dataframes
+3. Build quick summaries/plots
+4. Explain what each pull is useful for
+
+---
+
+## ✅ Final Summary
+
+APIs let you:
+
+* Access live data
+* Build reproducible pipelines
+* Move from manual files to automated analysis workflows
+
+Key line:
+
+> Analysts who can pull API data can answer policy questions faster and better.

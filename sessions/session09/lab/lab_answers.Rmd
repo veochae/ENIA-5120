@@ -1,34 +1,92 @@
 ---
-title: "Lab 09 – Clustering"
+title: "Lab 09 – APIs in R"
 author: "Your Name"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-ENIA_ROOT <- "~/ENIA-5120"
-library(purrr)
+library(jsonlite)
+library(dplyr)
+library(tibble)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-cust_df <- readr::read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv"))
-num_cols <- cust_df %>%
-  dplyr::select(age, volunteer_hours, energy_reduction_pct, wellbeing_index, monthly_water_usage_l)
-cust_scaled <- scale(num_cols)
+## API Key Setup (.Renviron)
+
+```{r renviron-setup, eval=FALSE}
+# Run once to open your user .Renviron file:
+usethis::edit_r_environ()
+
+# Add this line in the file, then save:
+# NASA_API_KEY=your_key_here
+
+# Restart R, then verify:
+Sys.getenv("NASA_API_KEY")
 ```
 
-```{r}
-wss_values <- map_dbl(2:6, ~kmeans(cust_scaled, centers = .x, nstart = 10)$tot.withinss)
-wss_values
+## Part A: No-Auth API (Open-Meteo)
+
+```{r open-meteo-call}
+lat <- 38.9072
+lon <- -77.0369
+
+meteo_url <- paste0(
+  "https://api.open-meteo.com/v1/forecast?",
+  "latitude=", lat,
+  "&longitude=", lon,
+  "&daily=temperature_2m_max,precipitation_sum",
+  "&timezone=auto"
+)
+
+meteo_raw <- fromJSON(meteo_url)
+weather_df <- as.data.frame(meteo_raw$daily) %>%
+  select(time, temperature_2m_max, precipitation_sum)
+
+head(weather_df)
 ```
 
-```{r}
-kmeans_model <- kmeans(cust_scaled, centers = 3, nstart = 20)
-summary(kmeans_model)
+```{r open-meteo-summary}
+weather_summary <- weather_df %>%
+  summarize(
+    avg_max_temp = mean(temperature_2m_max, na.rm = TRUE),
+    total_precip = sum(precipitation_sum, na.rm = TRUE)
+  )
+
+weather_summary
 ```
 
-```{r}
-cust_clustered <- cust_df %>%
-  dplyr::mutate(cluster = factor(kmeans_model$cluster))
-head(cust_clustered)
+## Part B: API Key Auth (NASA APOD)
+
+```{r nasa-call}
+nasa_key <- Sys.getenv("NASA_API_KEY")
+if (nasa_key == "") {
+  message("NASA_API_KEY not found; using DEMO_KEY (lower rate limits).")
+  nasa_key <- "DEMO_KEY"
+}
+
+nasa_url <- paste0(
+  "https://api.nasa.gov/planetary/apod?",
+  "start_date=2026-03-01",
+  "&end_date=2026-03-07",
+  "&api_key=", nasa_key
+)
+
+nasa_raw <- fromJSON(nasa_url)
+apod_df <- as.data.frame(nasa_raw) %>%
+  select(any_of(c("date", "title", "media_type", "url")))
+
+head(apod_df)
 ```
+
+```{r nasa-summary}
+apod_counts <- apod_df %>%
+  count(media_type, sort = TRUE)
+
+apod_counts
+```
+
+## Reflection (Example Responses)
+
+1. The key-auth API added setup overhead (`.Renviron`, key management), while the no-auth API worked immediately.
+2. Open-Meteo was easier because the response was nested in a predictable `daily` table.
+3. NASA key-based calls can fail with 429 rate limits or missing fields depending on date ranges.

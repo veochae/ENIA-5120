@@ -1,11 +1,11 @@
 total_points: 20
 criteria:
-  - id: scaling
-    description: "Correctly scales numeric features"
-    max_points: 6
-  - id: clustering
-    description: "Runs k-means with rationale for k"
+  - id: open_meteo_pull
+    description: "Builds a valid no-auth Open-Meteo request and parses `weather_df` correctly."
+    max_points: 8
+  - id: nasa_key_pull
+    description: "Uses `NASA_API_KEY` (or DEMO fallback), calls APOD, and builds `apod_df` correctly."
     max_points: 8
   - id: interpretation
-    description: "Describes resulting clusters"
-    max_points: 6
+    description: "Provides clear reflection on auth differences, data cleaning, and reliability risk."
+    max_points: 4
