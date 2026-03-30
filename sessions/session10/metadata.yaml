@@ -1,8 +1,8 @@
 session: 10
-title: "Session 10 - Model Evaluation & Validation"
+title: "Session 10 - Storytelling, Dashboards, and Delivery"
 module:
-  name: "Week 10 - Model Evaluation"
-  description: "Train/test splits, regression & classification metrics, and ethical considerations."
+  name: "Week 10 - Data Storytelling"
+  description: "Audience-focused storytelling, dashboarding concepts, Shiny basics, and delivery choices for analytical work."
 slides:
   source: slides.qmd
   rendered: slides.html
@@ -11,20 +11,20 @@ lab:
   assignment_key: lab10
   files:
     - path: lab/lab_spec.pdf
-      display_name: "Lab 10 - Evaluation Spec.pdf"
+      display_name: "Lab 10 - Storytelling & Shiny Spec.pdf"
     - path: lab/lab_template.Rmd
-      display_name: "Lab 10 - Evaluation Template.Rmd"
+      display_name: "Lab 10 - Storytelling & Shiny Template.Rmd"
     - path: lab/lab_answers.Rmd
-      display_name: "Lab 10 - Evaluation Answers.Rmd"
+      display_name: "Lab 10 - Storytelling & Shiny Answers.Rmd"
     - path: lab/lab_rubric.pdf
       display_name: "Lab 10 - Rubric.pdf"
 homework:
   assignment_key: hw04
   files:
     - path: homework/hw_prompt.md
-      display_name: "HW 04 - Executive Summary.md"
+      display_name: "HW 04 - Modeling Choice Project.md"
     - path: homework/hw_prompt.pdf
-      display_name: "HW 04 - Executive Summary.pdf"
+      display_name: "HW 04 - Modeling Choice Project.pdf"
     - path: homework/hw_rubric.yaml
       display_name: "HW 04 - Rubric.yaml"
     - path: homework/hw_rubric.pdf

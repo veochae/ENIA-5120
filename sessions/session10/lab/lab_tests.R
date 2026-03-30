@@ -1,17 +1,9 @@
 library(testthat)
 
 run_lab10_tests <- function(env) {
-  test_that("rmse_value exists", {
-    expect_true(exists("rmse_value", envir = env))
-    val <- get("rmse_value", envir = env)
-    expect_true(is.numeric(val))
-  })
-
-  test_that("precision/recall exist", {
-    for (name in c("precision_val", "recall_val")) {
-      expect_true(exists(name, envir = env))
-      val <- get(name, envir = env)
-      expect_true(is.numeric(val))
-    }
+  test_that("story_dashboard exists and is a shiny app", {
+    expect_true(exists("story_dashboard", envir = env))
+    app <- get("story_dashboard", envir = env)
+    expect_s3_class(app, "shiny.appobj")
   })
 }

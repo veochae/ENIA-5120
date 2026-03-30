@@ -1,58 +1,300 @@
 ---
-title: "Lab 10 – Model Evaluation"
+title: "Lab 10 - Storytelling and Shiny"
 author: "Your Name"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
+# Store the course project path once so the data import line is easier to read later.
 ENIA_ROOT <- "~/ENIA-5120"
+
+# Show code in the knitted document so students can inspect every step.
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+# Load readr for CSV import.
 library(readr)
+
+# Load dplyr for filtering, counting, and piping.
 library(dplyr)
-library(rsample)
-library(yardstick)
 
-league_df <- read_csv(file.path(ENIA_ROOT, "data", "laser_league_players.csv")) %>%
-  mutate(
-    high_glow = if_else(glow_rating >= 8, 1, 0)
+# Load ggplot2 for the bar chart output.
+library(ggplot2)
+
+# Load shiny for the dashboard interface and reactive logic.
+library(shiny)
+
+# Load scales so large counts can be displayed with commas and percentages.
+library(scales)
+
+# Read the Washington EV registration file from the shared course data folder.
+ev_df <- read_csv("../../../data/wa_ev_population.csv") %>%
+  # Keep only rows with usable county and model year values for the dashboard filters.
+  filter(!is.na(county), county != "", !is.na(model_year))
+
+# Build a sorted county list for the county dropdown.
+county_choices <- sort(unique(ev_df$county))
+
+# Build a sorted EV type list for the EV type dropdown.
+type_choices <- sort(unique(ev_df$ev_type))
+
+# Build a sorted manufacturer list for the second tab's trend view.
+make_choices <- sort(unique(ev_df$make))
+```
+
+## Shiny Story Dashboard
+
+```{r}
+# Create the user interface object that defines everything visible in the app.
+ui <- navbarPage(
+  # Put the app title in the navigation bar so multiple app views still feel like one product.
+  "Washington EV Story Dashboard",
+
+  # First tab: the existing county-level dashboard.
+  tabPanel(
+    "County Snapshot",
+
+    # Add a short subtitle to frame what the user can do on this tab.
+    p("Explore how EV adoption shifts across counties, years, and vehicle types."),
+
+    # Use a horizontal rule to visually separate the intro from the dashboard content.
+    hr(),
+
+    # Use a fluid row so the controls and outputs sit in a clean two-column dashboard layout.
+    fluidRow(
+      # Reserve the left column for filters.
+      column(
+        width = 3,
+        wellPanel(
+          h4("Filters"),
+
+          # Let the user focus on one county at a time.
+          selectInput(
+            "county_pick",
+            "County",
+            choices = county_choices,
+            selected = "King"
+          ),
+
+          # Let the user limit the analysis to a specific model year range.
+          sliderInput(
+            "year_range",
+            "Model year range",
+            min = min(ev_df$model_year, na.rm = TRUE),
+            max = max(ev_df$model_year, na.rm = TRUE),
+            value = c(2018, max(ev_df$model_year, na.rm = TRUE))
+          ),
+
+          # Let the user either keep all EV types or isolate one type.
+          selectInput(
+            "ev_type_pick",
+            "EV type",
+            choices = c("All", type_choices),
+            selected = "All"
+          )
+        )
+      ),
+
+      # Reserve the larger right column for the KPI, chart, and table.
+      column(
+        width = 9,
+        wellPanel(
+          h4("Headline"),
+          textOutput("story_kpi")
+        ),
+        wellPanel(
+          h4("Top Makes"),
+          plotOutput("make_plot", height = "420px")
+        ),
+        wellPanel(
+          h4("Model Year Summary"),
+          tableOutput("make_table")
+        )
+      )
+    )
+  ),
+
+  # Second tab: a trend view that focuses on manufacturers over time.
+  tabPanel(
+    "Manufacturer Trends",
+
+    # Explain the purpose of this tab in one sentence.
+    p("Track how EV registrations change over time for selected manufacturers."),
+
+    # Separate the intro text from the controls and plot.
+    hr(),
+
+    # Use another two-column layout, with controls on the left and the plot on the right.
+    fluidRow(
+      column(
+        width = 3,
+        wellPanel(
+          h4("Trend Filters"),
+
+          # Allow users to compare multiple manufacturers at once.
+          selectizeInput(
+            "make_pick",
+            "Manufacturers",
+            choices = make_choices,
+            selected = head(make_choices, 5),
+            multiple = TRUE
+          )
+        )
+      ),
+
+      column(
+        width = 9,
+        wellPanel(
+          h4("EV Registrations by Year"),
+          plotOutput("manufacturer_trend_plot", height = "480px")
+        )
+      )
+    )
   )
-
-set.seed(123)
-split <- initial_split(league_df, prop = 0.75)
-train_df <- training(split)
-test_df <- testing(split)
+)
 ```
 
 ```{r}
-reg_model <- lm(
-  season_score ~ matches_played + assists + tag_accuracy_pct + shield_uptime_pct,
-  data = train_df
-)
-reg_predictions <- predict(reg_model, newdata = test_df)
-rmse_value <- rmse_vec(test_df$season_score, reg_predictions)
-rmse_value
+# Define the server logic that reacts to user inputs and updates outputs.
+server <- function(input, output, session) {
+  # Build one filtered dataset that every output can reuse.
+  filtered_story <- reactive({
+    # Start with county and model year filters because those apply in every case.
+    current_df <- ev_df %>%
+      filter(
+        county == input$county_pick,
+        between(model_year, input$year_range[1], input$year_range[2])
+      )
+
+    # Apply the EV type filter only when the user selects a specific type.
+    if (input$ev_type_pick != "All") {
+      current_df <- current_df %>% filter(ev_type == input$ev_type_pick)
+    }
+
+    # Return the final filtered table to the rest of the app.
+    current_df
+  })
+
+  # Pre-compute a make-level summary so the KPI and chart use the same numbers.
+  make_summary <- reactive({
+    filtered_story() %>%
+      count(make, sort = TRUE, name = "registrations") %>%
+      slice_head(n = 8)
+  })
+
+  # Create a one-sentence takeaway that updates whenever the filters change.
+  output$story_kpi <- renderText({
+    # Handle the no-data case so the app still gives the user a clear next step.
+    if (nrow(filtered_story()) == 0) {
+      return("No registrations match the current filters. Try widening the year range or switching EV type.")
+    }
+
+    # Count all rows in the current filtered view.
+    total_regs <- nrow(filtered_story())
+
+    # Pull the highest-volume make from the summarized make table.
+    top_make <- make_summary()$make[1]
+
+    # Pull the registration count for that top make.
+    top_count <- make_summary()$registrations[1]
+
+    # Combine the pieces into one sentence that reads like a dashboard takeaway.
+    paste(
+      input$county_pick,
+      "shows",
+      comma(total_regs),
+      "registrations in the filtered view, with",
+      top_make,
+      "leading at",
+      comma(top_count),
+      "vehicles."
+    )
+  })
+
+  # Build the main chart that shows the top makes in the filtered view.
+  output$make_plot <- renderPlot({
+    # If no rows remain after filtering, show a helpful message instead of a broken plot.
+    validate(need(nrow(make_summary()) > 0, "No data available for the selected filters."))
+
+    ggplot(make_summary(), aes(x = reorder(make, registrations), y = registrations, fill = registrations)) +
+      # Use bars because we are comparing category counts.
+      geom_col(show.legend = FALSE) +
+      # Flip coordinates so long make names are easier to read.
+      coord_flip() +
+      # Format the y-axis with commas for readability.
+      scale_y_continuous(labels = comma) +
+      # Use a simple fill gradient to add visual emphasis without creating a second legend.
+      scale_fill_gradient(low = "#b8d8d8", high = "#1f4e5f") +
+      # Write titles that explain what the chart is showing right now.
+      labs(
+        title = paste("Top EV makes in", input$county_pick),
+        subtitle = "Filtered by model year and EV type",
+        x = NULL,
+        y = "Registrations"
+      ) +
+      # Keep the styling minimal so the bars stay primary.
+      theme_minimal(base_size = 12)
+  })
+
+  # Build a supporting table that shows where the filtered registrations sit across model years.
+  output$make_table <- renderTable({
+    # Guard against empty filters here as well.
+    validate(need(nrow(filtered_story()) > 0, "No data available for the selected filters."))
+
+    filtered_story() %>%
+      # Count registrations by model year.
+      count(model_year, sort = TRUE, name = "registrations") %>%
+      # Add share so the table gives both count and proportion.
+      mutate(share = percent(registrations / sum(registrations), accuracy = 0.1)) %>%
+      # Keep only the top 10 rows so the table stays compact.
+      slice_head(n = 10)
+  })
+
+  # Build a second summarized dataset for the manufacturer-over-time tab.
+  manufacturer_trend <- reactive({
+    # Require the user to keep at least one manufacturer selected.
+    validate(need(length(input$make_pick) > 0, "Select at least one manufacturer."))
+
+    ev_df %>%
+      # Keep only the selected manufacturers and rows with valid model years.
+      filter(make %in% input$make_pick, !is.na(model_year)) %>%
+      # Count registrations by manufacturer and year.
+      count(model_year, make, name = "registrations") %>%
+      # Sort by year so the line plot draws in chronological order.
+      arrange(model_year, make)
+  })
+
+  # Draw a multi-line chart showing how EV registrations evolve by year for the selected manufacturers.
+  output$manufacturer_trend_plot <- renderPlot({
+    ggplot(manufacturer_trend(), aes(x = model_year, y = registrations, color = make)) +
+      # Use lines to emphasize change over time.
+      geom_line(linewidth = 1) +
+      # Add points so individual year values remain visible.
+      geom_point(size = 2) +
+      # Format the y-axis with commas for readability.
+      scale_y_continuous(labels = comma) +
+      # Use yearly ticks when possible so the horizontal scale reads as time rather than just numbers.
+      scale_x_continuous(breaks = pretty_breaks()) +
+      # Add descriptive labels for a professional presentation.
+      labs(
+        title = "EV registrations by manufacturer over time",
+        subtitle = "Use the selector to compare one or more manufacturers",
+        x = "Model year",
+        y = "Registrations",
+        color = "Manufacturer"
+      ) +
+      # Keep the styling clean and presentation-ready.
+      theme_minimal(base_size = 12)
+  })
+}
+
+# Combine the UI and server objects into one runnable Shiny app.
+story_dashboard <- shinyApp(ui, server)
+
+story_dashboard
 ```
 
-```{r}
-log_model <- glm(
-  high_glow ~ matches_played + tag_accuracy_pct + shield_uptime_pct,
-  data = train_df,
-  family = binomial()
-)
-class_probs <- predict(log_model, newdata = test_df, type = "response")
-predicted_class <- if_else(class_probs > 0.5, "Yes", "No")
-actual_class <- if_else(test_df$high_glow == 1, "Yes", "No")
+## Reflection
 
-eval_confusion <- table(Predicted = predicted_class, Actual = actual_class)
-eval_confusion
-precision_val <- eval_confusion["Yes", "Yes"] / sum(eval_confusion["Yes", ])
-recall_val <- eval_confusion["Yes", "Yes"] / sum(eval_confusion[, "Yes"])
-precision_val
-recall_val
-```
-
-## Notes
-Discuss any biases you notice.
+This dashboard is designed to answer two related questions. The first tab asks what local EV adoption looks like within a chosen county, year range, and EV type. The second tab asks how different manufacturers have grown or changed over time. The KPI, bar chart, and summary table work together to tell a focused county-level story, while the trend page adds a second analytical view without forcing everything onto one screen.

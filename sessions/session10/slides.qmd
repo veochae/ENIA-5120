@@ -1,28 +1,331 @@
 ---
-title: "Session 10 – Model Evaluation & Validation"
+title: "Session 10: Storytelling, Dashboards, and Delivery"
+subtitle: "How to make analysis usable"
 format:
   revealjs:
     slide-number: true
-    toc: true
+    smaller: true
+    scrollable: true
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
+    theme: serif
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: false
 ---
 
-# Agenda
-- Train/test split refresh
-- Regression metrics
-- Classification metrics
-- Ethics & bias
+## ⚙️ Live Setup
+
+```{r setup-data, eval=TRUE, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(scales)
+
+resolve_data_path <- function(filename) {
+  candidates <- c(
+    file.path("data", filename),
+    file.path("..", "..", "data", filename)
+  )
+  hit <- candidates[file.exists(candidates)][1]
+  if (is.na(hit)) stop("Could not find data file: ", filename)
+  hit
+}
+
+ev_raw <- read_csv(resolve_data_path("wa_ev_population.csv"), show_col_types = FALSE)
+
+story_df <- ev_raw %>%
+  filter(!is.na(county), county != "", !is.na(ev_type)) %>%
+  count(county, ev_type, name = "ev_registrations") %>%
+  group_by(county) %>%
+  summarize(
+    total_evs = sum(ev_registrations),
+    bev_share = sum(ev_registrations[ev_type == "Battery Electric Vehicle (BEV)"]) / total_evs,
+    .groups = "drop"
+  ) %>%
+  arrange(desc(total_evs)) %>%
+  slice_head(n = 10) %>%
+  mutate(county = reorder(county, total_evs))
+```
 
 ---
 
-# Metrics Cheat Sheet
-- RMSE / MAE
-- Precision / Recall / F1
-- ROC / AUC (concept)
+## 🎯 The Problem
+
+Most weak storytelling does not fail on analysis.
+
+It fails on translation:
+
+* too much process
+* too many equal-priority visuals
+* no default takeaway
+* no clear decision at the end
+
+The audience rarely asks for "more charts."
+They ask for less ambiguity.
 
 ---
 
-# Avoiding Pitfalls
-- Data leakage examples
-- Overfitting vs underfitting
-- Documentation checklist
+## 🔍 What Actually Matters
+
+Three questions decide whether a story works:
+
+1. What should this audience notice first?
+2. What should they believe after 60 seconds?
+3. What should they do differently after seeing it?
+
+That is the real filter.
+Not "is the graphic pretty?"
+
+---
+
+## 🧠 Storytelling for Analysts
+
+The audience already assumes:
+
+* you can calculate
+* you can visualize
+* you can summarize
+
+What they are testing instead:
+
+* judgment
+* prioritization
+* sequencing
+* restraint
+
+---
+
+## 🧭 A Better Mental Model
+
+Treat storytelling as attention design.
+
+You are deciding:
+
+* where attention starts
+* where it moves next
+* where it ends
+
+That is true in slides, dashboards, memos, and briefings.
+
+---
+
+## ⚖️ The Real Difference: Story vs Dashboard
+
+**Story**
+
+* you control sequence
+* you control emphasis
+* you decide what matters now
+
+**Dashboard**
+
+* user controls sequence
+* user explores branches
+* default state matters more than spoken explanation
+
+So the design challenge changes.
+
+---
+
+## 🧱 Why Dashboards Get Overbuilt
+
+Teams often confuse flexibility with value.
+
+Typical failure mode:
+
+* more filters
+* more tabs
+* more cards
+* less clarity
+
+A good dashboard does not answer everything.
+It answers the most common next question fast.
+
+---
+
+## 📊 Why Tableau and Power BI Win
+
+Not because they are magical.
+
+Because organizations value:
+
+* fast build cycles
+* business-user interaction
+* low engineering overhead
+* repeatable publishing
+* compatibility with existing data stacks
+
+They are workflow tools as much as visualization tools.
+
+---
+
+## ✅ What Makes a Dashboard Good
+
+A strong dashboard has:
+
+* a useful default view
+* obvious controls
+* one primary comparison
+* one or two secondary details
+* no confusion about what is updating
+
+If a stakeholder needs instructions, the design is already weak.
+
+---
+
+## 📈 Example: One Chart, Two Stories
+
+```{r story-plot, eval=TRUE, fig.width=8, fig.height=4.8}
+ggplot(story_df, aes(x = county, y = total_evs, fill = bev_share)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_gradient(
+    low = "#c9d9d3",
+    high = "#145a52",
+    labels = percent_format(accuracy = 1)
+  ) +
+  labs(
+    title = "Large counties dominate EV volume, but composition still varies",
+    subtitle = "Top Washington counties by registration volume; color shows BEV share",
+    x = NULL,
+    y = "Registered EVs",
+    fill = "BEV share"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+## 💡 Why This Works Better Than a Generic Plot
+
+The chart does two jobs at once:
+
+* size answers "where is the volume?"
+* color answers "what kind of adoption is it?"
+
+That is more useful than stacking three disconnected charts.
+
+Good storytelling often comes from combining roles, not adding slides.
+
+---
+
+## ✨ Shiny's Real Value
+
+Shiny is not just "R, but interactive."
+
+It forces you to think about:
+
+* user intent
+* reactive dependencies
+* defaults
+* output coordination
+
+That makes it useful even if students never become full-time app builders.
+
+---
+
+## 🛠️ Shiny Design Rule
+
+Before writing UI code, define:
+
+* the question
+* the filter set
+* the primary output
+* the supporting output
+* the sentence the app should be able to say
+
+If you cannot write that sentence, the app is not conceptually ready.
+
+---
+
+## 🧩 Minimal but Real Shiny Pattern
+
+```{r shiny-skeleton, eval=FALSE}
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("county_pick", "County", choices = county_choices),
+      sliderInput("year_range", "Model year range", min_year, max_year, c(min_year, max_year))
+    ),
+    mainPanel(
+      textOutput("story_kpi"),
+      plotOutput("make_plot"),
+      tableOutput("make_table")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  filtered_story <- reactive({
+    ev_df %>%
+      filter(
+        county == input$county_pick,
+        between(model_year, input$year_range[1], input$year_range[2])
+      )
+  })
+}
+```
+
+---
+
+## 📝 Quarto in One Slide
+
+Quarto matters because delivery format changes the writing job.
+
+* Slides optimize pacing
+* Articles optimize readability
+* Reports optimize traceability
+
+Same analysis, different communication contract.
+
+That is the point.
+Not the syntax.
+
+---
+
+## 👀 What I Want Students To Notice
+
+Not "dashboards exist."
+
+I want them to notice that:
+
+* communication is part of analysis
+* default state is a design decision
+* interactivity can clarify or distract
+* the medium changes what good work looks like
+
+That is the transferable skill.
+
+---
+
+## 🧪 Lab Framing
+
+In lab we are not building a toy.
+
+We are building a dashboard that can answer a real question with:
+
+* three meaningful controls
+* one defensible main view
+* one supporting table
+* one text takeaway
+
+That is enough complexity to be real without becoming messy.
+
+---
+
+## 📌 Final Point
+
+Weak storytelling usually comes from refusing to choose.
+
+Strong storytelling comes from choosing:
+
+* what matters
+* what waits
+* what the audience should leave with
+
+That is the job.

@@ -1,13 +1,40 @@
-# Lab 10 – Model Evaluation
+# Lab 10 - Storytelling and Shiny
 
 ## Goals
-- Perform train/test split
-- Calculate regression and classification metrics
-- Compare models
 
-## Tasks
-1. Load `~/ENIA-5120/data/laser_league_players.csv`.
-2. Create a train/test split (e.g., 75/25) and fit a linear model predicting `season_score` from gameplay metrics; compute RMSE on the test set (`rmse_value`).
-3. Using the same split, fit a logistic model predicting `high_glow` (glow rating >= 8) and generate class predictions.
-4. Build a confusion matrix (`eval_confusion`) plus precision and recall values (`precision_val`, `recall_val`) for the positive class.
-5. Reflect on potential sources of bias or leakage.
+- build an interactive Shiny dashboard from a real course dataset
+- make interface choices that support a clear analytical story
+- practice turning a dataset into a focused, stakeholder-friendly interface
+
+## Time Plan
+
+- Shiny dashboard build, about 60 minutes
+
+## Task
+
+Use `~/ENIA-5120/data/wa_ev_population.csv` to build a small but meaningful EV storytelling dashboard.
+
+Your app should include:
+
+1. At least three inputs:
+   - a county selector
+   - a model year range slider
+   - an EV type selector or make selector
+2. At least three outputs:
+   - one plot
+   - one summary table
+   - one short text or KPI output that states a takeaway
+3. A reactive filtered dataset named `filtered_story`
+4. A Shiny app object named `story_dashboard`
+
+Design expectation:
+
+> The dashboard should help a user answer a real question, not just flip filters at random.
+
+## Reflection
+
+Write 3-5 sentences explaining:
+
+- what question your dashboard is designed to answer
+- why you chose these inputs instead of other possible controls
+- what the KPI, plot, and table each contribute to the story

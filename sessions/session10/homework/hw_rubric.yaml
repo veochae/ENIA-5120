@@ -1,14 +1,66 @@
 total_points: 30
 criteria:
-  - id: insight_clarity
-    description: "Main findings and takeaways are obvious, well-organized, and avoid jargon"
-    max_points: 10.5
-  - id: storytelling
-    description: "Narrative flows logically with smooth integration of visuals and findings"
-    max_points: 7.5
-  - id: professional_tone
-    description: "Writing, formatting, and tone are appropriate for an executive audience"
+  - id: question_and_method_fit
+    description: "States a clear analytical question, chooses a modeling method that fits the question, and justifies the variable selection."
     max_points: 6
-  - id: evidence_and_limits
-    description: "Claims are supported by visuals/metrics and limitations are acknowledged"
-    max_points: 6
+    levels:
+      - score: 6
+        description: "Question is clear and substantive; method choice is well justified; variables and setup strongly match the modeling goal."
+      - score: 4
+        description: "Question and method mostly fit, with minor gaps in justification or variable choice."
+      - score: 2
+        description: "Basic question is present, but the model choice or variable selection is only partly justified."
+      - score: 0
+        description: "Question, method choice, or variable logic is unclear or missing."
+  - id: model_construction_and_selection
+    description: "Builds a reasonable modeling workflow, compares alternatives when appropriate, and explains why the final model or clustering setup was chosen."
+    max_points: 8
+    levels:
+      - score: 8
+        description: "Modeling workflow is careful and well defended; alternative models or settings are compared meaningfully; final choice is clearly justified."
+      - score: 6
+        description: "Workflow is good overall, with minor gaps in comparison or model-selection reasoning."
+      - score: 4
+        description: "A model is fit correctly, but comparison or justification of the final setup is limited."
+      - score: 2
+        description: "Modeling workflow is weak, incomplete, or only partly appropriate for the method."
+      - score: 0
+        description: "No meaningful modeling workflow shown."
+  - id: result_interpretation
+    description: "Explains the most important model outputs correctly in plain language, including variable impact or cluster characteristics."
+    max_points: 10
+    levels:
+      - score: 10
+        description: "Interpretation is accurate, specific, and substantive; clearly explains what matters in the results and what was found to be true."
+      - score: 8
+        description: "Strong interpretation with only minor gaps in depth, precision, or clarity."
+      - score: 5
+        description: "Key outputs are reported, but explanation of their meaning is limited or partly mechanical."
+      - score: 2
+        description: "Interpretation is weak, vague, or partially incorrect."
+      - score: 0
+        description: "Results are missing or not meaningfully interpreted."
+  - id: evidence_and_evaluation
+    description: "Includes appropriate diagnostics, evaluation metrics, visuals, or cluster summaries for the chosen method."
+    max_points: 4
+    levels:
+      - score: 4
+        description: "Uses method-appropriate evidence well, such as test metrics, confidence intervals, confusion matrix, elbow plot, dendrogram, or cluster summaries."
+      - score: 3
+        description: "Includes mostly appropriate evidence with minor omissions."
+      - score: 2
+        description: "Some supporting evidence is present, but important diagnostics or summaries are missing."
+      - score: 1
+        description: "Very limited supporting evidence."
+      - score: 0
+        description: "No meaningful supporting evidence."
+  - id: communication_and_caution
+    description: "Writing is clear, well-organized, and includes appropriate limitations or cautions."
+    max_points: 2
+    levels:
+      - score: 2
+        description: "Writing is clear and well structured, and the analysis includes appropriate caution about limits or assumptions."
+      - score: 1
+        description: "Writing is understandable but uneven, brief, or light on limitations."
+      - score: 0
+        description: "Writing is unclear or lacks meaningful caution."

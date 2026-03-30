@@ -1,11 +1,8 @@
 total_points: 20
 criteria:
-  - id: metrics
-    description: "Computes RMSE and classification metrics from the split"
-    max_points: 10
-  - id: interpretation
-    description: "Explains what the metrics indicate about model quality"
-    max_points: 6
-  - id: ethics
-    description: "Identifies potential bias/leakage and proposes mitigations"
-    max_points: 4
+  - id: dashboard_design
+    description: "Builds a functional Shiny dashboard with meaningful inputs and outputs"
+    max_points: 12
+  - id: storytelling
+    description: "Uses titles, summaries, and layout choices that support a clear analytical takeaway"
+    max_points: 8

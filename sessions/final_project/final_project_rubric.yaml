@@ -1,0 +1,151 @@
+total_points: 100
+project_overview:
+  team_size: "2-3 students per team"
+  assignment_type: "Group final project"
+  deliverables:
+    - "Presentation slides"
+    - "Source file in .qmd or .Rmd"
+    - "Knitted report in HTML or PDF"
+notes:
+  - "Students may choose their own topic and dataset."
+  - "The knitted report should be presentable and professionally organized."
+  - "Recommended section structure: Executive Summary, Data Source, Data Selection, Exploratory Data Analysis, Hypothesis Testing, Modeling, Modeling Results, Conclusion."
+  - "Students may use LLMs and prior lab code, but the initial thinking and writing should be original."
+  - "A post-course contribution survey will be used to identify low-contribution group members, who may receive a penalty."
+criteria:
+  - id: question_and_storyline
+    description: "Frames a clear, meaningful question and builds a cohesive story around it rather than presenting disconnected analyses."
+    max_points: 15
+    levels:
+      - score: 15
+        description: "Project has a strong central question, clear motivation, and a well-structured narrative that connects all parts of the analysis."
+      - score: 12
+        description: "Question and storyline are clear overall, with only minor gaps in focus or transitions."
+      - score: 8
+        description: "A reasonable question is present, but the report feels somewhat fragmented or uneven."
+      - score: 4
+        description: "Question is vague or weakly connected to the analysis."
+      - score: 0
+        description: "No clear question or coherent story is established."
+  - id: data_choice_and_source_context
+    description: "Justifies the chosen data, explains why it is sufficient for the topic, and documents the source and relevant dataset context."
+    max_points: 10
+    levels:
+      - score: 10
+        description: "Data choice is well justified; source, scope, variables, and relevance to the research question are clearly explained."
+      - score: 8
+        description: "Data choice and dataset context are mostly clear, with minor missing details."
+      - score: 5
+        description: "Basic dataset description is present, but justification or source/context is limited."
+      - score: 2
+        description: "Dataset is mentioned, but choice and relevance are weakly justified."
+      - score: 0
+        description: "Data source and rationale are missing or unclear."
+  - id: data_cleaning_and_preparation
+    description: "Performs appropriate cleaning and preparation, including handling missing values, standardization, categorical alignment, and reporting dataset dimensions before and after cleaning."
+    max_points: 10
+    levels:
+      - score: 10
+        description: "Preparation is careful and appropriate to the data; key cleaning decisions are evident; starting and ending dimensions are clearly reported."
+      - score: 8
+        description: "Cleaning is generally solid, with only minor omissions in documentation or preparation choices."
+      - score: 5
+        description: "Basic cleaning is present, but key preparation choices or dimension reporting are incomplete."
+      - score: 2
+        description: "Cleaning appears minimal, weak, or only partly appropriate."
+      - score: 0
+        description: "No meaningful preparation process is shown."
+  - id: exploratory_data_analysis
+    description: "Uses EDA to uncover relevant patterns tied to the topic at the variable and multivariable level."
+    max_points: 10
+    levels:
+      - score: 10
+        description: "EDA is purposeful, topic-driven, and helps build the analytical case with relevant univariate and multivariable exploration."
+      - score: 8
+        description: "EDA is useful and mostly connected to the topic, with minor gaps in depth or focus."
+      - score: 5
+        description: "EDA is present but feels somewhat generic, limited, or only loosely tied to the topic."
+      - score: 2
+        description: "EDA is thin, poorly chosen, or weakly interpreted."
+      - score: 0
+        description: "No meaningful EDA is presented."
+  - id: hypothesis_testing
+    description: "Uses one or two appropriate hypothesis tests to evaluate claims or questions raised by the topic and data."
+    max_points: 10
+    levels:
+      - score: 10
+        description: "Hypothesis tests are well chosen, correctly implemented, and clearly interpreted in context."
+      - score: 8
+        description: "Testing is solid overall, with only minor gaps in setup, explanation, or interpretation."
+      - score: 5
+        description: "A reasonable test is attempted, but motivation or interpretation is limited."
+      - score: 2
+        description: "Testing is weak, poorly matched to the question, or partially misinterpreted."
+      - score: 0
+        description: "No meaningful hypothesis testing is shown."
+  - id: modeling_approach_and_tuning
+    description: "Chooses an appropriate modeling method, tunes or compares alternatives when relevant, and explains why the final model is the best choice."
+    max_points: 15
+    levels:
+      - score: 15
+        description: "Model choice strongly fits the question; alternative models/settings are meaningfully compared; final model is well defended."
+      - score: 12
+        description: "Modeling workflow is strong, with only minor gaps in tuning, comparison, or justification."
+      - score: 8
+        description: "Model is reasonable, but the argument for why it is optimal is limited."
+      - score: 4
+        description: "Model choice or tuning process is weakly justified."
+      - score: 0
+        description: "No meaningful modeling workflow is shown."
+  - id: modeling_results_and_interpretation
+    description: "Interprets model results correctly and clearly, including significant variables, effect direction, model evidence, and method-specific technical proof."
+    max_points: 15
+    levels:
+      - score: 15
+        description: "Results are interpreted accurately and substantively; important variables or group characteristics are clearly explained; method-specific outputs are used well."
+      - score: 12
+        description: "Interpretation is strong overall, with minor gaps in precision, depth, or explanation."
+      - score: 8
+        description: "Main results are reported, but interpretation is somewhat mechanical or incomplete."
+      - score: 4
+        description: "Results are weakly interpreted or partly misunderstood."
+      - score: 0
+        description: "Model results are not meaningfully interpreted."
+  - id: visuals_and_evidence_quality
+    description: "Uses visuals strategically to tell the story, prioritizing quality and relevance over volume, while still including technical plots when they are necessary."
+    max_points: 8
+    levels:
+      - score: 8
+        description: "Visuals are polished, relevant, and integral to the story; technical plots are included when needed and interpreted effectively."
+      - score: 6
+        description: "Visuals are generally strong, with only minor issues in focus, quality, or interpretation."
+      - score: 4
+        description: "Some visuals are useful, but others feel generic, excessive, or weakly integrated."
+      - score: 2
+        description: "Visual evidence is limited, low quality, or poorly matched to the narrative."
+      - score: 0
+        description: "Visuals are missing or do not support the project meaningfully."
+  - id: conclusions_and_synthesis
+    description: "Draws clear conclusions and explains how the evidence from cleaning, EDA, testing, and modeling supports or challenges the project's claims."
+    max_points: 5
+    levels:
+      - score: 5
+        description: "Conclusion is clear, well synthesized, and directly tied to the project's evidence and claims."
+      - score: 4
+        description: "Conclusion is good overall, with minor gaps in synthesis or specificity."
+      - score: 3
+        description: "Conclusion is present but somewhat generic or only partly integrated with earlier sections."
+      - score: 1
+        description: "Conclusion is weak, vague, or disconnected from the analysis."
+      - score: 0
+        description: "No meaningful conclusion is provided."
+  - id: professionalism_and_deliverables
+    description: "Report, source file, and slides are complete, presentable, professionally organized, and suitable as a future template for real-world analytical work."
+    max_points: 2
+    levels:
+      - score: 2
+        description: "All deliverables are complete, polished, and professionally structured."
+      - score: 1
+        description: "Deliverables are mostly complete and understandable, but presentation or organization is uneven."
+      - score: 0
+        description: "Deliverables are incomplete, hard to follow, or not professionally presented."
