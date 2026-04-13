@@ -10,11 +10,5 @@ slides:
 lab:
   assignment_key: lab11
   files:
-    - path: lab/lab_spec.pdf
-      display_name: "Lab 11 – APIs Spec.pdf"
-    - path: lab/lab_template.Rmd
-      display_name: "Lab 11 – APIs Template.Rmd"
-    - path: lab/lab_answers.Rmd
-      display_name: "Lab 11 – APIs Answers.Rmd"
-    - path: lab/lab_rubric.pdf
-      display_name: "Lab 11 – Rubric.pdf"
+    - path: lab/lab_template.md
+      display_name: "Lab 11 – APIs Template.md"

@@ -1,30 +1,801 @@
 ---
-title: "Session 11 – APIs & Web Scraping"
+title: "Session 11: GenAI and LLMs"
+subtitle: "The Story of How Machines Learned to Write"
 format:
   revealjs:
     slide-number: true
-    toc: true
+    smaller: true
+    scrollable: true
+    footer: "ENIA-5120 · Veo Chae · Georgetown University"
     self-contained: true
+    theme: serif
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: false
 ---
 
-# Agenda
-- API basics (endpoints, auth, JSON)
-- Calling APIs with `httr`
-- Scraping HTML with `rvest`
+## You Already Use This Technology
+
+You have probably used ChatGPT, Copilot, or Claude this week.
+
+Maybe to draft an email, summarize a report, or brainstorm ideas.
+
+But here is the question:
+
+**Do you know what is actually happening when you hit "send"?**
+
+Today, we trace the full arc — from the first attempts at machine language, to the system you used this morning.
 
 ---
 
-# API Flow
-<!-- ```r
-resp <- httr::GET(url, query = list(q = "laser tag"))
-json <- httr::content(resp, as = "text")
-data <- jsonlite::fromJSON(json)
-``` -->
+## Session Goal
+
+By the end of today, you should be able to:
+
+1. Tell the **story** of how we went from rule-based AI to ChatGPT
+2. Explain what an LLM actually does (in plain language *and* with technical precision)
+3. Understand key concepts: **transformers, attention, RAG, fine-tuning, hallucinations**
+4. Know the difference between model architectures and deployment choices
+5. Think critically about when to trust — and when to verify — AI outputs
 
 ---
 
-# Scraping Checklist
-- Respect robots.txt
-- Inspect DOM / CSS selectors
-- Clean parsed tables
-- Document data provenance
+## Why This Matters for You
+
+You will encounter AI systems in every career path from here.
+
+If you cannot explain how they work, you cannot:
+
+- **Choose** the right tool for a task
+- **Evaluate** whether an output is trustworthy
+- **Debug** when results are wrong or misleading
+- **Govern** their use in your organization or policy domain
+
+Understanding the mechanics is not optional — it is professional literacy.
+
+---
+
+# Part 1: What Are We Even Talking About?
+
+---
+
+## What Is Generative AI?
+
+Generative AI refers to models that **create new content** — text, images, audio, code, video.
+
+Key distinction:
+
+- **Traditional AI** classifies, predicts, or retrieves. ("Is this email spam?")
+- **Generative AI** produces. ("Write me an email about...")
+
+It does not copy from a single document. It learns **patterns** across massive datasets, then generates new outputs that follow those patterns.
+
+---
+
+## What Is an LLM?
+
+LLM stands for **Large Language Model**.
+
+Think of it as a very sophisticated text prediction engine:
+
+> Given everything written so far, what word (token) should come next?
+
+It answers that question, appends the answer, then asks the same question again. And again. And again.
+
+That is how you get paragraphs, essays, code, and conversations — one token at a time.
+
+---
+
+## The Core Surprise
+
+The training objective sounds almost trivially simple:
+
+> **Predict the next token.**
+
+But when you do this across trillions of words, something remarkable happens. The model learns:
+
+- Grammar and syntax
+- Facts and relationships (imperfectly)
+- Reasoning patterns (imperfectly)
+- Style, tone, and register
+- How to follow instructions
+
+**Simple goal. Complex emergent behavior.**
+
+This tension — between the simplicity of the objective and the sophistication of the results — is one of the most important things to understand about LLMs.
+
+---
+
+## Before We Go Deeper: What Is a Token?
+
+LLMs do not read words the way you do. They read **tokens** — chunks of text.
+
+- Common words are usually one token: "the", "hello", "policy"
+- Less common words get split: "un" + "believ" + "able"
+- Punctuation, spaces, and numbers are also tokens
+
+Why? Because you need a manageable vocabulary. English has millions of possible words (including names, technical terms, typos). Tokens let you represent any text with a vocabulary of ~50,000-100,000 pieces.
+
+**Think of it like Lego**: you can build any shape, but you work with a fixed set of bricks.
+
+---
+
+# Part 2: The Road Here — A Brief History
+
+---
+
+## Act 1: The Age of Rules (1950s–1980s)
+
+The earliest approach to making computers understand language was to **write rules by hand**.
+
+> IF the sentence contains "not" before an adjective,  
+> THEN flip the sentiment.
+
+This is called **symbolic AI** or **expert systems**.
+
+**Strength**: The logic is transparent and auditable.
+
+**Fatal weakness**: Language is messy. Sarcasm, idioms, ambiguity, context — rules cannot capture it all. You would need millions of rules, and they would still break.
+
+---
+
+## Act 2: Let the Data Decide (1980s–2000s)
+
+Researchers shifted from hand-writing rules to **learning patterns from data**.
+
+The core idea: instead of telling the computer what language *means*, show it millions of examples and let it figure out what *tends to happen*.
+
+This is **statistical NLP** (Natural Language Processing).
+
+---
+
+## The N-gram Model: A Simple But Powerful Idea
+
+One of the most intuitive statistical models:
+
+> Look at the last few words. What word usually comes next?
+
+"Peanut butter and ___" → **jelly** (very likely)
+
+This is called an **n-gram model** — it predicts based on the previous *n* words.
+
+**It works** for short, common phrases.
+
+**It breaks** when meaning depends on something said 20 words ago, or when the phrase has never been seen before.
+
+---
+
+## Why Statistics Alone Hit a Ceiling
+
+Three fundamental limits:
+
+1. **Tiny context window**: Only looks at the last 2–4 words. Cannot capture "The senator who spoke at the UN last Tuesday said she would ___"
+2. **Data sparsity**: Many reasonable phrases simply never appear in the training data
+3. **No understanding of meaning**: "Bank of the river" and "Bank of America" look the same to an n-gram model
+
+We needed a way to represent **meaning**, not just word sequences.
+
+---
+
+## Act 3: Teaching Machines What Words Mean — Embeddings
+
+**Breakthrough idea (2013):** What if we represent each word as a point in space?
+
+Words with similar meanings end up near each other. Words with different meanings are far apart.
+
+This is called a **word embedding** (word2vec, GloVe).
+
+The classic example:
+
+> king − man + woman ≈ **queen**
+
+The model learned that "king" and "queen" differ in the same *direction* as "man" and "woman." It captured a *relationship* — gender — as a geometric pattern.
+
+**Why this matters**: For the first time, computers had a way to represent meaning, not just spelling.
+
+---
+
+## Embeddings: The Limitation
+
+Word embeddings were a breakthrough, but they were **static**.
+
+The word "bank" always gets the *same* vector — whether you are talking about a river bank or a financial bank.
+
+We needed models that could understand words **in context**.
+
+---
+
+## Act 4: Learning Sequences — RNNs
+
+**Recurrent Neural Networks (RNNs)** were designed to process text sequentially — one word at a time, carrying forward a "memory" of what came before.
+
+Think of it like reading a book and keeping a mental summary in your head as you go.
+
+**Advance over n-grams**: RNNs could, in theory, remember information from much earlier in the text.
+
+**Problem in practice**: The "memory" degrades. By the time you reach word 50, the model has largely forgotten word 5. This is the **vanishing gradient problem** — the learning signal fades over long distances.
+
+---
+
+## LSTM and GRU: Better Memory, Same Architecture
+
+**LSTM** (Long Short-Term Memory) and **GRU** (Gated Recurrent Unit) added "gates" — mechanisms that control what to remember and what to forget.
+
+**Analogy**: If an RNN is reading a book and trying to remember everything, an LSTM is reading with a highlighter — it marks the important parts and lets the rest fade.
+
+This helped significantly with longer text. But there was still a fundamental bottleneck:
+
+**Processing was sequential.** Word 50 had to wait for words 1–49 to be processed first. This made training slow and scaling difficult.
+
+---
+
+## Act 5: The Encoder-Decoder Idea
+
+Before the big breakthrough, researchers developed an important architectural pattern for tasks like translation:
+
+**Encoder**: Reads the entire input and compresses it into a summary representation.  
+**Decoder**: Takes that summary and generates the output, one token at a time.
+
+**Analogy**: The encoder is like a reader who reads a French paragraph and creates a mental summary. The decoder is like a writer who uses that summary to write the English version.
+
+This **encoder-decoder** pattern will keep coming back. Remember it — it is the foundation for understanding the different types of LLMs.
+
+---
+
+## The Attention Mechanism: A Game-Changer Within Encoder-Decoder
+
+There was a problem with the encoder-decoder setup: the entire input had to be compressed into a **single** summary vector. For long inputs, information got lost.
+
+**Attention** (2014–2015) solved this:
+
+> Instead of relying on one summary, let the decoder **look back** at the full input at each step and focus on the most relevant parts.
+
+**Analogy**: Instead of summarizing an entire chapter into one sentence and handing it to the writer, you let the writer flip back through the chapter and re-read whichever paragraphs are relevant to the sentence they are writing *right now*.
+
+This was a crucial stepping stone.
+
+---
+
+## Act 6: The Transformer — "Attention Is All You Need" (2017)
+
+The landmark paper asked: if attention is so powerful, why do we need the sequential processing of RNNs at all?
+
+**Answer: We do not.**
+
+The **Transformer** architecture dropped RNNs entirely and used **self-attention** as its core mechanism.
+
+> For every token, look at **every other token** in the sequence and figure out which ones matter most — all at once, in parallel.
+
+**Why this was revolutionary:**
+
+- **Parallel processing**: No more waiting for word 1 before processing word 50. All tokens are processed simultaneously.
+- **Long-range connections**: Any token can directly attend to any other token, regardless of distance.
+- **Scalability**: Parallelism means you can throw more hardware at the problem and train faster.
+
+---
+
+## Self-Attention in Plain Language
+
+Imagine you are reading this sentence:
+
+> "The animal didn't cross the street because **it** was too tired."
+
+What does "it" refer to? The animal, obviously. But a computer needs to figure this out.
+
+**Self-attention** lets the model ask, for every word: *"Which other words in this sentence should I pay attention to right now?"*
+
+For the word "it," the model learns to pay strong attention to "animal" and weak attention to "street."
+
+For the word "tired," it pays attention to "animal" again — because tiredness is a property of animals, not streets.
+
+**This is what makes modern LLMs so powerful.** Every word's meaning is computed in light of every other word. Meaning becomes fully contextual.
+
+---
+
+## The Three Flavors of Transformers
+
+Remember the encoder-decoder pattern? The Transformer architecture can be used in three ways:
+
+| Architecture | What It Does | Analogy | Examples |
+|---|---|---|---|
+| **Encoder-only** | Reads and understands text | A reader who highlights and annotates | BERT, RoBERTa |
+| **Decoder-only** | Generates text left-to-right | A writer composing one word at a time | GPT, Claude, LLaMA |
+| **Encoder-decoder** | Reads input, then generates output | A translator: read French, write English | T5, BART |
+
+**Why this matters**: When people say "LLM," they usually mean **decoder-only** models (the GPT family). But BERT-style encoder models are everywhere too — they power search engines, classifiers, and spam filters.
+
+**The key difference**: Encoder models are great at *understanding*. Decoder models are great at *generating*. Encoder-decoder models do both.
+
+---
+
+## BERT vs GPT: The Two Family Lines
+
+**BERT** (2018) — Bidirectional Encoder
+
+- Reads text in **both directions** (left-to-right AND right-to-left simultaneously)
+- Trained by **masking** random words and predicting them from context
+- Excels at: classification, question answering, search ranking
+- Not designed for generating long text
+
+**GPT** (2018–present) — Autoregressive Decoder
+
+- Reads text in **one direction** (left-to-right only)
+- Trained by predicting the **next token**
+- Excels at: writing, conversation, code generation, reasoning
+- This is what powers ChatGPT, Claude, etc.
+
+**Why can't GPT look both ways?** Because it would be "cheating" — you cannot predict the next word if you have already seen it. The left-to-right constraint is what makes generation possible.
+
+---
+
+# Part 3: The Scaling Era and the Rise of LLMs
+
+---
+
+## GPT-1 → GPT-2 → GPT-3: Bigger, Bigger, Bigger
+
+| Model | Year | Parameters | Key Moment |
+|---|---|---|---|
+| GPT-1 | 2018 | 117 million | Proved the concept |
+| GPT-2 | 2019 | 1.5 billion | "Too dangerous to release" |
+| GPT-3 | 2020 | 175 billion | Few-shot learning amazed the world |
+
+The recipe was deceptively simple:
+
+1. Take the same architecture (decoder-only transformer)
+2. Add **more parameters** (the model's internal knobs)
+3. Train on **more data** (larger slices of the internet)
+4. Use **more compute** (more GPUs, longer training)
+
+And it kept getting better. This is the era of **scaling laws**: researchers discovered that performance improves *predictably* as you increase model size, data, and compute.
+
+---
+
+## Emergent Abilities: The Scale Surprise
+
+At certain scales, models suddenly became capable of things they could not do before:
+
+- **In-context learning**: Show the model a few examples in the prompt, and it generalizes
+- **Chain-of-thought reasoning**: Walk through problems step by step
+- **Code generation**: Write working programs from descriptions
+- **Translation without training**: Translate between languages it was not explicitly trained to translate
+
+These are called **emergent abilities** — they appear to arise from scale, not from being explicitly programmed.
+
+**Important caveat**: This is not magic. It is likely a threshold effect — enough capacity + enough data diversity + enough optimization eventually crosses a capability boundary.
+
+---
+
+## But Raw LLMs Were Awkward to Use
+
+GPT-3 was impressively capable, but **painful to use**.
+
+You had to carefully craft prompts. The model would often:
+
+- Ignore your instructions
+- Continue your text instead of answering your question
+- Generate toxic or harmful content
+- Make up facts with total confidence
+
+Think of it as a brilliant but uncooperative colleague who has read the entire internet but never learned how to have a normal conversation.
+
+**The next breakthroughs were about making LLMs actually useful.**
+
+---
+
+# Part 4: Making LLMs Useful — The Modern Era
+
+---
+
+## Instruction Tuning: Teaching Models to Follow Directions
+
+**Problem**: Pretrained models predict "what text typically comes next." If you write a question, the model might generate *another* question instead of an answer — because that is what it has seen in training data.
+
+**Solution**: **Instruction tuning** — fine-tune the model on thousands of examples of (instruction, desired response) pairs.
+
+> Instruction: "Summarize this article in three bullet points."  
+> Desired response: [an actual three-bullet summary]
+
+After this training, the model learns a new pattern: when given an instruction, *follow it*.
+
+This is what turned GPT-3 into ChatGPT-style assistants.
+
+---
+
+## RLHF: Aligning Models with Human Preferences
+
+Instruction tuning was not enough. Models could follow instructions but still produce outputs that were unhelpful, biased, or harmful.
+
+**RLHF** (Reinforcement Learning from Human Feedback) added another layer:
+
+1. Show humans two model responses to the same prompt
+2. Humans pick which response is better
+3. Train a **reward model** that predicts human preferences
+4. Optimize the LLM to produce responses the reward model scores highly
+
+**Analogy**: If instruction tuning teaches a student to answer the question, RLHF teaches them to answer it the way a good teacher would — clearly, helpfully, and responsibly.
+
+This is often called **alignment** — aligning the model's behavior with human values and expectations.
+
+---
+
+## The Context Window: The LLM's Working Memory
+
+Here is something critical to understand:
+
+**LLMs do not have persistent memory.** They do not remember your conversation from yesterday. They do not learn from your corrections.
+
+Everything an LLM "knows" during a conversation comes from two sources:
+
+1. **Pretraining knowledge**: Patterns learned during training (frozen, potentially outdated)
+2. **The context window**: The text currently in front of it (your prompt + conversation history)
+
+The **context window** has a fixed size — measured in tokens. Early models had ~4,000 tokens (~3,000 words). Modern models can handle 100,000–1,000,000+ tokens.
+
+**If critical information is not in the context window, the model simply does not have it.** This is the single most important concept for using LLMs effectively.
+
+---
+
+## The Hallucination Problem
+
+Because LLMs are trained to produce **plausible** text, not **true** text, they sometimes generate fluent, confident, and completely wrong outputs.
+
+This is called a **hallucination**.
+
+It happens because:
+
+- The model's training data is incomplete or contradictory
+- The question is ambiguous or outside the model's knowledge
+- The model is optimized to sound good, not to say "I don't know"
+
+**Example**: Ask an LLM for a legal citation. It may produce a case name, court, year, and ruling that all *sound* real — but the case does not exist.
+
+**This is not a bug that will be fixed. It is a fundamental property of how these models work.** The risk can be reduced but not eliminated.
+
+---
+
+## RAG: Giving the Model a Cheat Sheet
+
+**RAG** stands for **Retrieval-Augmented Generation**. It is one of the most important techniques in modern AI systems.
+
+The idea is simple:
+
+> Before the model generates an answer, first **search** for relevant documents and **paste them into the context window**.
+
+The model then generates its answer based on the retrieved evidence, not just its training memory.
+
+---
+
+## RAG: How It Works, Step by Step
+
+```
+User asks: "What is Georgetown's policy on AI use in coursework?"
+
+Step 1 — RETRIEVE: Search a document database for Georgetown AI policies
+         → Find 3 relevant policy documents
+
+Step 2 — AUGMENT: Paste those documents into the model's context window
+         along with the user's question
+
+Step 3 — GENERATE: The model reads the question + the documents
+         and generates a grounded answer with specific references
+```
+
+**Why this is powerful:**
+
+- The model answers based on **actual source material**, not hazy training memory
+- You can update the document database without retraining the model (fresh information)
+- You can point to the **source documents** the answer came from (verifiability)
+- It dramatically **reduces hallucination risk** (but does not eliminate it)
+
+---
+
+## RAG vs Fine-Tuning: Two Ways to Specialize
+
+When you need an LLM to perform well in a specific domain, you have two main approaches:
+
+| | RAG | Fine-Tuning |
+|---|---|---|
+| **What it does** | Gives the model relevant documents at query time | Modifies the model's internal weights with domain data |
+| **Analogy** | Open-book exam | Studying the material beforehand |
+| **Data freshness** | Always current (just update the database) | Frozen at training time |
+| **Cost** | Lower (no model training) | Higher (requires GPU training) |
+| **Best for** | Factual Q&A, document search, policy lookup | Style adaptation, specialized reasoning, consistent behavior |
+
+In practice, many production systems use **both**: a fine-tuned model enhanced with RAG retrieval.
+
+---
+
+## Tool Use: LLMs as Orchestrators
+
+Modern LLM systems are not just "one model generating text."
+
+They can **call tools**:
+
+- 🔢 Calculators (for math the model might get wrong)
+- 🔍 Search engines (for current information)
+- 💻 Code interpreters (run code and return results)
+- 🗄️ Databases (query real data)
+- 🌐 APIs (interact with external services)
+
+**Why?** Because LLMs are good at language and reasoning, but bad at arithmetic, real-time data, and deterministic computation.
+
+**The pattern**: The model decides *which* tool to use and *what* to ask it. The tool returns results. The model incorporates the results into its response.
+
+This is why ChatGPT can browse the web, make charts, and run Python code — it is not doing those things itself. It is **orchestrating** specialized tools.
+
+---
+
+## Multimodal Models: Beyond Text
+
+The latest generation of models can process and generate multiple types of content:
+
+- **Text + Images**: Describe a photo, read a chart, analyze a document scan
+- **Text + Audio**: Transcribe, translate, speak
+- **Text + Video**: Understand scenes, summarize videos
+
+The core architecture is the same — transformers and attention — but the **embeddings** are extended to represent pixels, audio waveforms, and video frames alongside text tokens.
+
+This is why you can now paste a screenshot into ChatGPT and ask "What does this chart show?"
+
+---
+
+## The Efficiency Wave: Making It Practical
+
+Running a 175-billion-parameter model is expensive. The field has developed techniques to make LLMs cheaper and faster:
+
+- **Quantization**: Reduce the precision of model weights (e.g., 32-bit → 4-bit) with minimal quality loss
+- **Distillation**: Train a smaller model to mimic a larger one
+- **LoRA / Adapters**: Fine-tune only a small fraction of the model's parameters instead of all of them
+- **Smaller models**: Focused models with 7B–13B parameters that run on consumer hardware
+
+This is why you can now run AI models on your laptop or phone — not just in massive data centers.
+
+---
+
+# Part 5: Under the Hood — How LLMs Actually Work
+
+---
+
+## The Full Pipeline: From Text to Response
+
+Here is what happens when you send a message to an LLM:
+
+```
+"What is the capital of France?" 
+    ↓
+[1. TOKENIZE]     → Split into tokens: ["What", " is", " the", " capital", " of", " France", "?"]
+    ↓
+[2. EMBED]        → Convert each token to a vector (list of numbers)
+    ↓
+[3. ADD POSITION] → Mark each vector with its position in the sequence
+    ↓
+[4. TRANSFORM]    → Pass through many transformer layers (attention + processing)
+    ↓
+[5. PREDICT]      → Output probability distribution over all possible next tokens
+    ↓
+[6. SAMPLE]       → Select "Paris" (or whichever token has high probability)
+    ↓
+[7. REPEAT]       → Append "Paris" to the sequence, go back to step 4
+```
+
+Let us look at each step in more detail.
+
+---
+
+## Step 1–2: Tokenization and Embedding
+
+**Tokenization** breaks text into processable pieces.
+
+"unbelievable" → ["un", "believ", "able"]
+
+**Embedding** converts each token into a **vector** — a list of hundreds or thousands of numbers.
+
+Why numbers? Because neural networks only work with numbers. The embedding is a learned representation: tokens with similar meanings end up with similar vectors.
+
+**Key insight**: These embeddings are *learned during training*, not hand-designed. The model discovers what numbers to assign to each token by seeing billions of examples.
+
+---
+
+## Step 3: Positional Encoding — Why Order Matters
+
+"Dog bites man" and "Man bites dog" contain the exact same words with very different meanings.
+
+Since transformers process all tokens in parallel (not sequentially), they need a way to know **what position** each token is in.
+
+**Positional encoding** adds position information to each token's vector:
+
+> Token vector for "dog" + position signal for "first word" = final input vector
+
+This ensures the model knows not just *what* words are present, but *where* they appear.
+
+---
+
+## Step 4: The Transformer Block
+
+Each transformer layer does three things:
+
+1. **Self-attention**: Each token looks at all other tokens and computes how much to attend to each one
+2. **Feed-forward network**: Each token is independently processed through a small neural network
+3. **Residual connections**: The original signal is added back (prevents information loss in deep networks)
+
+A typical LLM stacks **dozens to over a hundred** of these layers. Each layer refines the representation — early layers capture syntax, later layers capture meaning and reasoning.
+
+---
+
+## Self-Attention: Q, K, V Explained
+
+Inside the attention mechanism, each token gets three representations:
+
+- **Query (Q)**: "What am I looking for?"
+- **Key (K)**: "What do I have to offer?"
+- **Value (V)**: "What information should I pass along?"
+
+**How it works:**
+
+1. Each token's Query is compared against every other token's Key
+2. High-similarity pairs get high **attention weights**
+3. The Values of highly-attended tokens are combined and passed forward
+
+**Analogy**: You are at a conference (Query = your research interest). You scan everyone's name badge (Key = their expertise). You spend the most time talking to (high attention weight) the people whose badges match your interest, and you absorb their ideas (Value).
+
+---
+
+## Step 5–6: Prediction and Sampling
+
+After passing through all transformer layers, the model outputs a **probability distribution** over its entire vocabulary for the next token:
+
+> "The" = 0.001, "Paris" = 0.85, "capital" = 0.02, "France" = 0.01, ...
+
+The model then **samples** from this distribution based on settings you control:
+
+- **Temperature**: Controls randomness. Low (0.1) = almost always pick the most likely token. High (1.0+) = more variety and surprise.
+- **Top-p**: Only consider tokens that make up the top X% of probability mass.
+- **Max tokens**: Hard cap on output length.
+
+**Lower temperature** = more predictable, factual, repetitive.  
+**Higher temperature** = more creative, varied, error-prone.
+
+---
+
+## Training: How the Model Learns
+
+During pretraining:
+
+1. Take a massive text corpus (books, websites, code, articles — trillions of tokens)
+2. For each position, **hide the next token**
+3. Ask the model to **predict** it
+4. Compare the prediction to the real token
+5. **Update the model's weights** to make the prediction slightly better
+6. Repeat — billions of times
+
+**This is where most of the model's capability comes from.** The instruction tuning and RLHF described earlier are relatively small adjustments on top of this massive pretraining phase.
+
+**Analogy**: Pretraining is like spending 20 years reading everything ever written. Instruction tuning is like a week-long workshop on being a helpful assistant. Most of what you know comes from the reading.
+
+---
+
+# Part 6: The LLM Landscape Today
+
+---
+
+## Closed vs Open Models
+
+| | Closed API Models | Open-Weight Models |
+|---|---|---|
+| **Examples** | GPT-4, Claude, Gemini | LLaMA, Mistral, Qwen |
+| **Access** | API calls only — you send data to their servers | Download the model, run it yourself |
+| **Strengths** | Top performance, managed infrastructure, easy to start | Full control, privacy, customization, no vendor lock-in |
+| **Weaknesses** | Vendor dependency, data leaves your environment, cost at scale | Requires your own infrastructure, may lag in capability |
+
+**This is fundamentally a governance and engineering tradeoff**, not a quality question. The best choice depends on your constraints: data sensitivity, budget, control requirements, and regulatory environment.
+
+---
+
+## Frontier vs Small Models
+
+**Frontier models** (GPT-4, Claude Opus, Gemini Ultra):
+
+- Strongest general capability — best at hard reasoning, nuanced writing, complex code
+- Expensive to run, only available via cloud API (mostly)
+
+**Small models** (Phi, LLaMA 8B, Mistral 7B):
+
+- Run on a laptop or single GPU
+- Good enough for many targeted tasks
+- Privacy advantage: data never leaves your machine
+
+**The gap is narrowing.** Today's small models outperform last year's frontier models on many benchmarks. Pick based on your actual constraints, not headlines.
+
+---
+
+# Part 7: Thinking Critically About LLMs
+
+---
+
+## Confidence Is Not Correctness
+
+An LLM's response always sounds confident. It never hesitates, hedges naturally, or says "I'm making this up."
+
+**This is by design.** The model is optimized to produce fluent, natural text — and confident-sounding text is more fluent than uncertain-sounding text.
+
+**Best practices:**
+
+- Treat LLM outputs as **first drafts**, not final answers
+- **Verify** critical claims against authoritative sources
+- Ask the model to **cite its sources** — then check if those sources actually exist
+- Be *most* skeptical when the model is *most* fluent — that is exactly when hallucinations are hardest to spot
+
+---
+
+## Evaluation: Beyond "It Sounds Good"
+
+Three levels of evaluation:
+
+| Level | What You Measure | Difficulty |
+|---|---|---|
+| **Benchmarks** | Performance on standardized tests (MMLU, HumanEval, etc.) | Easy — already published |
+| **Task performance** | Does it actually improve *your* workflow? | Medium — requires your own testing |
+| **Failure analysis** | Where does it break? What are the worst outputs? | Hard — but this is what matters most |
+
+**Only level 1 is easy. Levels 2 and 3 are what matter for real deployment.**
+
+Benchmarks tell you how the model performs on average. Your use case cares about the worst case.
+
+---
+
+## Common Misconceptions
+
+| Misconception | Reality |
+|---|---|
+| "LLMs are just autocomplete" | They learn deep abstractions through scale — but the training objective *is* prediction, so this is a matter of degree, not category |
+| "Bigger is always better" | Bigger helps, but cost, speed, and task fit matter too. A fine-tuned small model can beat a generic large one on specific tasks |
+| "Open source is always better/worse" | It depends on your governance model, budget, data sensitivity, and willingness to operate infrastructure |
+| "If it sounds confident, it must be right" | **False.** This is the single most dangerous misconception. |
+| "AI will replace analysts" | AI changes the *nature* of analysis work — it makes verification, judgment, and domain expertise *more* important, not less |
+
+---
+
+## The Timeline as a Story
+
+```
+1950s–1980s  RULES          "If X then Y" — brittle, hand-coded
+1980s–2000s  STATISTICS     "What usually follows X?" — n-grams, limited context
+2013         MEANING        Word embeddings — words become coordinates in space
+2014–2016    SEQUENCES      RNNs/LSTMs — reading one word at a time, with memory
+2014–2015    ATTENTION       Let the model look back at what matters
+2017         TRANSFORMER    "Attention Is All You Need" — parallel, scalable
+2018–2020    SCALING        GPT-1→3, BERT — bigger models, better results
+2022         ALIGNMENT      Instruction tuning + RLHF → ChatGPT → mass adoption
+2023–now     EXPANSION      Tools, multimodal, RAG, agents, efficiency
+```
+
+**This is an evolutionary arc, not a single invention moment.** Each step built on the last. The transformer was the biggest single leap, but it only mattered because of everything that came before and after.
+
+---
+
+## What You Should Take Away
+
+1. **LLMs predict the next token** — everything else emerges from scale and training
+2. **Transformers and self-attention** are the architectural breakthrough that made this possible
+3. **The context window is everything** — if information is not in it, the model does not have it
+4. **RAG** solves the knowledge freshness and grounding problem by retrieving documents at query time
+5. **Hallucinations are fundamental**, not a bug to be fixed — always verify
+6. **Architecture, access model, and size** are tradeoffs with no universal winner
+7. **Understanding how these systems work is essential** for using, governing, and evaluating them responsibly
+
+---
+
+## Preview: In-Class Lab
+
+In the lab that follows, we will put this framework into practice:
+
+- Test prompts and see how wording changes outputs
+- Compare model responses and evaluate reliability
+- Explore RAG in action
+- Practice the verification habits that separate good AI use from dangerous AI use
+
+Today gave you the map. Lab is where you navigate.
