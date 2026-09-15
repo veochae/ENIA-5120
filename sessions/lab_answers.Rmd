@@ -1,0 +1,259 @@
+---
+title: "Lab 01: Climate Station Forensic Audit"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## 🧭 Mission Background
+Welcome to your first day as a Junior Auditor for the **Global Climate Monitoring Network**. You've been handed a raw export from 20 monitoring stations around the world. Before anyone downstream (scientists, policymakers, journalists) can trust a single chart built from this data, you need to prove it's structurally sound and free of "Gremlins."
+
+**Your Goal:** Perform a forensic audit. Confirm what data types R assigned, check the table's structural integrity, and document every quality issue you find. These are the same six categories from lecture.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# library(): Loads the forensic toolkit into your session.
+# readr: Part of the Tidyverse, used for fast and "smart" data loading.
+# dplyr: Provides the tools for inspection (glimpse, count) and manipulation (mutate).
+
+library(readr)
+library(dplyr)
+
+# Define the root path (adjust if your folder structure is different)
+climate_path <- file.path("../../data", "climate_stations.csv")
+```
+
+---
+
+## 1. The Blueprint: Loading & Inspection
+Our first task is to bring the evidence onto our digital workbench (the R Environment).
+
+### 1.1 Load the Evidence
+**functions:**
+`read_csv()`: Loads data much faster and smarter than base R's `read.csv()`.
+`head()`: Displays the first 6 rows of a dataset.
+
+**logic steps:**
+Use `read_csv()` to load the file located at `climate_path`.
+Store the result in an object named `climate`.
+Use `head()` to verify the table looks correct.
+
+```{r}
+climate <- read_csv(climate_path)
+head(climate)
+```
+
+### 1.2 Identify the Data Structure
+**functions:**
+`class()`: Tells you the "Object Type" (e.g., tibble/data.frame).
+`glimpse()`: Provides a clean, vertical overview of column names and variable types.
+
+**logic steps:**
+Check the `class()` of your `climate` object to confirm R treats it as a table.
+Use `glimpse()` to see every column name and its assigned data type.
+
+```{r}
+class(climate)
+glimpse(climate)
+```
+
+**Question 1.2.1:** What R class is `climate`? How does R internally store this table?
+
+**Question 1.2.2:** Based on `glimpse()`, how many rows (observations) and columns (variables) are present?
+
+---
+
+## 2. The Language: Data Type Checks
+In R, the type of data determines what math is allowed. You cannot calculate the "average" of a word.
+
+### 2.1 Inspect Individual Columns
+**functions:**
+`class(df$column)`: Extracts a specific column using the `$` sign and reveals its type.
+
+**logic steps:**
+Check the class of `temp_c` and `extreme_weather_events`. Both are numeric, but not the same *kind* of numeric.
+Check the class of `energy_source` and `climate_risk_level`. Both are categorical, but not the same *kind* of categorical.
+
+```{r}
+class(climate$temp_c)
+class(climate$extreme_weather_events)
+class(climate$energy_source)
+class(climate$climate_risk_level)
+```
+
+**Question 2.1.1:** `temp_c` and `extreme_weather_events` are both numeric. Which one is **continuous** and which is **discrete**? Why?
+
+**Question 2.1.2:** `energy_source` and `climate_risk_level` are both categorical. Which one is **nominal** and which is **ordinal**? Why does that distinction matter for later analysis?
+
+### 2.2 Numerical Summaries
+**functions:**
+`summary()`: Provides the Min, Max, Median, and Mean.
+
+**logic steps:**
+Run `summary()` on `temp_c` and `co2_ppm`.
+Look closely at the Min and Max. An impossible value hides in plain sight here.
+
+```{r}
+summary(climate$temp_c)
+summary(climate$co2_ppm)
+```
+
+**Question 2.2.1:** What is the max value of `temp_c`? Is that physically possible for a surface temperature reading?
+
+---
+
+## 3. Forensic Audit: Missingness, Duplicates, Casing
+Now we look for three of the six quality issues from lecture: gaps, repeats, and label inconsistency.
+
+### 3.1 Missing Values (NA)
+**functions:**
+`is.na()`: Returns TRUE for every missing value.
+`colSums()`: Adds up all the TRUEs to give a total count of missing values per column.
+
+**logic steps:**
+Combine `is.na(climate)` with `colSums()` to get a report of all missing values across the entire table.
+
+```{r}
+colSums(is.na(climate))
+```
+
+**Question 3.1.1:** Which variable (besides `analyst_notes`, which is expected to be mostly empty) has the most missing values? Why is that a problem if it's a key climate measurement?
+
+### 3.2 Inconsistent Casing
+**functions:**
+`count()`: Groups rows by a column and counts how many times each label appears.
+`arrange(desc(n))`: Sorts the counts from highest to lowest.
+
+**logic steps:**
+Take `climate`, count `location`, and arrange by descending count. Repeat for `energy_source`.
+
+```{r}
+climate %>%
+  count(location) %>%
+  arrange(desc(n))
+
+climate %>%
+  count(energy_source) %>%
+  arrange(desc(n))
+```
+
+**Question 3.2.1:** Do you notice inconsistent casing in either column (e.g., `Arlington` vs. `ARLINGTON`, or `Wind` vs. `WIND`)? Why would this mess up a bar chart of station locations or energy sources?
+
+### 3.3 Duplicate Station-Year Entries
+**functions:**
+`count(col1, col2)`: Counts how many times each combination of two columns appears together.
+`filter(n > 1)`: Keeps only combinations that appear more than once.
+
+**logic steps:**
+`station_id` alone repeats naturally, since there's one row per station per year, so a duplicate isn't "the same station_id twice." It's "the same station and the same year twice." Count `station_id` and `reading_date` together, then filter down to combinations that appear more than once.
+
+```{r}
+climate %>%
+  count(station_id, reading_date) %>%
+  filter(n > 1)
+```
+
+**Question 3.3.1:** How many station-year combinations are duplicated? Why is this a bigger problem for a yearly summary than it would be for a table with no natural repeats?
+
+---
+
+## 4. Logical Detective Work
+Time to reuse the bracket-filtering skills from Lab 0. Instead of reading a printed summary, we'll pull out the exact offending rows ourselves.
+
+### 4.1 Isolate the Impossible Temperatures
+**functions:**
+`df[condition, ]`: Keeps only the rows where `condition` is TRUE.
+
+**logic steps:**
+No surface station on Earth reads above 60°C or below -60°C. Filter `climate` down to rows where `temp_c` is outside that range.
+
+```{r}
+climate[climate$temp_c > 60 | climate$temp_c < -60, ]
+```
+
+**Question 4.1.1:** How many rows have a physically impossible temperature? What's the most extreme value you found?
+
+```
+5 rows have an impossible temperature. The most extreme is 999.9°C.
+```
+
+### 4.2 Catch the Malformed Sensor Readings
+**functions:**
+`class()`, `df[!df$column %in% c(...), ]`: `%in%` checks membership. `!` negates it, keeping rows that do not match.
+
+**logic steps:**
+First check what class R actually assigned to `sensor_active`. Then filter to rows where the value isn't `"True"` or `"False"`.
+
+```{r}
+class(climate$sensor_active)
+
+climate[!climate$sensor_active %in% c("True", "False"), ]
+```
+
+**Question 4.2.1:** What class did R assign to `sensor_active`? Given what you just found in the filter above, why did it end up that way instead of being a clean TRUE/FALSE logical column?
+
+### 4.3 Catch the Invalid Risk Category
+**functions:**
+`df[!df$column %in% c(...), ]`
+
+**logic steps:**
+`climate_risk_level` should only ever be "Low," "Medium," or "High." Filter to rows where it isn't.
+
+```{r}
+climate[!climate$climate_risk_level %in% c("Low", "Medium", "High"), ]
+```
+
+**Question 4.3.1:** What value(s) showed up that don't belong to any of the three defined levels? Why is an invalid category worse than a missing one for an ordinal variable?
+
+### 4.4 Check the Date Column
+**functions:**
+`class()`
+
+**logic steps:**
+Check what class `reading_date` currently has.
+
+```{r}
+class(climate$reading_date)
+```
+
+**Question 4.4.1:** What class is `reading_date` right now? Given that some entries look like `"Jan 15th, 2020"` instead of `"2020-01-15"`, why can't R sort this chronologically yet?
+
+---
+
+## 5. Flagging with `mutate()`
+We're not fixing anything yet. That's next week's "surgery." But we can build a flag that marks every row with at least one issue, so Session 2 knows exactly where to start.
+
+**functions:**
+`mutate()`: Adds a new column to the data frame.
+`|` : Logical OR. TRUE if *any* of the conditions is TRUE.
+
+**logic steps:**
+Create a new logical column `has_issue` that is TRUE if the row has a missing `co2_ppm`, an impossible `temp_c`, a malformed `sensor_active`, or an invalid `climate_risk_level`.
+
+```{r}
+climate_flagged <- climate %>%
+  mutate(
+    has_issue = is.na(co2_ppm) |
+      temp_c > 60 | temp_c < -60 |
+      !sensor_active %in% c("True", "False") |
+      !climate_risk_level %in% c("Low", "Medium", "High")
+  )
+
+sum(climate_flagged$has_issue)
+```
+
+**Question 5.1.1:** How many rows got flagged? Does that roughly match what you'd expect from adding up the individual checks above (keeping in mind some rows might trip more than one check)?
+
+---
+
+## 6. Write the Audit Report
+No new functions here. Just synthesize what you found.
+
+**Question 6.1:** In 4 to 6 sentences, summarize your audit. Include roughly how many rows have at least one issue, which issue type was most common, and (this is the part that takes judgment, not a lookup) if you only had time to fix one issue type before Session 2, which would you fix first and why?
+
+

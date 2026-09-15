@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENIA-5120: Lab 1 Instructions, Climate Station Forensic Audit</title>
+<style>
+  :root {
+    --paper: #EADFC7;
+    --paper-light: #F4EDDD;
+    --ink: #2B2118;
+    --ink-soft: #55493B;
+    --navy: #041E42;
+    --navy-soft: #274873;
+    --gold: #B8842E;
+    --gold-light: #F1DFB8;
+    --rule: #C9B98E;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 28px 120px;
+  }
+
+  header.cover {
+    text-align: center;
+    padding: 40px 0 48px;
+    border-bottom: 3px double var(--navy);
+    margin-bottom: 48px;
+  }
+
+  header.cover .kicker {
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  header.cover h1 {
+    font-size: 38px;
+    margin: 0 0 8px;
+    color: var(--navy);
+    letter-spacing: 0.5px;
+  }
+
+  header.cover p {
+    margin: 4px 0;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+
+  nav.toc {
+    background: var(--paper-light);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 20px 26px;
+    margin-bottom: 56px;
+  }
+
+  nav.toc h2 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--navy);
+    margin: 0 0 12px;
+  }
+
+  nav.toc ul {
+    columns: 2;
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14.5px;
+  }
+
+  nav.toc a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--rule);
+  }
+
+  nav.toc a:hover { color: var(--navy); }
+
+  h2.module {
+    font-size: 26px;
+    color: var(--navy);
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 10px;
+    margin-top: 6px;
+    margin-bottom: 22px;
+  }
+
+  h3.sub {
+    font-size: 19px;
+    color: var(--navy-soft);
+    margin-top: 32px;
+  }
+
+  p { margin: 14px 0; }
+
+  .analogy {
+    background: var(--gold-light);
+    border-left: 4px solid var(--gold);
+    padding: 12px 18px;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: 0 3px 3px 0;
+  }
+  .analogy strong { color: var(--navy); }
+
+  .gotcha {
+    background: #F7E7DD;
+    border-left: 4px solid #B85C38;
+    padding: 12px 18px;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: 0 3px 3px 0;
+  }
+  .gotcha strong { color: #8A3E20; }
+
+  pre {
+    background: var(--paper-light);
+    border: 1px dashed var(--ink-soft);
+    border-radius: 3px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  pre::before {
+    content: "R";
+    position: absolute;
+    top: -9px;
+    left: 14px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 1px 8px;
+    border-radius: 2px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  code {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--paper-light);
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-size: 0.92em;
+  }
+
+  pre code { background: none; padding: 0; }
+
+  .worksheet-ptr {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px dotted var(--rule);
+  }
+
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  footer {
+    text-align: center;
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 3px double var(--navy);
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="cover">
+    <div class="kicker">ENIA-5120, Lab 1</div>
+    <h1>Climate Station Forensic Audit</h1>
+    <p>The Instructions. Read this first, then open <code>lab_template.Rmd</code></p>
+    <p>About 1 hour in class. Continues the Forensic Audit from Session 1</p>
+  </header>
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#intro">The Mission, Continued</a></li>
+      <li><a href="#s1">1. The Blueprint: Loading and Inspection</a></li>
+      <li><a href="#s2">2. The Language: Data Type Checks</a></li>
+      <li><a href="#s3">3. Missingness, Duplicates, Casing</a></li>
+      <li><a href="#s4">4. Logical Detective Work</a></li>
+      <li><a href="#s5">5. Flagging with mutate()</a></li>
+      <li><a href="#s6">6. Write the Audit Report</a></li>
+    </ul>
+  </nav>
+
+  <section id="intro">
+    <h2 class="module">🕵️ The Mission, Continued</h2>
+    <p>In lecture, you learned to spot six kinds of data quality "Gremlins": missing values, duplicates, inconsistent casing, impossible numbers, invalid categories, and timestamps stored as text. Today you audit a real dataset that has all six of them hiding inside it. It's 146 station-year readings from 20 fictional climate monitoring stations.</p>
+    <p>You are <strong>not fixing anything yet</strong>. Session 2 is "the surgery," where you learn the tidyverse verbs to actually repair messy data. Today is purely about <strong>finding and documenting</strong> what's broken, the same way an auditor writes a findings report before anyone touches the books.</p>
+  </section>
+
+  <section id="s1">
+    <h2 class="module">🧰 1. The Blueprint: Loading and Inspection</h2>
+    <p>Before you can audit anything, you need the evidence sitting in front of you. <code>read_csv()</code> reads the file off disk and stores it as a table (technically a <em>tibble</em>) in your R Environment.</p>
+    <p><code>class()</code> tells you what kind of object something is. <code>glimpse()</code> is a better version of just printing the data. Instead of a wide spreadsheet that runs off the edge of your screen, it turns the table on its side so you can read straight down a list of every column name, its type, and a peek at its first few values.</p>
+    <div class="analogy"><strong>Analogy:</strong> If <code>head()</code> is looking at a table from above, <code>glimpse()</code> is turning that same table 90 degrees so you're reading it like a list instead of squinting across a row.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 1, Tasks 1.1 and 1.2</p>
+  </section>
+
+  <section id="s2">
+    <h2 class="module">🔠 2. The Language: Data Type Checks</h2>
+    <p>You already know numeric, character, and logical from Lab 0. This section adds one more layer on top. Within "numeric," there's continuous vs. discrete. Within "categorical," there's nominal vs. ordinal.</p>
+    <ul>
+      <li><strong>Continuous:</strong> can take any value in between two points. 14.5°C, 14.53°C, and 14.531°C are all valid. Temperature is continuous.</li>
+      <li><strong>Discrete:</strong> only takes whole-number counts. You can have 2 extreme weather events or 3, never 2.5. Counts are discrete.</li>
+      <li><strong>Nominal:</strong> categories with no ranking. Solar, Wind, and Coal: none of them is "higher" than another.</li>
+      <li><strong>Ordinal:</strong> categories with a real order. Low, Medium, High is a ladder. High is genuinely more than Medium.</li>
+    </ul>
+    <div class="analogy"><strong>Analogy:</strong> Think of <code>energy_source</code> as hooks on a wall. Solar, Wind, and Coal are just different hooks, none ranked above another. Think of <code>climate_risk_level</code> as rungs on a ladder. Low, Medium, and High are steps, and skipping straight to the top rung means something different than the bottom one.</div>
+    <p>Why this matters beyond vocabulary: if you ever build a chart or a model using an ordinal variable and R doesn't know it's ordered, R will sort it alphabetically (High, Low, Medium) instead of logically (Low, Medium, High), and your chart will look broken even though nothing crashed.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 2, Tasks 2.1 and 2.2</p>
+  </section>
+
+  <section id="s3">
+    <h2 class="module">🔍 3. Forensic Audit: Missingness, Duplicates, Casing</h2>
+    <p><code>is.na()</code> checks every single cell and returns TRUE if it's missing. <code>colSums()</code> adds up all those TRUEs per column, so you get one number per column instead of thousands of TRUE/FALSE values.</p>
+    <p><code>count()</code> groups a column by its distinct values and counts how many rows fall into each one. It's the fastest way to see every version of a label that exists, including the typos and casing mismatches hiding among them.</p>
+    <div class="gotcha"><strong>Careful with duplicates here.</strong> Checking <code>duplicated(climate$station_id)</code> by itself will look "duplicated" almost everywhere, because every station legitimately appears once per year. That's 7 rows per station by design, not a Gremlin. A real duplicate in this dataset means <strong>the same station AND the same year</strong> showing up twice. That's why the worksheet has you count <code>station_id</code> and <code>reading_date</code> together, not <code>station_id</code> alone.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 3, Tasks 3.1 to 3.3</p>
+  </section>
+
+  <section id="s4">
+    <h2 class="module">🕵️‍♀️ 4. Logical Detective Work</h2>
+    <p>Remember bracket filtering from Lab 0 Module 5, the pattern <code>vec[vec &gt; 15]</code>? Same idea, now applied to a whole data frame instead of a single vector: <code>df[condition, ]</code> keeps only the rows where <code>condition</code> is TRUE, and drops everything else.</p>
+    <pre><code>climate[climate$temp_c &gt; 60 | climate$temp_c &lt; -60, ]</code></pre>
+    <p>The <code>|</code> means OR: a row is kept if temp_c is too high <em>or</em> too low. You'll also use <code>%in%</code>, which checks whether a value is a member of a set, and <code>!</code>, which flips TRUE to FALSE (and vice versa):</p>
+    <pre><code>climate[!climate$sensor_active %in% c("True", "False"), ]</code></pre>
+    <p>Read that line right to left. Is <code>sensor_active</code> in the set <code>c("True", "False")</code>? Now flip that (<code>!</code>), and keep only the rows where the answer is FALSE. In other words, keep the rows that <em>don't</em> belong to the valid set.</p>
+    <div class="gotcha"><strong>Why does a whole column turn into text over a few bad values?</strong> R has to pick <em>one</em> type for an entire column. If even one row has "Yes" instead of TRUE/FALSE, R can't call the column logical anymore, since logical only allows TRUE/FALSE. So it falls back to character for every single value in that column, clean rows included. One bad label anywhere is enough to break the type for everyone.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 4, Tasks 4.1 to 4.4</p>
+  </section>
+
+  <section id="s5">
+    <h2 class="module">🏷️ 5. Flagging with mutate()</h2>
+    <p><code>mutate()</code> adds a new column to a data frame without changing anything else in it. Today you'll use it to create one new column, <code>has_issue</code>, that's TRUE for any row that failed at least one of your checks above.</p>
+    <div class="analogy"><strong>Analogy:</strong> Think of <code>has_issue</code> as a sticky note you attach to a row. You're not fixing anything, just marking "come back to this one" so next week's cleanup has a starting map instead of starting from scratch.</div>
+    <p>Combine conditions with <code>|</code> (OR) the same way you did in Section 4. A row gets flagged if <em>any</em> of the conditions is true, not just one specific one.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 5, Task 5.1</p>
+  </section>
+
+  <section id="s6">
+    <h2 class="module">📝 6. Write the Audit Report</h2>
+    <p>No new functions in this section. This one is judgment, not lookup. You've already found every issue, so now you have to decide what matters most. A real analyst doesn't just report "here are 26 broken rows." They tell their team which problem to fix first and defend that choice. That's the actual skill this section is testing.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 6, Task 6.1</p>
+  </section>
+
+  <footer>
+    ENIA-5120, Georgetown University, Veo Chae
+  </footer>
+
+</div>
+</body>
+</html>
