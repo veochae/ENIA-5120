@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENIA-5120: Lab 2 Instructions, The Surgery</title>
+<style>
+  :root {
+    --paper: #EADFC7;
+    --paper-light: #F4EDDD;
+    --ink: #2B2118;
+    --ink-soft: #55493B;
+    --navy: #041E42;
+    --navy-soft: #274873;
+    --gold: #B8842E;
+    --gold-light: #F1DFB8;
+    --rule: #C9B98E;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 28px 120px;
+  }
+
+  header.cover {
+    text-align: center;
+    padding: 40px 0 48px;
+    border-bottom: 3px double var(--navy);
+    margin-bottom: 48px;
+  }
+
+  header.cover .kicker {
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  header.cover h1 {
+    font-size: 38px;
+    margin: 0 0 8px;
+    color: var(--navy);
+    letter-spacing: 0.5px;
+  }
+
+  header.cover p {
+    margin: 4px 0;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+
+  nav.toc {
+    background: var(--paper-light);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 20px 26px;
+    margin-bottom: 56px;
+  }
+
+  nav.toc h2 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--navy);
+    margin: 0 0 12px;
+  }
+
+  nav.toc ul {
+    columns: 2;
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14.5px;
+  }
+
+  nav.toc a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--rule);
+  }
+
+  nav.toc a:hover { color: var(--navy); }
+
+  h2.module {
+    font-size: 26px;
+    color: var(--navy);
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 10px;
+    margin-top: 6px;
+    margin-bottom: 22px;
+  }
+
+  h3.sub {
+    font-size: 19px;
+    color: var(--navy-soft);
+    margin-top: 32px;
+  }
+
+  p { margin: 14px 0; }
+
+  .analogy {
+    background: var(--gold-light);
+    border-left: 4px solid var(--gold);
+    padding: 12px 18px;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: 0 3px 3px 0;
+  }
+  .analogy strong { color: var(--navy); }
+
+  .gotcha {
+    background: #F7E7DD;
+    border-left: 4px solid #B85C38;
+    padding: 12px 18px;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: 0 3px 3px 0;
+  }
+  .gotcha strong { color: #8A3E20; }
+
+  pre {
+    background: var(--paper-light);
+    border: 1px dashed var(--ink-soft);
+    border-radius: 3px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  pre::before {
+    content: "R";
+    position: absolute;
+    top: -9px;
+    left: 14px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 1px 8px;
+    border-radius: 2px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  code {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--paper-light);
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-size: 0.92em;
+  }
+
+  pre code { background: none; padding: 0; }
+
+  table.ref {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+  table.ref th, table.ref td {
+    border: 1px solid var(--rule);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  table.ref th {
+    background: var(--paper-light);
+    color: var(--navy);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .worksheet-ptr {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px dotted var(--rule);
+  }
+
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  footer {
+    text-align: center;
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 3px double var(--navy);
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="cover">
+    <div class="kicker">ENIA-5120, Lab 2</div>
+    <h1>The Surgery</h1>
+    <p>The Instructions. Read this first, then open <code>lab_template.Rmd</code></p>
+    <p>About 1 hour in class. Fixes everything you flagged in Lab 1's Forensic Audit</p>
+  </header>
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#intro">The Mission, Continued</a></li>
+      <li><a href="#s1">1. Ruling Out Outliers</a></li>
+      <li><a href="#s2">2. Fixing Duplicate Station-Years</a></li>
+      <li><a href="#s3">3. Fixing Missing Values</a></li>
+      <li><a href="#s4">4. Fixing Inconsistent Categories</a></li>
+      <li><a href="#s5">5. Factors: Nominal vs. Ordinal in R</a></li>
+      <li><a href="#s6">6. Fixing Broken Types</a></li>
+      <li><a href="#s7">7. Diagnosing and Fixing Skew</a></li>
+      <li><a href="#s8">8. Visual Confirmation: ggplot2 Basics</a></li>
+      <li><a href="#s9">9. Write the Cleaning Report</a></li>
+    </ul>
+  </nav>
+
+  <section id="intro">
+    <h2 class="module">🔧 The Mission, Continued</h2>
+    <p>Last week you audited 146 station-year readings from the Global Climate Monitoring Network and found all six Gremlins hiding inside: missing values, duplicates, inconsistent casing, impossible numbers, invalid categories, and timestamps stored as text. You flagged every broken row with <code>has_issue</code>, but you didn't touch anything.</p>
+    <p>Today you fix it. Every section below repairs one of the issues you already found, in a specific order. That order isn't arbitrary, and section 1's gotcha box explains exactly why it matters.</p>
+    <div class="gotcha"><strong>Order matters this week.</strong> Unlike last week, where each section was independent, several of today's fixes depend on the ones before them. Do the sections in order, even if you're tempted to jump ahead to the one that looks more interesting.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 0, load the data and record <code>dim_before</code> before touching anything</p>
+  </section>
+
+  <section id="s1">
+    <h2 class="module">🎯 1. Ruling Out Outliers</h2>
+    <p>Last lecture we built the 3-standard-deviation rule of thumb: a value is flagged if it sits more than 3 SDs from the mean. In R, that's just arithmetic you already know how to write. <code>mean()</code> and <code>sd()</code> give you the two numbers, <code>abs()</code> gives you the distance regardless of direction, and <code>filter()</code> keeps only the rows that pass.</p>
+    <pre><code>climate %>% filter(abs(temp_c - mu) <= 3 * sd_val)</code></pre>
+    <p>That single line keeps every row whose temperature is within 3 SDs of the mean, and quietly drops the rest.</p>
+    <div class="gotcha"><strong>One pass isn't quite enough here.</strong> A couple of the fabricated readings in this dataset are so extreme (close to 1000°C) that they drag the standard deviation itself way up when you calculate it, which stretches the "acceptable" range out far enough to hide a third bad value (a −180°C reading) that would otherwise be an obvious outlier. This is a real, known limitation of the 3-SD rule: a handful of severe outliers can inflate the very spread measure used to catch them, effectively masking themselves and each other. The fix is a second pass using the physical bound from Lab 1, no surface reading is possible outside ±60°C, as a backstop after the statistical check. Two different tools, catching two different kinds of "wrong."</div>
+    <div class="gotcha"><strong>Why this runs before duplicates.</strong> One of the "duplicate" station-years from Lab 1 isn't really a duplicate at all, it's the same station and year logged twice, once with a real temperature reading and once with a fabricated one (one of the extreme readings you flagged as impossible last week). If you removed duplicates first, R would have no way of knowing which of the two rows to keep, and by default it keeps whichever one comes first in the file, which happens to be the broken one. Running the outlier check first means the fabricated reading is already gone by the time you get to duplicates, so there's nothing left to decide.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 1, Task 1.1</p>
+  </section>
+
+  <section id="s2">
+    <h2 class="module">👯 2. Fixing Duplicate Station-Years</h2>
+    <p>Remember from Lab 1: <code>station_id</code> alone repeats naturally, once per station per year, so checking it by itself isn't useful. A real duplicate means the same <code>station_id</code> <em>and</em> the same <code>reading_date</code> showing up twice.</p>
+    <p><code>duplicated()</code> can check more than one column at once if you hand it a small table instead of a single column. It marks the first occurrence of each combination <code>FALSE</code>, and every repeat after that <code>TRUE</code>.</p>
+    <pre><code>duplicated(climate[c("station_id", "reading_date")])</code></pre>
+    <div class="analogy"><strong>Analogy:</strong> think of it like checking guests into a hotel by first name and last name together, not first name alone. Plenty of guests share a first name, that's not a problem. Two guests sharing both a first <em>and</em> last name is the actual red flag.</div>
+    <p>Keep only the rows where that check comes back <code>FALSE</code>, and the repeats are gone.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 2, Task 2.1</p>
+  </section>
+
+  <section id="s3">
+    <h2 class="module">🕳️ 3. Fixing Missing Values</h2>
+    <p>You already know the decision: delete when it's a handful of rows, impute when deleting would cost too much data. For <code>co2_ppm</code>, you're imputing.</p>
+    <p><code>coalesce()</code> is a simple idea with a slightly odd name: it looks at a column and, wherever it finds a missing value, replaces it with whatever backup value you give it. Everywhere the column already has a real value, <code>coalesce()</code> leaves it alone.</p>
+    <pre><code>mutate(co2_ppm = coalesce(co2_ppm, mean_co2))</code></pre>
+    <div class="analogy"><strong>Analogy:</strong> <code>coalesce()</code> is like a form that says "if this field is blank, use this default instead." It never overwrites an answer that's already there.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 3, Task 3.1</p>
+  </section>
+
+  <section id="s4">
+    <h2 class="module">🔤 4. Fixing Inconsistent Categories</h2>
+    <p>Two columns have this problem: <code>energy_source</code> (<code>"solar"</code> vs. <code>"Solar"</code>) and <code>location</code> (you'll recognize this one, it's the exact <code>Arlington</code> / <code>ARLINGTON</code> / <code>arlington</code> example from the Session 1 slides). <code>str_to_lower()</code> forces every value in a column to lowercase in one pass, so all three versions of Arlington collapse into one.</p>
+    <p><code>n_distinct()</code> is your before-and-after check, it just counts how many different values exist in a column. Run it before the fix and after, and the drop tells you exactly how many fake categories you just merged away.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 4, Task 4.1</p>
+  </section>
+
+  <section id="s5">
+    <h2 class="module">🏷️ 5. Factors: Nominal vs. Ordinal in R</h2>
+    <p>Session 1 covered the idea: nominal categories have no order (<code>Solar</code>, <code>Wind</code>, <code>Coal</code> are just different labels), ordinal categories do (<code>Low</code> &lt; <code>Medium</code> &lt; <code>High</code> is a real ladder). Today's the first time you'll actually write the R code for it, using <code>factor()</code>.</p>
+    <p>For a nominal column, <code>factor()</code> on its own is enough:</p>
+    <pre><code>climate$energy_source <- factor(climate$energy_source)</code></pre>
+    <p>For an ordinal column, you tell R the rungs of the ladder, in order, and mark it as ordered:</p>
+    <pre><code>climate$climate_risk_level <- factor(
+  climate$climate_risk_level,
+  levels = c("Low", "Medium", "High"),
+  ordered = TRUE
+)</code></pre>
+    <div class="gotcha"><strong>Here's the part that matters for this lab.</strong> R will only accept values that exactly match one of the <code>levels</code> you listed. Anything else, like the <code>"TBD"</code> and <code>"Extreme"</code> values you flagged in Lab 1, silently becomes <code>NA</code>. That's not a bug, it's the whole reason to do this: assigning an ordinal factor doubles as a built-in validity check. You didn't have to go hunting for the bad values again, R just told you.</div>
+    <div class="analogy"><strong>Analogy:</strong> think of <code>levels</code> as a guest list at the door. If your name's not on it, you don't get in, you get turned into <code>NA</code> instead.</div>
+    <p>Once you see how few values are salvageable, you'll make a judgment call: is it worth recoding 3 bad values out of 146, or is the column better off dropped entirely? There's no single right answer here, that's the point.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 5, Tasks 5.1 and 5.2</p>
+  </section>
+
+  <section id="s6">
+    <h2 class="module">🛠️ 6. Fixing Broken Types</h2>
+    <h3 class="sub">6.1 <code>sensor_active</code></h3>
+    <p>This column should only ever hold <code>TRUE</code> or <code>FALSE</code>, but a few rows have <code>"Yes"</code> and <code>"No"</code> instead, which is why R stores the whole column as text instead of a clean logical column. The fix is two steps: first make every value read <code>"True"</code> or <code>"False"</code>, then convert.</p>
+    <pre><code>mutate(sensor_active = case_when(
+  sensor_active == "Yes" ~ "True",
+  sensor_active == "No"  ~ "False",
+  TRUE ~ sensor_active
+))</code></pre>
+    <p><code>case_when()</code> reads top to bottom: if the first condition matches, use that result; if not, check the next one; the final <code>TRUE ~</code> line is a catch-all for "nothing else matched, leave it as is." Once every value is a clean <code>"True"</code>/<code>"False"</code> string, <code>as.logical()</code> converts the whole column in one call.</p>
+
+    <h3 class="sub">6.2 <code>reading_date</code></h3>
+    <p>Six rows have dates written out as text, like <code>"Jan 15th, 2020"</code>, instead of the standard format the rest of the column uses. There are only 5 distinct bad strings in the whole dataset, so this doesn't need anything fancy, just a direct swap for each one.</p>
+    <table class="ref">
+      <tr><th>Found in the data</th><th>Correct value</th></tr>
+      <tr><td><code>Jan 15th, 2016</code></td><td><code>2016-01-15</code></td></tr>
+      <tr><td><code>Jan 15th, 2018</code></td><td><code>2018-01-15</code></td></tr>
+      <tr><td><code>Jan 15th, 2019</code></td><td><code>2019-01-15</code></td></tr>
+      <tr><td><code>Jan 15th, 2020</code></td><td><code>2020-01-15</code></td></tr>
+      <tr><td><code>Jan 15th, 2022</code></td><td><code>2022-01-15</code></td></tr>
+    </table>
+    <p>Same <code>case_when()</code> pattern as above, five conditions instead of two. Once every value looks like <code>"2020-01-15"</code>, <code>as.Date()</code> converts the column with no extra arguments needed, R recognizes that format automatically.</p>
+    <div class="gotcha"><strong>Why not just tell R "this means January 15th"?</strong> R can't guess "15th" means the number 15, "th" isn't part of any date it recognizes. Swapping the whole string is simpler and safer than trying to strip just the "th" out, since it also fixes the month-name and format at the same time, not just the ordinal suffix.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 6, Tasks 6.1 and 6.2</p>
+  </section>
+
+  <section id="s7">
+    <h2 class="module">📉 7. Diagnosing and Fixing Skew</h2>
+    <p><code>precipitation_mm</code> has a long right tail, exactly the kind of shape lecture covered. But before transforming it, there's a catch this column has that <code>temp_c</code> didn't.</p>
+    <div class="gotcha"><strong>Check for negative values first.</strong> Rainfall can never be negative, that's impossible by definition, the same way a 500°C surface reading was impossible. But a negative value isn't necessarily far enough from the mean to trip the 3-SD rule, so it can slip through a purely statistical check. This is exactly the distinction from lecture: some bad values are <em>statistically</em> rare, others are <em>logically</em> impossible no matter how common they look. Filter these out with plain domain knowledge before you do anything else with this column, <code>log()</code> of a negative number isn't a real number in R, it'll break your plot.</div>
+    <p>Once that's handled, the transform itself is one line: <code>log(precipitation_mm)</code>. Plot the raw column, plot the log-transformed version, and compare the shapes. You only need the log-transformed values for this one comparison, so compute them inline for the plot rather than saving a permanent `log_precip` column, no reason to carry a one-off diagnostic column through the rest of the dataset.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 7, Task 7.1</p>
+  </section>
+
+  <section id="s8">
+    <h2 class="module">🎨 8. Visual Confirmation: ggplot2 Basics</h2>
+    <p>Every <code>ggplot2</code> chart is built the same three-part way, no matter what it ends up looking like:</p>
+    <ul>
+      <li><strong>The data</strong> you're handing it.</li>
+      <li><strong>What goes on which axis</strong>, set inside <code>aes()</code> (short for "aesthetics").</li>
+      <li><strong>What kind of chart</strong> you want, a <code>geom_*()</code> layer.</li>
+    </ul>
+    <div class="analogy"><strong>Analogy:</strong> think of it like ordering a sandwich. <code>ggplot(data)</code> is picking the bread, <code>aes()</code> is deciding what goes where in the sandwich, and <code>geom_*()</code> is choosing what the sandwich actually is, hot or cold, toasted or not. Same three steps, different filling every time.</p>
+    <p>You'll use three different geoms today:</p>
+    <table class="ref">
+      <tr><th>Function</th><th>What it shows</th></tr>
+      <tr><td><code>geom_histogram()</code></td><td>The shape of a numeric column. What you'll use to check <code>temp_c</code> and <code>precipitation_mm</code>.</td></tr>
+      <tr><td><code>geom_col()</code></td><td>A count per category. What you'll use to check <code>energy_source</code>.</td></tr>
+      <tr><td><code>geom_line()</code></td><td>How a value changes over time, connected point to point in order.</td></tr>
+    </table>
+    <div class="gotcha"><strong>Why <code>geom_line()</code> needed section 6 first.</strong> A line chart draws points in whatever order the data is sorted in. If <code>reading_date</code> were still stored as text, R would sort it alphabetically, "Jan 15th, 2020" would land near "Jan 15th, 2022" purely by coincidence of spelling, not chronology, and the line would zigzag nonsense. Because you already converted <code>reading_date</code> to a real <code>Date</code> in section 6, R now sorts it the way a calendar does, and the line actually tells a story.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 8, Tasks 8.1 to 8.3</p>
+  </section>
+
+  <section id="s9">
+    <h2 class="module">📝 9. Write the Cleaning Report</h2>
+    <p>No new functions. Compare <code>dim_before</code> to where you ended up, and write a short summary: what changed, and why each fix mattered for whatever gets built on top of this dataset next.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 9, Task 9.1</p>
+  </section>
+
+  <footer>
+    ENIA-5120, Georgetown University, Veo Chae
+  </footer>
+
+</div>
+</body>
+</html>

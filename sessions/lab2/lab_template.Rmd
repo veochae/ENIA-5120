@@ -1,0 +1,292 @@
+---
+title: "Lab 02: The Surgery"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## 🔧 Mission Background
+Last week, you audited the climate stations dataset and flagged every row with at least one issue. You found all six Gremlins hiding inside: missing values, duplicates, inconsistent casing, impossible numbers, invalid categories, and timestamps stored as text.
+
+**Your Goal:** Fix every one of them. Unlike last week, the order of these sections matters, several fixes depend on the ones before them. Follow the sections in order.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# readr: fast, smart data loading.
+# dplyr: filtering, mutating, and summarizing.
+# stringr: cleaning up text columns.
+# ggplot2: visual confirmation at the end.
+
+library(readr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+
+# Define the root path (adjust if your folder structure is different)
+climate_path <- file.path("../../data", "climate_stations.csv")
+```
+
+---
+
+## 0. Setup: Reload the Evidence
+**functions:**
+`read_csv()`: Loads the dataset.
+`dim()`: Reports rows and columns.
+
+**logic steps:**
+Load `climate_stations.csv` into an object named `climate`.
+Save its starting dimensions as `dim_before`, before any fixes happen. You'll compare against this number in Section 9.
+
+```{r}
+"<write your code here>"
+```
+
+---
+
+## 1. Ruling Out Outliers
+We use the 3-SD rule from lecture to catch physically impossible temperature readings.
+
+**functions:**
+`mean()` / `sd()`: Center and spread of `temp_c`.
+`abs()`: Distance from the mean, regardless of direction.
+`filter()`: Keeps only rows that pass a condition.
+
+**logic steps:**
+Compute the mean and SD of `temp_c` on the full dataset.
+Keep only rows where the temperature is within 3 SDs of the mean.
+Then, as a backstop, apply the physical bound from Lab 1 (no real surface reading falls outside ±60°C). A couple of very extreme values can inflate the SD enough to hide themselves, or each other, from the 3-SD rule, so this second pass catches whatever the statistical check alone missed.
+Overwrite `climate` with the result after each pass.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 1.1:** How many rows were removed in total, and in which of the two passes? What were the removed `temp_c` values?
+
+```
+<write your answer here>
+```
+
+---
+
+## 2. Fixing Duplicate Station-Years
+**functions:**
+`duplicated()`: Flags repeat rows. Can check two columns together instead of one.
+
+**logic steps:**
+Reminder from Lab 1: a real duplicate here means the same `station_id` *and* the same `reading_date`, not `station_id` alone.
+Use `duplicated()` on `station_id` and `reading_date` together to flag repeats.
+Keep only the rows where that check is `FALSE`.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 2.1:** How many rows were removed this time? Does that match what you'd expect, given what Section 1 already resolved?
+
+```
+<write your answer here>
+```
+
+---
+
+## 3. Fixing Missing Values
+**functions:**
+`mean(na.rm = TRUE)` / `median(na.rm = TRUE)`: Center of `co2_ppm`, ignoring gaps.
+`coalesce()`: Fills a missing value with a backup value.
+`mutate()`: Adds or replaces a column.
+
+**logic steps:**
+Compute the mean and median of `co2_ppm`.
+Decide which is the safer choice to impute with.
+Fill missing values using `coalesce()`.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 3.1:** Which did you use, mean or median, and why?
+
+```
+<write your answer here>
+```
+
+---
+
+## 4. Fixing Inconsistent Categories
+**functions:**
+`str_to_lower()`: Forces every value in a column to lowercase.
+`n_distinct()`: Counts how many different values exist in a column.
+
+**logic steps:**
+Check `n_distinct()` on `energy_source` and `location` before fixing.
+Standardize the casing on both columns.
+Check `n_distinct()` again to confirm the count dropped.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 4.1:** Combined across both columns, how many fake extra categories existed purely because of casing?
+
+```
+<write your answer here>
+```
+
+---
+
+## 5. Factors: Nominal vs. Ordinal in R
+**functions:**
+`factor()`: Converts a column into a categorical factor.
+`levels =`, `ordered = TRUE`: Defines the valid categories, and whether they have a real order.
+`sum(is.na())`: Counts how many values became missing.
+
+**logic steps:**
+Convert `energy_source` into a nominal factor, no order needed.
+Attempt to convert `climate_risk_level` into an ordered factor with levels `"Low"`, `"Medium"`, `"High"`.
+Count how many values became `NA` as a result.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 5.1:** How many values became `NA`? Do they match the invalid values you flagged in Lab 1?
+
+```
+<write your answer here>
+```
+
+**logic steps (continued):**
+Given how few values are salvageable, decide whether `climate_risk_level` is worth recoding or better off dropped entirely. Drop the column if that's your call.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 5.2:** In 2-3 sentences, justify your decision.
+
+```
+<write your answer here>
+```
+
+---
+
+## 6. Fixing Broken Types
+
+### 6.1 `sensor_active`
+**functions:**
+`case_when()`: Recodes values based on conditions, checked top to bottom.
+`as.logical()`: Converts a column to `TRUE`/`FALSE`.
+
+**logic steps:**
+Recode `"Yes"` to `"True"` and `"No"` to `"False"`, leaving everything else as is.
+Convert the column to logical.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 6.1:** Confirm the class of `sensor_active` is now logical. What was it before?
+
+```
+<write your answer here>
+```
+
+### 6.2 `reading_date`
+**functions:**
+`case_when()`: Swaps each known bad string for its correct value.
+`as.Date()`: Converts a column to a real date type.
+
+**logic steps:**
+Swap each of the 5 known bad date strings (see the workbook table) for its correct ISO-format equivalent.
+Convert the column with `as.Date()`.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 6.2:** Confirm the class of `reading_date` is now `Date`. What was it before?
+
+```
+<write your answer here>
+```
+
+---
+
+## 7. Diagnosing and Fixing Skew
+**functions:**
+`filter()`: Removes impossible values before transforming.
+`log()`: Compresses a long right tail.
+`geom_histogram()`: Shows distribution shape.
+
+**logic steps:**
+`precipitation_mm` has a long right tail, but first, filter out any negative values, rainfall can't be negative, and the 3-SD rule alone won't necessarily catch it.
+Plot the raw distribution.
+For the log-transformed plot, compute `log(precipitation_mm)` inline rather than saving it as a permanent column, it's only needed for this one comparison.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 7.1:** Why didn't the 3-SD rule necessarily catch the negative values on its own? Compare the two histograms, did the shape move closer to normal?
+
+```
+<write your answer here>
+```
+
+---
+
+## 8. Visual Confirmation
+**functions:**
+`ggplot()`, `aes()`: Set up the data and what goes on which axis.
+`geom_histogram()`: Numeric shape.
+`geom_col()`: Category counts.
+`geom_line()`: Change over time.
+`labs()`, `theme_minimal()`: Titles and a clean look.
+
+### 8.1 Histogram: `temp_c`
+Confirm the outliers are gone.
+
+```{r}
+"<write your code here>"
+```
+
+### 8.2 Bar Chart: `energy_source`
+Confirm there's no longer a split between two versions of the same category.
+
+```{r}
+"<write your code here>"
+```
+
+### 8.3 Line Chart: `temp_c` Over Time
+Filter to one `station_id` of your choosing, and plot its temperature across `reading_date`.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 8.1:** What would have gone wrong with this line chart if you'd tried it before fixing `reading_date`'s type in Section 6?
+
+```
+<write your answer here>
+```
+
+---
+
+## 9. Write the Cleaning Report
+No new functions here. Just synthesize what you did.
+
+```{r}
+"<write your code here>"
+```
+
+**Question 9.1:** In 4 to 6 sentences, summarize your cleaning pass. Compare `dim_before` to your final dimensions, note which fix you think mattered most, and explain why a clean dataset matters for what comes next (joins, in Session 3).
+
+```
+<write your answer here>
+```

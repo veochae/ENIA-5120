@@ -1,0 +1,312 @@
+---
+title: "Lab 02: The Surgery"
+subtitle: "Answer Key"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## 🔧 Mission Background
+Last week, you audited the climate stations dataset and flagged every row with at least one issue. You found all six Gremlins hiding inside: missing values, duplicates, inconsistent casing, impossible numbers, invalid categories, and timestamps stored as text.
+
+**Your Goal:** Fix every one of them. Unlike last week, the order of these sections matters, several fixes depend on the ones before them. Follow the sections in order.
+
+```{r setup, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+
+climate_path <- file.path("../../data", "climate_stations.csv")
+```
+
+---
+
+## 0. Setup: Reload the Evidence
+**functions:**
+`read_csv()`: Loads the dataset.
+`dim()`: Reports rows and columns.
+
+**logic steps:**
+Load `climate_stations.csv` into an object named `climate`.
+Save its starting dimensions as `dim_before`.
+
+```{r}
+climate <- read_csv(climate_path)
+dim_before <- dim(climate)
+dim_before
+```
+
+---
+
+## 1. Ruling Out Outliers
+**functions:**
+`mean()` / `sd()`, `abs()`, `filter()`
+
+**logic steps:**
+Compute the mean and SD of `temp_c` on the full dataset.
+Keep only rows within 3 SDs of the mean.
+Then apply the domain-knowledge bound from Lab 1 (no surface reading is physically possible outside ±60°C) as a second pass, a backstop for anything the statistical rule alone misses.
+
+```{r}
+mu <- mean(climate$temp_c, na.rm = TRUE)
+sd_val <- sd(climate$temp_c, na.rm = TRUE)
+
+removed_by_3sd <- climate %>%
+  filter(abs(temp_c - mu) > 3 * sd_val) %>%
+  pull(temp_c)
+
+climate <- climate %>%
+  filter(abs(temp_c - mu) <= 3 * sd_val)
+
+removed_by_3sd
+dim(climate)
+
+# Backstop: a couple of extreme values can inflate the SD enough to hide
+# each other from the 3-SD rule. The physical bound from Lab 1 catches
+# what's left.
+still_impossible <- climate %>%
+  filter(temp_c > 60 | temp_c < -60) %>%
+  pull(temp_c)
+
+climate <- climate %>%
+  filter(temp_c <= 60, temp_c >= -60)
+
+still_impossible
+dim(climate)
+```
+
+**Question 1.1:** How many rows were removed in total, and in which of the two passes? What were the removed `temp_c` values?
+
+---
+
+## 2. Fixing Duplicate Station-Years
+**functions:**
+`duplicated()` on two columns together
+
+**logic steps:**
+A real duplicate is the same `station_id` and the same `reading_date`. Keep only the first occurrence of each combination.
+
+```{r}
+n_before <- nrow(climate)
+
+climate <- climate[!duplicated(climate[c("station_id", "reading_date")]), ]
+
+n_before - nrow(climate)
+dim(climate)
+```
+
+**Question 2.1:** How many rows were removed this time? Does that match what you'd expect, given what Section 1 already resolved?
+
+---
+
+## 3. Fixing Missing Values
+**functions:**
+`mean(na.rm = TRUE)` / `median(na.rm = TRUE)`, `coalesce()`, `mutate()`
+
+**logic steps:**
+Compare mean and median of `co2_ppm`, pick the safer one, impute.
+
+```{r}
+mean_co2 <- mean(climate$co2_ppm, na.rm = TRUE)
+median_co2 <- median(climate$co2_ppm, na.rm = TRUE)
+
+mean_co2
+median_co2
+
+climate <- climate %>%
+  mutate(co2_ppm = coalesce(co2_ppm, mean_co2))
+
+sum(is.na(climate$co2_ppm))
+```
+
+**Question 3.1:** Which did you use, mean or median, and why?
+
+---
+
+## 4. Fixing Inconsistent Categories
+**functions:**
+`str_to_lower()`, `n_distinct()`
+
+**logic steps:**
+Check distinct counts before, standardize casing, check again.
+
+```{r}
+n_distinct(climate$energy_source)
+n_distinct(climate$location)
+
+climate <- climate %>%
+  mutate(
+    energy_source = str_to_lower(str_trim(energy_source)),
+    location = str_to_lower(str_trim(location))
+  )
+
+n_distinct(climate$energy_source)
+n_distinct(climate$location)
+```
+
+**Question 4.1:** Combined across both columns, how many fake extra categories existed purely because of casing?
+
+---
+
+## 5. Factors: Nominal vs. Ordinal in R
+**functions:**
+`factor()`, `levels =`, `ordered = TRUE`, `sum(is.na())`
+
+**logic steps:**
+Convert `energy_source` to a nominal factor. Attempt `climate_risk_level` as an ordered factor and see what breaks.
+
+```{r}
+climate <- climate %>%
+  mutate(energy_source = factor(energy_source))
+
+levels(climate$energy_source)
+
+risk_test <- factor(
+  climate$climate_risk_level,
+  levels = c("Low", "Medium", "High"),
+  ordered = TRUE
+)
+
+sum(is.na(risk_test))
+```
+
+**Question 5.1:** How many values became `NA`? Do they match the invalid values you flagged in Lab 1?
+
+```{r}
+climate <- climate %>%
+  select(-climate_risk_level)
+
+dim(climate)
+```
+
+**Question 5.2:** In 2-3 sentences, justify your decision.
+
+---
+
+## 6. Fixing Broken Types
+
+### 6.1 `sensor_active`
+**functions:**
+`case_when()`, `as.logical()`
+
+```{r}
+class(climate$sensor_active)
+
+climate <- climate %>%
+  mutate(sensor_active = case_when(
+    sensor_active == "Yes" ~ "True",
+    sensor_active == "No"  ~ "False",
+    TRUE ~ sensor_active
+  )) %>%
+  mutate(sensor_active = as.logical(sensor_active))
+
+class(climate$sensor_active)
+```
+
+**Question 6.1:** Confirm the class of `sensor_active` is now logical. What was it before?
+
+### 6.2 `reading_date`
+**functions:**
+`case_when()`, `as.Date()`
+
+```{r}
+class(climate$reading_date)
+
+climate <- climate %>%
+  mutate(reading_date = case_when(
+    reading_date == "Jan 15th, 2016" ~ "2016-01-15",
+    reading_date == "Jan 15th, 2018" ~ "2018-01-15",
+    reading_date == "Jan 15th, 2019" ~ "2019-01-15",
+    reading_date == "Jan 15th, 2020" ~ "2020-01-15",
+    reading_date == "Jan 15th, 2022" ~ "2022-01-15",
+    TRUE ~ reading_date
+  )) %>%
+  mutate(reading_date = as.Date(reading_date))
+
+class(climate$reading_date)
+```
+
+**Question 6.2:** Confirm the class of `reading_date` is now `Date`. What was it before?
+
+---
+
+## 7. Diagnosing and Fixing Skew
+**functions:**
+`filter()`, `log()`, `geom_histogram()`
+
+```{r}
+climate %>% filter(precipitation_mm < 0)
+
+climate <- climate %>%
+  filter(precipitation_mm >= 0)
+
+ggplot(climate, aes(x = precipitation_mm)) +
+  geom_histogram(bins = 30, fill = "#274873", color = "white") +
+  labs(title = "Raw Precipitation", x = "Precipitation (mm)", y = "Count") +
+  theme_minimal()
+
+# log_precip is only needed for this one comparison plot, so it's computed
+# inline rather than saved permanently into climate.
+climate %>%
+  mutate(log_precip = log(precipitation_mm)) %>%
+  ggplot(aes(x = log_precip)) +
+  geom_histogram(bins = 30, fill = "#B8842E", color = "white") +
+  labs(title = "Log-Transformed Precipitation", x = "log(Precipitation)", y = "Count") +
+  theme_minimal()
+```
+
+**Question 7.1:** Why didn't the 3-SD rule necessarily catch the negative values on its own? Compare the two histograms, did the shape move closer to normal?
+
+---
+
+## 8. Visual Confirmation
+
+### 8.1 Histogram: `temp_c`
+```{r}
+ggplot(climate, aes(x = temp_c)) +
+  geom_histogram(bins = 30, fill = "#274873", color = "white") +
+  labs(title = "Temperature Readings (Outliers Removed)", x = "Temp (C)", y = "Count") +
+  theme_minimal()
+```
+
+### 8.2 Bar Chart: `energy_source`
+```{r}
+climate %>%
+  count(energy_source) %>%
+  ggplot(aes(x = reorder(energy_source, -n), y = n)) +
+  geom_col(fill = "#B8842E") +
+  labs(title = "Energy Source Counts (Casing Fixed)", x = "Energy Source", y = "Count") +
+  theme_minimal()
+```
+
+### 8.3 Line Chart: `temp_c` Over Time
+```{r}
+climate %>%
+  filter(station_id == "STN-002") %>%
+  arrange(reading_date) %>%
+  ggplot(aes(x = reading_date, y = temp_c)) +
+  geom_line(color = "#274873") +
+  geom_point() +
+  labs(title = "Temperature Over Time, STN-002", x = "Reading Date", y = "Temp (C)") +
+  theme_minimal()
+```
+
+**Question 8.1:** What would have gone wrong with this line chart if you'd tried it before fixing `reading_date`'s type in Section 6?
+
+---
+
+## 9. Write the Cleaning Report
+```{r}
+dim_before
+dim(climate)
+
+climate_clean <- climate
+```
+
+**Question 9.1:** In 4 to 6 sentences, summarize your cleaning pass. Compare `dim_before` to your final dimensions, note which fix you think mattered most, and explain why a clean dataset matters for what comes next (joins, in Session 3).
