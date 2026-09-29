@@ -1,0 +1,386 @@
+---
+title: "Lab 03: Follow the Money"
+subtitle: "Answer Key"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## 💵 Mission Background
+The state runs a climate resilience grant program. On paper, the money goes to communities facing the most extreme weather. Your job is to check whether that's actually true.
+
+You already cleaned the weather data in Lab 2. Now you'll bring in a second file, `resilience_grants.csv`, join it to the weather data, and build the audit.
+
+**Your Goal:** Find out which communities are getting the most money per storm, and which ones are being left behind.
+
+```{r setup, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(ggplot2)
+
+climate_path <- file.path("../../data", "climate_stations.csv")
+grants_path  <- file.path("../../data", "resilience_grants.csv")
+```
+
+---
+
+## 0. Setup: Load Both Tables
+
+### 0.1 The Lab 2 Recap (already written for you)
+This chunk repeats your Lab 2 cleaning in one pass, so everyone starts Lab 3 from the same clean data. Run it as is.
+
+```{r lab2-recap, message=FALSE}
+climate_raw <- read_csv(climate_path)
+
+mu <- mean(climate_raw$temp_c, na.rm = TRUE)
+sd_val <- sd(climate_raw$temp_c, na.rm = TRUE)
+
+climate <- climate_raw %>%
+  # Lab 2, Sections 1 and 7: drop impossible temperatures and negative rainfall
+  filter(
+    abs(temp_c - mu) <= 3 * sd_val,
+    temp_c >= -60, temp_c <= 60,
+    precipitation_mm >= 0
+  ) %>%
+  mutate(
+    # Lab 2, Section 4: one spelling per community
+    location = str_to_lower(str_trim(location)),
+    # Lab 2, Section 3: fill missing CO2 with the mean
+    co2_ppm = coalesce(co2_ppm, mean(co2_ppm, na.rm = TRUE)),
+    # Lab 2, Section 6: fix the text dates, then make them real dates
+    reading_date = case_when(
+      reading_date == "Jan 15th, 2016" ~ "2016-01-15",
+      reading_date == "Jan 15th, 2018" ~ "2018-01-15",
+      reading_date == "Jan 15th, 2019" ~ "2019-01-15",
+      reading_date == "Jan 15th, 2020" ~ "2020-01-15",
+      reading_date == "Jan 15th, 2022" ~ "2022-01-15",
+      TRUE ~ reading_date
+    ),
+    reading_date = as.Date(reading_date),
+    # New for Lab 3: pull the year out of the date
+    year = as.numeric(format(reading_date, "%Y"))
+  ) %>%
+  # Lab 2, Section 2: one reading per station per year
+  distinct(station_id, year, .keep_all = TRUE)
+
+dim(climate)
+```
+
+### 0.2 Load the Grants
+**functions:**
+`read_csv()`: Loads the dataset.
+`glimpse()`: Shows every column, its type, and a few values.
+
+**logic steps:**
+Load `resilience_grants.csv` into an object named `grants`.
+Glimpse both `climate` and `grants`.
+
+```{r}
+grants <- read_csv(grants_path)
+
+glimpse(climate)
+glimpse(grants)
+```
+
+**Question 0.1:** How many rows does each table have? What does one row represent in each?
+
+---
+
+## 1. Find the Keys
+**functions:**
+`count()`: Counts how many rows share each value.
+`filter(n > 1)`: Keeps only values that appear more than once.
+
+**logic steps:**
+Check whether any `grant_id` appears more than once.
+Check how many times each `station_id` appears in `climate`.
+Check whether any combination of `station_id` and `year` appears more than once.
+
+```{r}
+grants %>%
+  count(grant_id) %>%
+  filter(n > 1)
+
+climate %>%
+  count(station_id)
+
+climate %>%
+  count(station_id, year) %>%
+  filter(n > 1)
+```
+
+**Question 1.1:** What is the primary key of `grants`? Which column in `grants` points to the weather data (the foreign key)?
+
+**Question 1.2:** Why isn't `station_id` alone the primary key of `climate`? What is?
+
+---
+
+## 2. Clean the Grant Keys
+**functions:**
+`count()`: Lists every spelling of a value.
+`n_distinct()`: Counts how many different values a column has.
+`str_to_lower()` / `str_trim()`: Same casing rule you used in Lab 2.
+
+**logic steps:**
+Count the rows for each `location` in `grants` and check `n_distinct()`.
+Apply the same cleaning rule Lab 2 used on the weather data.
+Check `n_distinct()` again.
+
+```{r}
+grants %>%
+  count(location)
+
+n_distinct(grants$location)
+
+grants <- grants %>%
+  mutate(location = str_to_lower(str_trim(location)))
+
+n_distinct(grants$location)
+```
+
+**Question 2.1:** How many "communities" did the grants table seem to have before cleaning, and how many after? Name two of the messy spellings you found.
+
+**Question 2.2:** After Lab 2, every `location` in `climate` is lowercase. Before your fix, which grant spellings would have matched the weather data at all?
+
+---
+
+## 3. Summarize First
+**functions:**
+`group_by()` + `summarize()`: One row per group.
+`n()`: Counts rows in each group.
+`sum(na.rm = TRUE)`: Adds up values, skipping missing ones.
+
+**logic steps:**
+Build `storms`: one row per community, with `total_events` (sum of `extreme_weather_events`) and `n_years` (number of readings).
+Build `funding`: one row per community, with `n_grants` and `total_funding` (sum of `amount_usd`). Try it first without `na.rm = TRUE` and look for NAs.
+Rebuild `funding` with `na.rm = TRUE`.
+
+```{r}
+storms <- climate %>%
+  group_by(location) %>%
+  summarize(
+    total_events = sum(extreme_weather_events),
+    n_years = n()
+  )
+
+storms
+
+# First attempt: no na.rm
+funding <- grants %>%
+  group_by(location) %>%
+  summarize(
+    n_grants = n(),
+    total_funding = sum(amount_usd)
+  )
+
+funding %>% filter(is.na(total_funding))
+
+# Second attempt: skip the pending grants
+funding <- grants %>%
+  group_by(location) %>%
+  summarize(
+    n_grants = n(),
+    total_funding = sum(amount_usd, na.rm = TRUE)
+  )
+
+funding
+```
+
+**Question 3.1:** Which communities had an NA total on your first attempt? Why did one missing grant ruin the whole total?
+
+**Question 3.2:** Look at `n_years` in `storms`. Does every community have 7 years of readings? Which don't, and why?
+
+---
+
+## 4. The Join Experiment
+**functions:**
+`inner_join()`, `left_join()`, `full_join()`: Combine two tables on a shared key.
+`anti_join()`: Lists rows in the first table that found no match in the second.
+`nrow()`: Counts rows.
+
+**logic steps:**
+Join `storms` (left) and `funding` (right) by `location` three ways: inner, left, full.
+Compare row counts.
+Use `anti_join()` in both directions to see exactly who didn't match.
+
+```{r}
+test_inner <- inner_join(storms, funding, by = "location")
+test_left  <- left_join(storms, funding, by = "location")
+test_full  <- full_join(storms, funding, by = "location")
+
+nrow(test_inner)
+nrow(test_left)
+nrow(test_full)
+
+# Communities with weather data but no grants
+anti_join(storms, funding, by = "location")
+
+# Communities with grants but no weather data
+anti_join(funding, storms, by = "location")
+```
+
+**Question 4.1:** Which join gave the most rows, and why?
+
+**Question 4.2:** Which community disappears in the inner join? Why is that a problem for this audit specifically?
+
+**Question 4.3:** Which join fits the audit best? Explain in 1-2 sentences.
+
+---
+
+## 5. Watch It Explode
+**functions:**
+`left_join()`: This time on the raw, unsummarized tables.
+`nrow()`, `sum()`: Check the damage.
+
+**logic steps:**
+Join `climate` (one row per station per year) directly to `grants` (one row per grant) by `location`. Read the warning R prints.
+Count the rows.
+Add up `amount_usd` in the exploded table and compare it to the real total from `funding`.
+
+```{r}
+exploded <- left_join(climate, grants, by = "location")
+
+nrow(exploded)
+
+sum(exploded$amount_usd, na.rm = TRUE)
+sum(funding$total_funding)
+```
+
+**Question 5.1:** How many rows did the exploded join create? What did R's warning say?
+
+**Question 5.2:** How far off is the exploded dollar total? Why did this happen?
+
+---
+
+## 6. Dollars per Storm
+**functions:**
+`coalesce()`: Fills NA with a value you choose (same as Lab 2).
+`mutate()`: Adds new columns.
+`arrange()`: Sorts rows.
+`ggplot()` + `geom_col()` + `coord_flip()`: Horizontal bar chart.
+
+**logic steps:**
+Start from your left join, and name it `audit`.
+Redstone Flats has NA for `n_grants` and `total_funding`. Decide what that NA really means, then fill it with 0 using `coalesce()`.
+Add `dollars_per_event` (funding divided by storms) and `has_grant` (TRUE if `n_grants` is above 0).
+Sort by `dollars_per_event` and plot it.
+
+```{r}
+audit <- test_left %>%
+  mutate(
+    n_grants = coalesce(n_grants, 0),
+    total_funding = coalesce(total_funding, 0),
+    dollars_per_event = total_funding / total_events,
+    has_grant = n_grants > 0
+  ) %>%
+  arrange(dollars_per_event)
+
+audit
+
+ggplot(audit, aes(x = reorder(location, dollars_per_event), y = dollars_per_event, fill = has_grant)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Resilience Funding per Extreme Weather Event",
+    x = "Community",
+    y = "Dollars per event",
+    fill = "Has a grant?"
+  ) +
+  theme_minimal()
+```
+
+**Question 6.1:** Which community gets the most money per storm, and which gets the least? Roughly how many times bigger is the top one than the lowest community that got any money at all?
+
+**Question 6.2:** You filled Redstone Flats' NA with 0. Why is that honest here? When would filling an NA with 0 be dishonest?
+
+**Question 6.3:** From Question 3.2, some communities have fewer years of data. How could that make `dollars_per_event` misleading? What fairer measure could you use?
+
+---
+
+## 7. Reshape the Data
+
+### 7.1 Long → Wide: Funding by Program
+**functions:**
+`group_by()` + `summarize()`: Total funding per community per program.
+`pivot_wider()`: Turns the program names into columns.
+`values_fill = 0`: Fills empty cells with 0 instead of NA.
+
+**logic steps:**
+Total `amount_usd` by `location` and `program`. This table is long: one row per community-program pair.
+Pivot it wider so each program becomes its own column.
+Use `values_fill = 0`, since an empty cell here means "no grant from this program."
+
+```{r}
+program_long <- grants %>%
+  group_by(location, program) %>%
+  summarize(funding = sum(amount_usd, na.rm = TRUE), .groups = "drop")
+
+program_long
+
+program_wide <- program_long %>%
+  pivot_wider(
+    names_from = program,
+    values_from = funding,
+    values_fill = 0
+  )
+
+program_wide
+```
+
+**Question 7.1:** How many rows and columns do the long and wide versions have? Which one would you put in a report for a policymaker, and why?
+
+**Question 7.2:** Is redstone flats in `program_wide`? Why or why not?
+
+### 7.2 Wide → Long: One Station's Climate
+**functions:**
+`filter()` / `select()`: Keep one community and the columns you need.
+`pivot_longer()`: Stacks several columns into two: a name column and a value column.
+`facet_wrap()`: Draws one small chart per group.
+
+**logic steps:**
+Keep only `marlowe bay`, and select `year`, `temp_c`, `co2_ppm`, and `precipitation_mm`.
+Pivot the three measurement columns into `measure` and `value`.
+Plot `value` over `year`, with one panel per `measure`. Use `scales = "free_y"` so each panel gets its own y-axis.
+
+```{r}
+marlowe_long <- climate %>%
+  filter(location == "marlowe bay") %>%
+  select(year, temp_c, co2_ppm, precipitation_mm) %>%
+  pivot_longer(
+    cols = c(temp_c, co2_ppm, precipitation_mm),
+    names_to = "measure",
+    values_to = "value"
+  )
+
+marlowe_long
+
+ggplot(marlowe_long, aes(x = year, y = value)) +
+  geom_line(color = "#274873") +
+  geom_point() +
+  facet_wrap(~ measure, scales = "free_y") +
+  labs(title = "Marlowe Bay Climate, 2016 to 2022", x = "Year", y = NULL) +
+  theme_minimal()
+```
+
+**Question 7.3:** Why did you need the long version to make this chart? What would happen without `scales = "free_y"`?
+
+---
+
+## 8. Write the Audit Memo
+No new functions here. Look back at `audit` and your chart.
+
+```{r}
+audit %>%
+  select(location, total_events, n_years, total_funding, dollars_per_event)
+```
+
+**Question 8.1:** In 4 to 6 sentences, write a short memo to the grant program director. Which 1 or 2 communities should be first in line for the next round of funding, and why? Mention at least one number, and one limitation of the data.
+
