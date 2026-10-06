@@ -1,0 +1,363 @@
+---
+title: "Lab 04: Put It on Trial"
+subtitle: "Answer Key"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## ⚖️ Mission Background
+In Lab 3 you followed the money and spotted some patterns. Wetter towns seemed to get more grants. Some energy sources seemed to sit in rainier places. Wet towns seemed to get more flood and storm money.
+
+But a pattern you can *see* isn't a pattern you can *defend*. Today, each claim goes on trial. You'll write a hypothesis, run a test, and deliver a verdict, using the same courtroom logic from lecture.
+
+**Your Goal:** Decide which patterns hold up as real evidence, and which ones could just be luck.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# readr: loading data.
+# dplyr: filtering, mutating, summarizing, and joining.
+# ggplot2: every chart in this lab.
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+climate_path <- file.path("../../data", "climate_stations_clean.csv")
+grants_path  <- file.path("../../data", "resilience_grants_clean.csv")
+```
+
+---
+
+## 0. Setup: Load and Merge (already written for you)
+
+### 0.1 Build the Two Tables
+These are the clean, bigger versions of the two files you used in Labs 1 to 3. Same columns, more stations, and no cleaning needed. This chunk loads both and builds the two tables you'll use today. Run it as is.
+
+```{r load-and-merge, message=FALSE}
+climate <- read_csv(climate_path) %>%
+  mutate(year = as.numeric(format(reading_date, "%Y")))
+
+grants <- read_csv(grants_path)
+
+# Table 1: one row per station per year, labeled Funded / Not funded
+grants_per_year <- grants %>%
+  count(location, award_year, name = "n_grants")
+
+station_years <- climate %>%
+  left_join(grants_per_year, by = c("location", "year" = "award_year")) %>%
+  mutate(
+    n_grants = coalesce(n_grants, 0L),
+    funded = if_else(n_grants > 0, "Funded", "Not funded")
+  )
+
+# Table 2: one row per grant, labeled with the town's climate zone
+# Wet = the town's average rainfall is at or above the middle (median) town
+station_zones <- climate %>%
+  group_by(location) %>%
+  summarize(avg_rain = mean(precipitation_mm)) %>%
+  mutate(zone = if_else(avg_rain >= median(avg_rain), "Wet", "Dry"))
+
+# inner_join drops the 10 grants for Eastbrook and Lowmere:
+# those towns have no weather station, so they have no zone
+grants_zoned <- grants %>%
+  inner_join(station_zones, by = "location") %>%
+  mutate(
+    grant_type = if_else(
+      program %in% c("Flood Protection", "Storm Preparedness", "Coastal Resilience"),
+      "Water", "Heat/Fire/Energy"
+    )
+  )
+```
+
+### 0.2 Look at What You Have
+**functions:**
+`glimpse()`: Shows every column, its type, and a few values.
+
+**logic steps:**
+Glimpse `station_years` and `grants_zoned`.
+
+```{r}
+glimpse(station_years)
+glimpse(grants_zoned)
+```
+
+**Question 0.1:** How many rows does each table have? In plain words, what does one row represent in each?
+
+---
+
+## 1. Look Before You Test
+**functions:**
+`group_by()` + `summarize()`: One row per group.
+`n()`, `mean()`, `sd()`: Count, average, and typical spread.
+`geom_density()`: 🆕 A smoothed histogram. Great for comparing the shape of two groups on one chart.
+
+**logic steps:**
+Summarize `precipitation_mm` by `funded`: the number of rows, the average, and the SD.
+Draw a density plot of `precipitation_mm`, filled by `funded`. Use `alpha = 0.5` so you can see through both curves.
+
+```{r}
+station_years %>%
+  group_by(funded) %>%
+  summarize(
+    n = n(),
+    avg_rain = mean(precipitation_mm),
+    sd_rain = sd(precipitation_mm)
+  )
+
+ggplot(station_years, aes(x = precipitation_mm, fill = funded)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Yearly Rainfall: Funded vs. Not Funded Station-Years",
+    x = "Rainfall (mm)",
+    y = "Density",
+    fill = NULL
+  ) +
+  theme_minimal()
+```
+
+**Question 1.1:** Write H₀ and Hₐ for this comparison in plain words.
+
+**Question 1.2:** Looking only at the density plot, do the two groups look different? Do the curves overlap?
+
+---
+
+## 2. The Averages Trick
+**functions:**
+`sample()`: 🆕 Picks random values from a vector.
+`replicate()`: 🆕 Repeats a piece of code many times and collects every result.
+`set.seed()`: 🆕 Makes the "random" picks repeatable, so everyone gets the same answer.
+`geom_histogram()`: Shows distribution shape.
+
+**logic steps:**
+Set the seed to `5120`.
+Store the grant amounts (in $ thousands) as `single_grants`.
+Use `replicate()` to average 30 random grants, 1,000 times. Store it as `avg_of_30`.
+Draw one histogram of `single_grants` and one of `avg_of_30`.
+Compare `sd()` of each.
+
+```{r}
+set.seed(5120)
+
+single_grants <- grants$amount_usd / 1000
+
+avg_of_30 <- replicate(1000, mean(sample(single_grants, 30)))
+
+ggplot(tibble(amount = single_grants), aes(x = amount)) +
+  geom_histogram(bins = 30, fill = "grey60", color = "white") +
+  labs(title = "Single Grants", x = "Grant amount ($ thousands)", y = "Count") +
+  theme_minimal()
+
+ggplot(tibble(average = avg_of_30), aes(x = average)) +
+  geom_histogram(bins = 30, fill = "#2a9d8f", color = "white") +
+  labs(title = "Averages of 30 Grants (1,000 batches)", x = "Average amount ($ thousands)", y = "Count") +
+  theme_minimal()
+
+sd(single_grants)
+sd(avg_of_30)
+```
+
+**Question 2.1:** What shape is each histogram? Which one is the Central Limit Theorem talking about?
+
+**Question 2.2:** `sd(single_grants)` is the SD. `sd(avg_of_30)` is the SE. In your own words, why is the second one so much smaller?
+
+---
+
+## 3. Z-Scores: Who's Unusually Wet or Dry?
+**functions:**
+`group_by()` + `summarize()`: One row per station.
+`mutate()`: Adds the z-score column.
+`arrange(desc())`: Sorts from highest to lowest.
+`geom_vline()`: 🆕 Draws a vertical reference line on a chart.
+
+**logic steps:**
+Build `station_avg`: one row per `location`, with `avg_rain`.
+Add `z`: (the station's average − the average of all stations) ÷ the SD of all stations. Sort from highest to lowest.
+Look up Greymist Harbor, and list every station beyond ±2.
+Draw a histogram of `z`, with dashed vertical lines at −2 and 2.
+
+```{r}
+station_avg <- station_years %>%
+  group_by(location) %>%
+  summarize(avg_rain = mean(precipitation_mm)) %>%
+  mutate(z = (avg_rain - mean(avg_rain)) / sd(avg_rain)) %>%
+  arrange(desc(z))
+
+station_avg %>% filter(location == "Greymist Harbor")
+
+station_avg %>% filter(abs(z) > 2)
+
+ggplot(station_avg, aes(x = z)) +
+  geom_histogram(bins = 25, fill = "#2a9d8f", color = "white") +
+  geom_vline(xintercept = c(-2, 2), linetype = "dashed") +
+  labs(
+    title = "Z-Scores of Average Rainfall, All 120 Stations",
+    x = "z-score (SDs away from the average station)",
+    y = "Number of stations"
+  ) +
+  theme_minimal()
+```
+
+**Question 3.1:** What is Greymist Harbor's z-score? Explain what it means in one plain sentence.
+
+**Question 3.2:** How many stations are beyond ±2? Is anyone beyond ±3? Look at your histogram: every extreme station is on the *wet* side. Why can't a station be extremely dry here? (Hint: what's the lowest rainfall possible?)
+
+---
+
+## 4. The t-test: Do Grants Follow the Rain?
+**functions:**
+`t.test(outcome ~ group, data = )`: Compares the averages of two groups.
+
+**logic steps:**
+Run a t-test of `precipitation_mm` by `funded`. Store it as `rain_test` and print it.
+
+```{r}
+rain_test <- t.test(precipitation_mm ~ funded, data = station_years)
+rain_test
+```
+
+**Question 4.1:** What is the t-value and the p-value? At α = 0.05, do you reject or fail to reject H₀? Write the conclusion in one plain sentence.
+
+**Question 4.2:** The gap between the two averages is about 414 mm, and R says t ≈ 12. Using gap ÷ wobble, roughly how big is the SE? (Mental math is fine!)
+
+**Question 4.3:** In plain words, what does the 95% confidence interval tell you? Does it include 0, and why does that matter?
+
+---
+
+## 5. Same Test, Different Answer: CO₂
+**functions:**
+`t.test()`: Same as Section 4.
+`geom_density()`: Same as Section 1.
+
+**logic steps:**
+⚠️ Answer Question 5.1 *before* you run the code.
+Run a t-test of `co2_ppm` by `funded`. Store it as `co2_test` and print it.
+Copy your density plot from Section 1, and swap in `co2_ppm`.
+
+**Question 5.1:** Predict first! Will funded and unfunded station-years have different CO₂ levels? Why do you think so?
+
+```{r}
+co2_test <- t.test(co2_ppm ~ funded, data = station_years)
+co2_test
+
+ggplot(station_years, aes(x = co2_ppm, fill = funded)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "CO2 Levels: Funded vs. Not Funded Station-Years",
+    x = "CO2 (ppm)",
+    y = "Density",
+    fill = NULL
+  ) +
+  theme_minimal()
+```
+
+**Question 5.2:** What is the p-value? What's your verdict? Compare this density plot to the one from Section 1. What looks different?
+
+**Question 5.3:** Explain why "fail to reject H₀" is **not** the same as "proving CO₂ is identical."
+
+---
+
+## 6. ANOVA: Rain by Energy Source
+**functions:**
+`geom_boxplot()`: 🆕 Shows the middle value (the line), the middle 50% of values (the box), and the spread (the whiskers) for each group.
+`aov(outcome ~ group, data = )`: Runs an ANOVA.
+`summary()`: Prints the ANOVA table.
+`TukeyHSD()`: 🆕 The post-hoc test. Checks every pair of groups.
+
+**logic steps:**
+Draw a boxplot of `precipitation_mm` by `energy_source`.
+Run an ANOVA of `precipitation_mm` by `energy_source`. Store it as `rain_aov` and print `summary()`.
+Run `TukeyHSD()` on `rain_aov`.
+
+```{r}
+ggplot(station_years, aes(x = energy_source, y = precipitation_mm)) +
+  geom_boxplot(fill = "#2a9d8f", alpha = 0.6) +
+  labs(
+    title = "Rainfall by Station Energy Source",
+    x = NULL,
+    y = "Rainfall (mm)"
+  ) +
+  theme_minimal()
+
+rain_aov <- aov(precipitation_mm ~ energy_source, data = station_years)
+summary(rain_aov)
+
+TukeyHSD(rain_aov)
+```
+
+**Question 6.1:** Write H₀ and Hₐ for this test. Be careful with Hₐ!
+
+**Question 6.2:** What is the F value and the p-value? What's your verdict, and what does it *not* tell you yet?
+
+**Question 6.3:** Look at the `p adj` column from `TukeyHSD()`. Which pair of energy sources is **not** significantly different? Does that match what you see in the boxplot?
+
+---
+
+## 7. Chi-Square: Wet Towns, Water Grants?
+**functions:**
+`table()`: Counts every combination of two categories.
+`prop.table(margin = 1)`: 🆕 Turns counts into shares within each row.
+`geom_bar(position = "fill")`: 🆕 A **100% stacked bar**. Every bar is the same height, so you compare mixes instead of counts.
+`geom_hline()`: 🆕 Draws a horizontal reference line.
+`chisq.test()`: Runs the chi-square test.
+`$expected`, `$residuals`: 🆕 Pull out the expected counts, and each cell's z-score.
+
+**logic steps:**
+Build `grant_table`: `zone` by `grant_type`. Print it, then print it as shares with `prop.table()`.
+Draw a 100% stacked bar: `zone` on the x-axis, filled by `grant_type`. Add a dashed line at 0.68, the share of water grants overall.
+Run `chisq.test()` on `grant_table`. Store it as `grant_test` and print it.
+Print `$expected` and `$residuals`.
+
+```{r}
+grant_table <- table(grants_zoned$zone, grants_zoned$grant_type)
+grant_table
+
+prop.table(grant_table, margin = 1)
+
+ggplot(grants_zoned, aes(x = zone, fill = grant_type)) +
+  geom_bar(position = "fill") +
+  geom_hline(yintercept = 0.68, linetype = "dashed", linewidth = 1) +
+  labs(
+    title = "Grant Mix: Dry vs. Wet Towns",
+    subtitle = "Dashed line = the overall mix (68% water). With no link, both bars would split here.",
+    x = NULL,
+    y = "Share of grants",
+    fill = "Grant type"
+  ) +
+  theme_minimal()
+
+grant_test <- chisq.test(grant_table)
+grant_test
+
+grant_test$expected
+grant_test$residuals
+```
+
+**Question 7.1:** From the stacked bar, roughly what share of grants are water grants in dry towns vs. wet towns? How far is each bar from the dashed line?
+
+**Question 7.2:** What is the p-value? What's your verdict? Check `$expected`: are all expected counts at least 5?
+
+**Question 7.3:** Look at `$residuals`. These are the z-scores from lecture. Which cell is furthest from "no link"? Why are the signs mixed between neighboring cells?
+
+---
+
+## 8. The Evidence Brief
+
+### 8.1 Significant vs. Important (already written for you)
+One more test, run for you. Is the average temperature different between funded and unfunded station-years?
+
+```{r}
+t.test(temp_c ~ funded, data = station_years)
+```
+
+**Question 8.1:** The p-value is tiny, and funded station-years are about 3°C cooler on average. The difference is *significant*. Is it *important*? What would you need to know to decide?
+
+### 8.2 Write the Brief
+No new code. Look back at your verdicts from Sections 4, 5, 6, and 7.
+
+**Question 8.2:** In 4 to 6 sentences, write a short evidence brief to the grant program director. Cover which patterns from Lab 3 held up and which didn't. Include at least two numbers (a p-value, a gap, or a CI), and one caution: what these tests can *not* tell us.
