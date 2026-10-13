@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENIA-5120: Lab 5 Instructions, Seeing Your Data</title>
+<style>
+  :root {
+    --paper: #EADFC7;
+    --paper-light: #F4EDDD;
+    --ink: #2B2118;
+    --ink-soft: #55493B;
+    --navy: #041E42;
+    --navy-soft: #274873;
+    --gold: #B8842E;
+    --gold-light: #F1DFB8;
+    --rule: #C9B98E;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 28px 120px;
+  }
+
+  header.cover {
+    text-align: center;
+    padding: 40px 0 48px;
+    border-bottom: 3px double var(--navy);
+    margin-bottom: 48px;
+  }
+
+  header.cover .kicker {
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  header.cover h1 {
+    font-size: 38px;
+    margin: 0 0 8px;
+    color: var(--navy);
+    letter-spacing: 0.5px;
+  }
+
+  header.cover p {
+    margin: 4px 0;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+
+  nav.toc {
+    background: var(--paper-light);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 20px 26px;
+    margin-bottom: 56px;
+  }
+
+  nav.toc h2 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--navy);
+    margin: 0 0 12px;
+  }
+
+  nav.toc ul {
+    columns: 2;
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14.5px;
+  }
+
+  nav.toc a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--rule);
+  }
+
+  nav.toc a:hover { color: var(--navy); }
+
+  h2.module {
+    font-size: 26px;
+    color: var(--navy);
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 10px;
+    margin-top: 6px;
+    margin-bottom: 22px;
+  }
+
+  h3.sub {
+    font-size: 19px;
+    color: var(--navy-soft);
+    margin-top: 32px;
+  }
+
+  p { margin: 14px 0; }
+
+  .analogy {
+    background: var(--gold-light);
+    border-left: 4px solid var(--gold);
+    padding: 12px 18px;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: 0 3px 3px 0;
+  }
+  .analogy strong { color: var(--navy); }
+
+  .gotcha {
+    background: #F7E7DD;
+    border-left: 4px solid #B85C38;
+    padding: 12px 18px;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: 0 3px 3px 0;
+  }
+  .gotcha strong { color: #8A3E20; }
+
+  pre {
+    background: var(--paper-light);
+    border: 1px dashed var(--ink-soft);
+    border-radius: 3px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  pre::before {
+    content: "R";
+    position: absolute;
+    top: -9px;
+    left: 14px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 1px 8px;
+    border-radius: 2px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  code {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--paper-light);
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-size: 0.92em;
+  }
+
+  pre code { background: none; padding: 0; }
+
+  table.ref {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+  table.ref th, table.ref td {
+    border: 1px solid var(--rule);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  table.ref th {
+    background: var(--paper-light);
+    color: var(--navy);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .worksheet-ptr {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px dotted var(--rule);
+  }
+
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  footer {
+    text-align: center;
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 3px double var(--navy);
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="cover">
+    <div class="kicker">ENIA-5120, Lab 5</div>
+    <h1>Seeing Your Data</h1>
+    <p>The Instructions. Read this first, then open <code>lab_template.Rmd</code></p>
+    <p>About 90 minutes in class, with a break after Checkpoint 2</p>
+  </header>
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#intro">The Mission</a></li>
+      <li><a href="#s0">0. Setup</a></li>
+      <li><a href="#cp1"><strong>Checkpoint 1: Shapes</strong></a></li>
+      <li><a href="#s1">1. The Boxplot Secret</a></li>
+      <li><a href="#s2">2. Violin</a></li>
+      <li><a href="#s3">3. Ridgeline</a></li>
+      <li><a href="#s4">4. Rare Groups</a></li>
+      <li><a href="#cp2"><strong>Checkpoint 2: Relationships</strong></a></li>
+      <li><a href="#s5">5. Scatterplot and r</a></li>
+      <li><a href="#s6">6. Box Plus Dots</a></li>
+      <li><a href="#s7">7. Count Heatmap</a></li>
+      <li><a href="#s8">8. Change Over Time</a></li>
+      <li><a href="#cp3"><strong>Checkpoint 3: Hidden Things + Story</strong></a></li>
+      <li><a href="#s9">9. The 3°C Mystery</a></li>
+      <li><a href="#s10">10. The Hydro Flip</a></li>
+      <li><a href="#s11">11. Find the Twins</a></li>
+      <li><a href="#s12">12. Bubble + Interactive</a></li>
+      <li><a href="#s13">13. The Interactive Map</a></li>
+      <li><a href="#s14">14. Save Your Favorite</a></li>
+    </ul>
+  </nav>
+
+  <section id="intro">
+    <h2 class="module">👀 The Mission</h2>
+    <p>Next week we start building models. Before anyone does that, the grant program director wants to <em>see</em> the data: what each variable looks like, how variables move together, and whether anything is hiding underneath.</p>
+    <p>Today you run steps 6 to 9 of the EDA checklist from lecture. Every section answers one question with the chart that fits it.</p>
+    <table class="ref">
+      <tr><th>Label</th><th>What it means</th></tr>
+      <tr><td>✅ <strong>Already written</strong></td><td>Code you know from Labs 1 to 4. Run it, look at the output, and answer the question. The code is free. The reading isn't.</td></tr>
+      <tr><td>🆕 <strong>Code with me</strong></td><td>New code. We write it together, step by step.</td></tr>
+    </table>
+  </section>
+
+  <section id="s0">
+    <h2 class="module">🧰 0. Setup ✅</h2>
+    <div class="gotcha"><strong>Install four new packages first.</strong> Run this once in your Console (not in the worksheet), and wait for it to finish:
+<pre><code>install.packages(c("ggridges", "GGally", "plotly", "maps"))</code></pre>
+If you skip this, the setup chunk will stop with "there is no package called..."</div>
+    <p>The first chunk builds two tables. Both should feel familiar:</p>
+    <table class="ref">
+      <tr><th>Table</th><th>One row is...</th><th>Used in</th></tr>
+      <tr><td><code>station_years</code></td><td>One station in one year, labeled <code>Funded</code> or <code>Not funded</code> (same as Lab 4)</td><td>Sections 1 to 3 and 5 to 10</td></tr>
+      <tr><td><code>towns</code></td><td>One town, with its average weather, total storms, total grant money, and its location on the map</td><td>Sections 11 to 13</td></tr>
+    </table>
+    <p>Two columns in <code>towns</code> are new. <code>latitude</code> and <code>longitude</code> say where each station sits, and you'll use them for the map in Section 13. <code>grants_millions</code> is just total grant money divided by a million, so chart axes read "3" instead of "3000000".</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 0</p>
+  </section>
+
+  <h2 class="module" id="cp1" style="margin-top:60px">🌊 Checkpoint 1: Seeing Shapes</h2>
+  <p><em>Checklist step 6: what does each variable look like on its own?</em></p>
+
+  <section id="s1">
+    <h3 class="sub">1. The Boxplot That Hides a Secret ✅</h3>
+    <p>Same 840 temperature readings, drawn two ways. You know both charts from Labs 2 and 4. This is the slide from lecture, now in your own hands. Look closely at the histogram before you answer.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 1</p>
+  </section>
+
+  <section id="s2">
+    <h3 class="sub">2. Violin: Shape Across Groups 🆕</h3>
+    <p>The histogram showed two humps. The question is <em>which</em> stations make up the second hump. To answer that, you need to see the shape of each group side by side.</p>
+    <p>A <strong>violin</strong> is a density curve (Lab 4) turned on its side and mirrored, so it looks like a violin. One violin per group. Where it's wide, lots of values sit there. Where it's thin, few do.</p>
+<pre><code>ggplot(pets, aes(x = species, y = weight_kg, fill = species)) +
+  geom_violin()</code></pre>
+    <div class="analogy"><strong>Analogy:</strong> A boxplot tells you where the middle of the crowd is. A violin shows you the crowd itself, including where people bunch up in two separate groups.</div>
+    <p><strong>Sorting groups:</strong> by default, R puts groups in alphabetical order, which rarely means anything. <code>reorder(energy_source, temp_c, FUN = median)</code> sorts them by their median temperature instead, so the chart reads from coolest to hottest.</p>
+    <div class="analogy"><strong>✨ The polish checklist.</strong> From this section on, every chart you make should have:
+      <ul>
+        <li>A <strong>title that states the takeaway</strong> ("Solar stations run far hotter"), not just the variable names</li>
+        <li><strong>Axis labels with units</strong> ("Temperature (°C)", not <code>temp_c</code>)</li>
+        <li><strong>A sensible order</strong> (<code>reorder()</code>) instead of alphabetical</li>
+        <li><strong>Colorblind-safe colors.</strong> <code>scale_fill_viridis_d()</code> is built in. The <code>_d</code> is for discrete (categories). Add <code>guide = "none"</code> to hide a legend that just repeats the x-axis.</li>
+        <li><code>theme_minimal()</code> for a clean background</li>
+      </ul>
+      HW1 grades whether your charts are "clear, labeled, and readable." This checklist is how you get those points.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 2</p>
+  </section>
+
+  <section id="s3">
+    <h3 class="sub">3. Ridgeline: Same Question, Another View 🆕</h3>
+    <p>A <strong>ridgeline</strong> stacks one density curve per group, like a mountain range seen from the side. It answers the same question as the violin, but the shapes are easier to compare because they share one x-axis.</p>
+<pre><code>ggplot(pets, aes(x = weight_kg, y = species, fill = species)) +
+  geom_density_ridges()</code></pre>
+    <div class="gotcha"><strong>The axes swap.</strong> In a violin, the groups go on x and the numbers go on y. In a ridgeline it's the opposite: numbers on x, groups on y. If you mix them up, R won't give an error. It just draws a strange chart, so double-check which is which.</div>
+    <p>R may print a message like "Picking joint bandwidth of 1.6." That's not an error. It's just telling you how smooth it made the curves.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 3</p>
+  </section>
+
+  <section id="s4">
+    <h3 class="sub">4. Rare Groups: Fix the Bar Chart (✅ then 🆕)</h3>
+    <p>4.1 is a sorted bar chart, same as Lab 3. Three programs each hold only about 6% of grants. From lecture, you have four options: combine, lump into "Other," keep and flag, or drop.</p>
+    <p>In 4.2 you'll <strong>combine</strong> with <code>case_when()</code>, which you know from Lab 2. The new part isn't the code. It's the decision: which groups actually belong together?</p>
+<pre><code>pets %&gt;%
+  mutate(pet_group = case_when(
+    species %in% c("Hamster", "Gerbil", "Mouse") ~ "Small rodents",
+    TRUE ~ species
+  ))</code></pre>
+    <p>The last line, <code>TRUE ~ species</code>, means "everything else keeps its original name."</p>
+    <div class="gotcha"><strong>Combine by meaning, not by size.</strong> Drought, Heat, and Wildfire all deal with hot, dry conditions, so they make a real group. Clean Energy Transition is small too, but it's about cutting emissions, not surviving extreme weather. Lumping it in just because it's small would make the new group meaningless.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 4</p>
+  </section>
+
+  <h2 class="module" id="cp2" style="margin-top:60px">🔵 Checkpoint 2: Seeing Relationships</h2>
+  <p><em>Checklist step 7: how do two variables move together?</em></p>
+
+  <section id="s5">
+    <h3 class="sub">5. Scatterplot, Trend Line, and r 🆕</h3>
+    <p>The one relationship type you haven't charted yet: <strong>number vs. number</strong>. Every row becomes one dot, placed by its two values.</p>
+<pre><code>ggplot(pets, aes(x = age_years, y = weight_kg)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE)
+
+cor(pets$age_years, pets$weight_kg)</code></pre>
+    <ul>
+      <li><code>alpha = 0.3</code> makes each dot 70% see-through. With 840 dots, they overlap, and see-through dots let crowded areas show up darker.</li>
+      <li><code>geom_smooth(method = "lm")</code> draws the straight line that best fits the cloud. <code>"lm"</code> stands for <em>linear model</em>. That's next week's topic, so remember this line. <code>se = FALSE</code> hides the gray band around it for now.</li>
+      <li><code>cor()</code> gives you r, the single number from lecture: sign for direction, size for strength.</li>
+    </ul>
+    <div class="analogy"><strong>Reading it, in order:</strong> direction (up or down?), strength (tight or loose cloud?), form (straight or curved?), oddballs (anyone far from the crowd?). Same four questions every time.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 5</p>
+  </section>
+
+  <section id="s6">
+    <h3 class="sub">6. Box Plus Dots (✅ then 🆕)</h3>
+    <p>6.1 is a boxplot per group, same as Lab 4. In 6.2 you add one layer on top: <code>geom_jitter()</code>, which draws every single data point, nudged a little sideways so they don't stack into one line.</p>
+<pre><code>ggplot(pets, aes(x = species, y = weight_kg)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.3)</code></pre>
+    <div class="gotcha"><strong>Why <code>outlier.shape = NA</code>?</strong> A boxplot draws its own dots for outliers. The jitter layer already draws <em>every</em> dot, outliers included, so without this you'd see some points twice.</div>
+    <p>Remember the "dots on a category" chart from the slides that looked like stripes? Jitter is the fix: spreading the dots out makes the crowd visible.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 6</p>
+  </section>
+
+  <section id="s7">
+    <h3 class="sub">7. Category vs. Category: Count Heatmap 🆕</h3>
+    <p>In Lab 4 you compared two categories with a 100% stacked bar. A <strong>count heatmap</strong> is another way: a grid where each square is one combination, colored by how many rows fall into it.</p>
+<pre><code>pets %&gt;%
+  count(species, size) %&gt;%
+  ggplot(aes(x = size, y = species, fill = n)) +
+  geom_tile() +
+  geom_text(aes(label = n))</code></pre>
+    <p><code>geom_tile()</code> draws the squares, and <code>geom_text()</code> writes the count on each one, so nobody has to guess numbers from colors. Use <code>scale_fill_viridis_c()</code> for the colors. The <code>_c</code> is for continuous (numbers).</p>
+    <p>Make <code>climate_risk_level</code> an ordered factor (Lab 2) first, so the columns read Low → Medium → High.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 7</p>
+  </section>
+
+  <section id="s8">
+    <h3 class="sub">8. Change Over Time (✅ then 🆕 🆕)</h3>
+    <p>8.1 is a line chart of average CO₂ by year, like Lab 2. Then you turn it into a story in two ways.</p>
+    <p><strong>8.2 Annotate.</strong> <code>annotate()</code> writes your own text anywhere on the chart. You tell it where with <code>x</code> and <code>y</code>, using the chart's own units (years and ppm here).</p>
+<pre><code>annotate("text", x = 2016, y = 417, hjust = 0,
+         label = paste0("+", round(co2_rise, 1), " ppm in 6 years"))</code></pre>
+    <p><code>hjust = 0</code> makes the text start at that point instead of centering on it. <code>paste0()</code> glues text and numbers into one label, so the number updates itself if the data changes.</p>
+    <p><strong>8.3 Highlight.</strong> An average line hides everyone. Drawing all 120 stations at once is a mess. The trick: draw everyone in light gray, then draw the one you care about on top in a bold color.</p>
+<pre><code>ggplot(pets_by_year, aes(x = year, y = weight_kg, group = pet_name)) +
+  geom_line(color = "grey85") +
+  geom_line(data = rex_only, color = "orange", linewidth = 1.5)</code></pre>
+    <ul>
+      <li><code>group = location</code> tells R to draw one separate line per station. Without it, R tries to connect all 840 points into a single zigzag.</li>
+      <li>The second <code>geom_line()</code> brings its <strong>own data</strong> (only Lakevale's rows), so it draws on top of the gray layer.</li>
+    </ul>
+    <div class="analogy"><strong>Analogy:</strong> Highlighting is a spotlight on a dark stage. Everyone is still there, but the audience knows exactly where to look.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 8</p>
+  </section>
+
+  <div class="gotcha" style="text-align:center"><strong>☕ Break time.</strong> 10 minutes. Make sure Sections 1 to 8 run before you leave your seat.</div>
+
+  <h2 class="module" id="cp3" style="margin-top:60px">🕵️ Checkpoint 3: Seeing What's Hidden, and Telling the Story</h2>
+  <p><em>Checklist steps 8 and 9: is a third variable hiding something? Are any variables twins?</em></p>
+
+  <section id="s9">
+    <h3 class="sub">9. The 3°C Mystery (🆕 then ✅)</h3>
+    <p>Lab 4 found that funded station-years were about 3°C cooler. Do grants cool towns down? Time to find out.</p>
+    <p><strong>9.1</strong> takes your Section 5 scatterplot and colors every dot by <code>funded</code>. Adding <code>color =</code> inside <code>aes()</code> is how you bring a third variable into a two-variable chart.</p>
+<pre><code>ggplot(pets, aes(x = age_years, y = weight_kg, color = indoor)) +
+  geom_point() +
+  scale_color_manual(values = c("Yes" = "teal", "No" = "orange"))</code></pre>
+    <div class="gotcha"><strong>fill vs. color.</strong> Shapes with an inside (bars, boxes, violins, tiles) use <code>fill</code>. Dots and lines use <code>color</code>. If your colors don't show up, you probably used the wrong one.</div>
+    <p><strong>9.2</strong> is already written. It splits every station-year into a Dry, Medium, or Wet rain band, then compares funded vs. not funded <em>inside</em> each band. If rain is the real reason for the gap, the gap should shrink once you only compare places with similar rain.</p>
+    <div class="analogy"><strong>Analogy:</strong> Umbrella owners get wet more often than people without umbrellas. Do umbrellas cause rain-soaked clothes? No. People who own umbrellas live in rainy places. Compare umbrella owners and non-owners <em>in the same city</em>, and the difference disappears.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 9</p>
+  </section>
+
+  <section id="s10">
+    <h3 class="sub">10. The Hydro Flip 🆕</h3>
+    <p>Section 5 showed one trend line for all 840 station-years: rainier means cooler. But is that true for <em>every</em> kind of station? Copy your Section 5 chart and add one line:</p>
+<pre><code>  facet_wrap(~ energy_source)</code></pre>
+    <p>You know <code>facet_wrap()</code> from Lab 3. Because your chart already has <code>geom_smooth()</code>, every panel gets its own trend line automatically.</p>
+    <p>Then put a number on it: <code>cor()</code> works inside <code>summarize()</code>, so combining it with <code>group_by()</code> gives you one r per energy source.</p>
+<pre><code>pets %&gt;%
+  group_by(species) %&gt;%
+  summarize(r = cor(age_years, weight_kg))</code></pre>
+    <p>This is the habit from lecture: after you find a pattern, split it by a category and see if it survives.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 10</p>
+  </section>
+
+  <section id="s11">
+    <h3 class="sub">11. Find the Twins 🆕</h3>
+    <p>Hand <code>cor()</code> a whole table of numbers instead of two columns, and it returns r for <em>every pair at once</em>. That grid is called a <strong>correlation matrix</strong>.</p>
+    <p>ggplot can't draw a matrix directly, so one line reshapes it into a long table with one row per pair:</p>
+<pre><code>cor_long &lt;- as.data.frame(as.table(cor_matrix))</code></pre>
+    <p>Run it and look: you get three columns, <code>Var1</code>, <code>Var2</code>, and <code>Freq</code>. Despite the odd name, <code>Freq</code> is just the r value for that pair. Then it's the same tile chart as Section 7, with one new color scale: <code>scale_fill_gradient2()</code>, which uses one color for negative r, white for 0, and another for positive r.</p>
+    <p><code>ggpairs()</code> (from <code>GGally</code>) goes one step further: a scatterplot for every pair, each variable's shape on the diagonal, and the r values in the other corner. It's a whole EDA in one picture.</p>
+    <div class="gotcha"><strong>What are the stars in <code>ggpairs()</code>?</strong> They're significance flags, same idea as p-values in Lab 4. More stars means stronger evidence the correlation isn't just luck. <code>***</code> is p &lt; 0.001.</div>
+    <div class="analogy"><strong>Remember the twins rule from lecture:</strong> look for |r| above 0.7 to 0.8 between two <em>input</em> variables. Twins aren't wrong, but a model can't tell which one deserves the credit. Keep the one that makes more sense for your question.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 11</p>
+  </section>
+
+  <section id="s12">
+    <h3 class="sub">12. Bubble Chart, Then Make It Interactive 🆕</h3>
+    <p>A <strong>bubble chart</strong> is a scatterplot that carries two more variables: one in the size of each dot, one in its color. Four variables, one chart.</p>
+<pre><code>ggplot(shelters, aes(x = staff, y = adoptions, size = dogs, color = region)) +
+  geom_point(alpha = 0.7)</code></pre>
+    <p>Then the fun part: <code>ggplotly()</code> turns any ggplot into an interactive chart you can hover over, zoom into, and click legend items on and off.</p>
+    <p>To control what shows up when you hover, add a <code>text =</code> aesthetic built with <code>paste0()</code>. <code>"&lt;br&gt;"</code> starts a new line in the hover box.</p>
+<pre><code>chart &lt;- ggplot(shelters, aes(x = staff, y = adoptions,
+                  text = paste0(name, "&lt;br&gt;Dogs: ", dogs))) +
+  geom_point()
+
+ggplotly(chart, tooltip = "text")</code></pre>
+    <div class="gotcha"><strong>"Ignoring unknown aesthetics: text."</strong> ggplot doesn't know what <code>text</code> is for, so it may warn you. That's fine: ggplot ignores it, and <code>ggplotly()</code> picks it up. <code>tooltip = "text"</code> tells plotly to show only your label instead of every raw value.</div>
+    <div class="gotcha"><strong>Interactive charts only work in HTML.</strong> If you knit to PDF, plotly charts won't appear. For HW1, knit to HTML if you use them.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 12</p>
+  </section>
+
+  <section id="s13">
+    <h3 class="sub">13. The Interactive Map 🆕</h3>
+    <p>A map is just a scatterplot where x is <strong>longitude</strong> (east-west) and y is <strong>latitude</strong> (north-south). Two new layers make it look like a map:</p>
+    <ul>
+      <li><code>borders("state")</code> draws the US state outlines (from the <code>maps</code> package).</li>
+      <li><code>coord_fixed(1.3)</code> locks the shape, so the country doesn't get squished when the chart resizes.</li>
+    </ul>
+<pre><code>ggplot() +
+  borders("state", fill = "grey95", colour = "grey70") +
+  geom_point(data = shelters, aes(x = longitude, y = latitude, color = dogs)) +
+  coord_fixed(1.3) +
+  theme_void()</code></pre>
+    <div class="gotcha"><strong>Why is <code>data =</code> inside <code>geom_point()</code>?</strong> The state outlines and the stations come from two different sources. So <code>ggplot()</code> starts empty, <code>borders()</code> brings its own outlines, and <code>geom_point()</code> brings <code>towns</code>. Each layer carries its own data.</div>
+    <p>Then wrap it in <code>ggplotly(..., tooltip = "text")</code>, same as Section 12. The <code>tooltip = "text"</code> part matters even more here. Without it, hovering over a state shows meaningless outline numbers.</p>
+    <div class="analogy"><strong>Want a fancier map someday?</strong> The <code>leaflet</code> package draws real street-map tiles you can zoom into, like Google Maps. It uses a different syntax, so it's not part of today, but it's worth a look for your final project.</div>
+    <p class="worksheet-ptr">→ Worksheet: Section 13</p>
+  </section>
+
+  <section id="s14">
+    <h3 class="sub">14. Save Your Favorite 🆕</h3>
+    <p><code>ggsave()</code> saves a chart as an image file you can drop into slides or a report. The file lands in the same folder as your worksheet.</p>
+<pre><code>ggsave("my_chart.png", chart, width = 8, height = 5)</code></pre>
+    <p>It saves the regular ggplot version, not the interactive one. That's why you saved your charts with names like <code>bubble</code> instead of only printing them.</p>
+    <p class="worksheet-ptr">→ Worksheet: Section 14</p>
+  </section>
+
+  <footer>
+    ENIA-5120, Georgetown University, Veo Chae
+  </footer>
+
+</div>
+</body>
+</html>
