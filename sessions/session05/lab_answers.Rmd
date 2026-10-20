@@ -1,5 +1,5 @@
 ---
-title: "Lab 05: Seeing Your Data"
+title: "Lab 06: What Grows the Harvest?"
 subtitle: "Answer Key"
 author: "Your Name"
 date: "`r Sys.Date()`"
@@ -11,620 +11,324 @@ output:
     theme: readable
 ---
 
-## 👀 Mission Background
-Next week we start building models. Before anyone does that, the grant program director wants to *see* the data: what each variable looks like, how variables move together, and whether anything is hiding underneath.
+## 🍇 Mission Background
+A climate adaptation fund for wine growers has money for one new program next year: **irrigation subsidies** or **frost protection**. The director wants to know which growing conditions actually move a vineyard's harvest, and by how much.
 
-Today every section answers one question with the right chart.
+Today you build that answer with linear regression. You'll start with one predictor, throw everything in, trim it back down, and then check how well the model does on vineyards it has never seen.
 
-* ✅ **Already written:** code you know from Labs 1 to 4. Run it, then answer the question.
+* ✅ **Already written:** code you know from Labs 1 to 5. Run it, then answer the question.
 * 🆕 **Code with me:** new code. We write it together.
 
-**Your Goal:** Run the second half of the EDA checklist (steps 6 to 9), and leave with a toolbox of charts you can use on any dataset.
+**Your Goal:** Build a model you can trust, and use it to tell the director which program buys more grapes.
 
 ```{r setup, message=FALSE, warning=FALSE}
 # --- UTILITY REFERENCE ---
-# readr, dplyr, tidyr: loading and shaping data (Labs 1 to 4).
+# readr: loading data.
+# dplyr: selecting, filtering, and summarizing.
 # ggplot2: every chart in this lab.
-# ggridges: 🆕 ridgeline charts.
-# GGally: 🆕 scatterplot matrices.
-# plotly: 🆕 interactive charts you can hover over.
-# maps: 🆕 US state outlines for maps.
+# lm(), summary(), confint(), predict(): 🆕 built into R, no package needed.
 
 library(readr)
 library(dplyr)
-library(tidyr)
 library(ggplot2)
-library(ggridges)
-library(GGally)
-library(plotly)
-library(maps)
 
-climate_path <- file.path("../../data", "climate_stations_clean_lon_lat.csv")
-grants_path  <- file.path("../../data", "resilience_grants_clean.csv")
+vineyards_path <- file.path("../../data", "vineyards.csv")
 ```
 
 ---
 
-## 0. ✅ Setup: Build the Two Tables (already written for you)
-This chunk loads both clean files and builds the two tables you'll use all lab. You've seen every function in it before. Run it as is.
+## 0. ✅ Setup: Meet the Vineyards
+This is the new dataset we'll use for linear regression, logistic regression, and clustering. It's already clean. Run this chunk as is.
 
-```{r load-and-build, message=FALSE}
-climate <- read_csv(climate_path) %>%
-  mutate(year = as.numeric(format(reading_date, "%Y")))
+```{r load, message=FALSE}
+vineyards <- read_csv(vineyards_path)
 
-grants <- read_csv(grants_path)
-
-# Table 1: one row per station per year, labeled Funded / Not funded (same as Lab 4)
-grants_per_year <- grants %>%
-  count(location, award_year, name = "n_grants")
-
-station_years <- climate %>%
-  left_join(grants_per_year, by = c("location", "year" = "award_year")) %>%
-  mutate(
-    n_grants = coalesce(n_grants, 0L),
-    funded = if_else(n_grants > 0, "Funded", "Not funded")
-  )
-
-# Table 2: one row per town, with its weather and its grant totals
-town_funding <- grants %>%
-  group_by(location) %>%
-  summarize(
-    total_grants = sum(amount_usd),
-    n_grants = n()
-  )
-
-towns <- climate %>%
-  group_by(location, latitude, longitude) %>%
-  summarize(
-    avg_rain = mean(precipitation_mm),
-    avg_temp = mean(temp_c),
-    avg_co2 = mean(co2_ppm),
-    storms = sum(extreme_weather_events),
-    # the risk level the town had most often across its 7 years
-    risk_level = names(which.max(table(climate_risk_level))),
-    .groups = "drop"
-  ) %>%
-  left_join(town_funding, by = "location") %>%
-  mutate(
-    total_grants = coalesce(total_grants, 0),
-    grants_millions = total_grants / 1e6,
-    n_grants = coalesce(n_grants, 0L),
-    risk_level = factor(risk_level, levels = c("Low", "Medium", "High"))
-  )
-
-glimpse(station_years)
-glimpse(towns)
+glimpse(vineyards)
 ```
 
-**Question 0.1:** How many rows does each table have? In plain words, what does one row represent in each?
+**Question 0.1:** How many rows and columns are there? In plain words, what does one row represent?
 
 ---
 
-# ✅ Checkpoint 1: Seeing Shapes
-
-## 1. ✅ The Boxplot That Hides a Secret
+## 1. ✅ Look Before You Model
 **functions:**
-`geom_boxplot()`: Median, middle 50%, and spread (Lab 4).
-`geom_histogram()`: The full shape (Lab 2).
+`geom_point()` + `geom_smooth(method = "lm")`: Scatterplot with a line of best fit (Lab 5).
+`cor()`: The correlation, r (Lab 5).
 
 **logic steps:**
-Draw a boxplot of `temp_c`, then a histogram of the same column.
-
-```{r}
-ggplot(station_years, aes(x = "", y = temp_c)) +
-  geom_boxplot(fill = "#274873", alpha = 0.5, width = 0.4) +
-  labs(title = "Temperature: Boxplot", x = NULL, y = "Temperature (°C)") +
-  theme_minimal()
-
-ggplot(station_years, aes(x = temp_c)) +
-  geom_histogram(bins = 30, fill = "#274873", color = "white") +
-  labs(title = "Temperature: Histogram", x = "Temperature (°C)", y = "Count") +
-  theme_minimal()
-```
-
-**Question 1.1:** What does the histogram show that the boxplot can't? Why can't a boxplot show it?
-
----
-
-## 2. 🆕 Violin: Shape Across Groups
-**functions:**
-`geom_violin()`: 🆕 A density curve mirrored on both sides, one per group.
-`reorder(group, value, FUN = median)`: 🆕 Sorts the groups by their median instead of alphabetically.
-`scale_fill_viridis_d()`: 🆕 A colorblind-safe palette for categories.
-
-**logic steps:**
-Put `energy_source` on the x-axis, sorted by median temperature, and `temp_c` on the y-axis.
-Fill each violin by `energy_source`. Hide the legend, since the x-axis already names each group.
-Give the chart a title that states the takeaway, and axis labels with units.
-
-```{r}
-ggplot(station_years, aes(
-  x = reorder(energy_source, temp_c, FUN = median),
-  y = temp_c,
-  fill = energy_source
-)) +
-  geom_violin(alpha = 0.7) +
-  scale_fill_viridis_d(guide = "none") +
-  labs(
-    title = "Solar stations run far hotter than the rest",
-    x = NULL,
-    y = "Temperature (°C)"
-  ) +
-  theme_minimal()
-```
-
-**Question 2.1:** Which energy source is the second hump you saw in Section 1? How can you tell?
-
----
-
-## 3. 🆕 Ridgeline: Same Question, Another View
-**functions:**
-`geom_density_ridges()`: 🆕 Stacked density curves, one row per group (from `ggridges`).
-
-**logic steps:**
-This time temperature goes on the x-axis and `energy_source` on the y-axis, again sorted by median.
-Fill each ridge by `energy_source` and hide the legend.
-
-```{r, message=FALSE}
-ggplot(station_years, aes(
-  x = temp_c,
-  y = reorder(energy_source, temp_c, FUN = median),
-  fill = energy_source
-)) +
-  geom_density_ridges(alpha = 0.7) +
-  scale_fill_viridis_d(guide = "none") +
-  labs(
-    title = "Temperature by Energy Source",
-    x = "Temperature (°C)",
-    y = NULL
-  ) +
-  theme_minimal()
-```
-
-**Question 3.1:** Violin or ridgeline: which one would you put in a report for the grant director, and why?
-
----
-
-## 4. Rare Groups: Fix the Bar Chart
-
-### 4.1 ✅ The Starting Chart
-**functions:**
-`count()`, `reorder()`, `geom_col()`, `coord_flip()`: Sorted horizontal bar chart (Lab 3).
-
-```{r}
-grants %>%
-  count(program) %>%
-  ggplot(aes(x = reorder(program, n), y = n)) +
-  geom_col(fill = "#274873") +
-  coord_flip() +
-  labs(title = "Grants by Program", x = NULL, y = "Number of grants") +
-  theme_minimal()
-```
-
-**Question 4.1:** Which programs are rare? Roughly what share of all grants does each one have?
-
-### 4.2 🆕 Combine the Rare Programs
-**functions:**
-`case_when()`: Recodes values by condition (Lab 2).
-`%in%`: Checks whether a value is in a list (Lab 1).
-
-**logic steps:**
-Create `program_group`: put Drought Response, Heat Resilience, and Wildfire Mitigation together as `"Heat, Drought & Fire"`. Leave every other program as it is.
-Count `program_group` and re-draw the sorted bar chart.
-
-```{r}
-grants %>%
-  mutate(program_group = case_when(
-    program %in% c("Drought Response", "Heat Resilience", "Wildfire Mitigation") ~ "Heat, Drought & Fire",
-    TRUE ~ program
-  )) %>%
-  count(program_group) %>%
-  ggplot(aes(x = reorder(program_group, n), y = n)) +
-  geom_col(fill = "#274873") +
-  coord_flip() +
-  labs(title = "Grants by Program (rare programs combined)", x = NULL, y = "Number of grants") +
-  theme_minimal()
-```
-
-**Question 4.2:** Why does it make sense to combine those three programs? Clean Energy Transition is still small. Why didn't we fold it in too, and what would you do with it instead?
-
----
-
-# ✅ Checkpoint 2: Seeing Relationships
-
-## 5. 🆕 Scatterplot, Trend Line, and r
-**functions:**
-`geom_point()`: 🆕 One dot per row. `alpha` makes the dots see-through so crowded areas look darker.
-`geom_smooth(method = "lm", se = FALSE)`: 🆕 Draws the straight line of best fit.
-`cor(x, y)`: 🆕 The correlation, r.
-
-**logic steps:**
-Plot `precipitation_mm` (x) against `temp_c` (y). Use `alpha = 0.3`.
-Add a straight trend line.
+Plot `avg_night_temp_c` (x) against `yield_tons_per_ha` (y), with a straight trend line.
 Calculate r for the same two columns.
 
 ```{r, message=FALSE}
-ggplot(station_years, aes(x = precipitation_mm, y = temp_c)) +
-  geom_point(alpha = 0.3, color = "#274873") +
+ggplot(vineyards, aes(x = avg_night_temp_c, y = yield_tons_per_ha)) +
+  geom_point(alpha = 0.4, color = "#274873") +
   geom_smooth(method = "lm", se = FALSE, color = "#B8842E", linewidth = 1.2) +
   labs(
-    title = "Rainier stations tend to be cooler",
-    x = "Yearly rainfall (mm)",
-    y = "Temperature (°C)"
+    title = "Vineyards with warmer nights tend to harvest more",
+    x = "Average nighttime temperature (°C)",
+    y = "Harvest (tons per hectare)"
   ) +
   theme_minimal()
 
-cor(station_years$precipitation_mm, station_years$temp_c)
+cor(vineyards$avg_night_temp_c, vineyards$yield_tons_per_ha)
 ```
 
-**Question 5.1:** Describe the scatterplot using the four questions from lecture: direction, strength, form, and oddballs.
-
-**Question 5.2:** What is r? Is that weak, moderate, or strong?
+**Question 1.1:** Describe the scatterplot: direction, strength, form, and oddballs. Is r weak, moderate, or strong?
 
 ---
 
-## 6. Box Plus Dots
-
-### 6.1 ✅ The Boxplot
+## 2. 🆕 Split Into Train and Test
 **functions:**
-`geom_boxplot()`: Same as Section 1, now one box per group.
-
-```{r}
-ggplot(station_years, aes(x = reorder(energy_source, precipitation_mm, FUN = median), y = precipitation_mm)) +
-  geom_boxplot(fill = "#2a9d8f", alpha = 0.6) +
-  labs(title = "Rainfall by Energy Source", x = NULL, y = "Yearly rainfall (mm)") +
-  theme_minimal()
-```
-
-### 6.2 🆕 Add the Dots
-**functions:**
-`geom_jitter()`: 🆕 Like `geom_point()`, but nudges each dot a little sideways so they don't pile on top of each other.
-`outlier.shape = NA`: 🆕 Stops the boxplot from drawing its own outlier dots, since the jitter already shows every point.
+`set.seed()`: Makes the random split repeatable (Lab 4).
+`sample(n, size)`: 🆕 Picks `size` random row numbers out of `n`.
+`data[rows, ]` and `data[-rows, ]`: 🆕 Keep those rows, or keep every row *except* those.
 
 **logic steps:**
-Copy your boxplot from 6.1. Add `outlier.shape = NA` inside `geom_boxplot()`.
-Add a `geom_jitter()` layer with `width = 0.2` and `alpha = 0.3`.
+Set the seed to `5120`.
+Pick 70% of the row numbers at random. Save them as `train_rows`.
+Build `train_df` from those rows, and `test_df` from all the other rows.
 
 ```{r}
-ggplot(station_years, aes(x = reorder(energy_source, precipitation_mm, FUN = median), y = precipitation_mm)) +
-  geom_boxplot(fill = "#2a9d8f", alpha = 0.6, outlier.shape = NA) +
-  geom_jitter(width = 0.2, alpha = 0.3, color = "#274873") +
-  labs(title = "Rainfall by Energy Source", x = NULL, y = "Yearly rainfall (mm)") +
-  theme_minimal()
+set.seed(5120)
+
+train_rows <- sample(nrow(vineyards), size = 0.7 * nrow(vineyards))
+
+train_df <- vineyards[train_rows, ]
+test_df  <- vineyards[-train_rows, ]
+
+nrow(train_df)
+nrow(test_df)
 ```
 
-**Question 6.1:** What do the dots show that the box alone hid? (Hint: look at Wind.)
+**Question 2.1:** How many vineyards are in each set? Why do we hide the test set from the model until the very end?
 
 ---
 
-## 7. 🆕 Category vs. Category: Count Heatmap
+## 3. 🆕 Model V1: One Predictor
 **functions:**
-`count(a, b)`: Counts every combination of two columns (Lab 3).
-`factor(levels = )`: Sets the order Low → Medium → High (Lab 2).
-`geom_tile()`: 🆕 Draws a grid of colored squares.
-`geom_text()`: 🆕 Writes a label on each square.
-`scale_fill_viridis_c()`: 🆕 Colorblind-safe palette for numbers.
+`lm(outcome ~ predictor, data = )`: 🆕 Fits a linear regression.
+`summary()`: 🆕 Shows the coefficients, p-values, and R².
+`confint()`: 🆕 Shows the 95% confidence interval for each coefficient.
 
 **logic steps:**
-Count `energy_source` by `climate_risk_level`.
-Make `climate_risk_level` an ordered factor so it reads Low → Medium → High.
-Draw a tile per combination, filled by the count, with the count written on top.
+Fit `model_v1`: `yield_tons_per_ha` by `avg_night_temp_c`, using `train_df`.
+Print `summary()` and `confint()`.
 
 ```{r}
-station_years %>%
-  count(energy_source, climate_risk_level) %>%
-  mutate(climate_risk_level = factor(climate_risk_level, levels = c("Low", "Medium", "High"))) %>%
-  ggplot(aes(x = climate_risk_level, y = energy_source, fill = n)) +
-  geom_tile(color = "white") +
-  geom_text(aes(label = n), color = "white", size = 5) +
-  scale_fill_viridis_c(name = "Station-years") +
-  labs(title = "Energy Source by Climate Risk Level", x = "Climate risk level", y = NULL) +
-  theme_minimal()
+model_v1 <- lm(yield_tons_per_ha ~ avg_night_temp_c, data = train_df)
+
+summary(model_v1)
+confint(model_v1)
 ```
 
-**Question 7.1:** Which combination is the most common? Does anything about it surprise you, given what you learned about Solar stations in Section 2?
+**Question 3.1:** Interpret the `avg_night_temp_c` coefficient in one sentence, with units.
+
+**Question 3.2:** What is its 95% confidence interval? In plain words, what does it tell the director?
+
+**Question 3.3:** The intercept is the predicted harvest when nighttime temperature is 0°C. Does that number mean anything here? Why or why not?
 
 ---
 
-## 8. Change Over Time
-
-### 8.1 ✅ The Average Line
+## 4. 🆕 Model V2: Everything In
 **functions:**
-`group_by()` + `summarize()`, `geom_line()`: Lab 2 and Lab 3.
-
-```{r}
-co2_by_year <- station_years %>%
-  group_by(year) %>%
-  summarize(avg_co2 = mean(co2_ppm))
-
-ggplot(co2_by_year, aes(x = year, y = avg_co2)) +
-  geom_line(color = "#274873", linewidth = 1.2) +
-  geom_point(color = "#274873", size = 2.5) +
-  labs(title = "Average CO2 by Year", x = NULL, y = "Average CO2 (ppm)") +
-  theme_minimal()
-```
-
-### 8.2 🆕 Annotate It
-**functions:**
-`annotate("text", x =, y =, label =)`: 🆕 Writes your own text anywhere on the chart.
-`paste0()`: Glues text and numbers together into one label.
+`select(-column)`: Drops a column (Lab 3).
+`lm(outcome ~ ., data = )`: 🆕 The dot means "use every other column as a predictor."
 
 **logic steps:**
-Calculate `co2_rise`: the last year's average minus the first year's.
-Copy the chart from 8.1. Add an `annotate()` layer in the empty top-left corner that says how much CO2 rose.
-Change the title so it states the takeaway.
+Build `model_data` from `train_df`: drop `vineyard_id`, `vineyard_name`, `region`, and `won_award`.
+Fit `model_v2`: `yield_tons_per_ha` by every column left in `model_data`.
+Print `summary()`.
 
 ```{r}
-co2_rise <- max(co2_by_year$avg_co2) - min(co2_by_year$avg_co2)
+model_data <- train_df %>%
+  select(-vineyard_id, -vineyard_name, -region, -won_award)
 
-ggplot(co2_by_year, aes(x = year, y = avg_co2)) +
-  geom_line(color = "#274873", linewidth = 1.2) +
-  geom_point(color = "#274873", size = 2.5) +
-  annotate(
-    "text", x = 2016, y = 417, hjust = 0, size = 5, color = "#B8842E",
-    label = paste0("+", round(co2_rise, 1), " ppm in 6 years")
-  ) +
-  labs(title = "CO2 rose every single year", x = NULL, y = "Average CO2 (ppm)") +
-  theme_minimal()
+model_v2 <- lm(yield_tons_per_ha ~ ., data = model_data)
+
+summary(model_v2)
 ```
 
-### 8.3 🆕 Highlight One Station
+**Question 4.1:** How much did adjusted R² change from V1 to V2? In plain words, what does that mean?
+
+**Question 4.2:** Find the `irrigatedTRUE` and `grape_varietyPinot Noir` rows. Interpret each one in a sentence. For grape variety, what is it being compared to?
+
+**Question 4.3 (Hypothesis Test):** Look at `avg_night_temp_c` in V2.
+
+- Write H₀ and Hₐ.
+- At α = 0.05, do you reject or fail to reject H₀?
+- In V1, the same variable had p < 0.001. What changed?
+
+**Question 4.4:** Which other predictors have p-values above 0.05? Do any of them surprise you?
+
+---
+
+## 5. ✅ Find the Twins
 **functions:**
-`aes(group = )`: 🆕 Tells `geom_line()` to draw one separate line per station.
-`filter()`: Keeps one station's rows (Lab 1).
-Two `geom_line()` layers: 🆕 The second layer uses its own `data =`, so it draws on top of the first.
+`cor()`: Same as Section 1 (Lab 5).
 
 **logic steps:**
-Draw every station's `temp_c` over `year` as a thin gray line, one line per `location`.
-Add a second `geom_line()` that uses only Lakevale's rows, in a bold color.
-Label Lakevale with `annotate()`.
+Calculate r between `avg_day_temp_c` and `avg_night_temp_c`.
 
 ```{r}
-lakevale <- station_years %>% filter(location == "Lakevale")
+cor(vineyards$avg_day_temp_c, vineyards$avg_night_temp_c)
+```
 
-ggplot(station_years, aes(x = year, y = temp_c, group = location)) +
-  geom_line(color = "grey85") +
-  geom_line(data = lakevale, color = "#B8842E", linewidth = 1.5) +
-  annotate("text", x = 2022.1, y = max(lakevale$temp_c), hjust = 0, color = "#B8842E",
-           label = "Lakevale") +
-  scale_x_continuous(limits = c(2016, 2023)) +
+**Question 5.1:** What is r? Use it to explain what happened to both temperature variables in V2.
+
+---
+
+## 6. 🆕 Model V3: Trimmed
+**functions:**
+`lm(outcome ~ . - column, data = )`: 🆕 The minus sign removes one predictor from the dot.
+
+**logic steps:**
+Fit `model_v3` on `model_data`: every predictor **except** `avg_night_temp_c`, `vineyard_size_ha`, and `organic_certified`.
+Print `summary()`.
+
+```{r}
+model_v3 <- lm(
+  yield_tons_per_ha ~ . - avg_night_temp_c - vineyard_size_ha - organic_certified,
+  data = model_data
+)
+
+summary(model_v3)
+```
+
+**Question 6.1:** What happened to the p-value of `avg_day_temp_c` once its twin was gone?
+
+**Question 6.2:** Compare adjusted R² for V2 and V3. V3 has three fewer predictors. Why would you prefer it?
+
+---
+
+## 7. 🆕 Check the Residuals
+**functions:**
+`fitted()`: 🆕 The model's predicted harvest for each training vineyard.
+`resid()`: 🆕 Each residual: actual minus predicted.
+`geom_hline()`: Horizontal reference line (Lab 4).
+
+**logic steps:**
+Build `resid_df` with two columns: `fitted` and `residual`, both from `model_v3`.
+Plot `fitted` (x) against `residual` (y), with a dashed line at 0.
+
+```{r}
+resid_df <- tibble(
+  fitted = fitted(model_v3),
+  residual = resid(model_v3)
+)
+
+ggplot(resid_df, aes(x = fitted, y = residual)) +
+  geom_point(alpha = 0.4, color = "#274873") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "#B8842E", linewidth = 1) +
   labs(
-    title = "Lakevale warmed faster than any other station",
-    x = NULL,
-    y = "Temperature (°C)"
+    title = "V3 residuals: a random cloud around zero",
+    x = "Predicted harvest (tons per hectare)",
+    y = "Residual (actual - predicted)"
   ) +
   theme_minimal()
 ```
 
-**Question 8.1:** What does the highlight chart show that a single average line would hide?
+**Question 7.1:** Is this a good residual pattern? Check for a curve, a funnel, or a one-sided pattern.
 
 ---
 
-# ✅ Checkpoint 3: Seeing What's Hidden, and Telling the Story
+## 8. The Test-Set Scorecard
 
-## 9. The 3°C Mystery
-
-### 9.1 🆕 Color by a Third Variable
-**functions:**
-`aes(color = )`: 🆕 Colors each dot by a category.
-`scale_color_manual()`: 🆕 Picks the colors yourself.
-
-**logic steps:**
-Copy your scatterplot from Section 5 (without the trend line).
-Color the dots by `funded`, using teal for Funded and gold for Not funded.
+### 8.1 ✅ Score All Three Models
+This chunk is already written. `score_model()` takes a model, predicts every vineyard in `test_df`, and returns MAE, RMSE, and MAPE. Run it as is.
 
 ```{r}
-ggplot(station_years, aes(x = precipitation_mm, y = temp_c, color = funded)) +
-  geom_point(alpha = 0.5) +
-  scale_color_manual(values = c("Funded" = "#2a9d8f", "Not funded" = "#B8842E")) +
-  labs(
-    title = "Funded station-years cluster on the rainy side",
-    x = "Yearly rainfall (mm)",
-    y = "Temperature (°C)",
-    color = NULL
-  ) +
-  theme_minimal()
-```
+score_model <- function(model, model_name) {
+  predicted <- predict(model, newdata = test_df)
+  miss <- test_df$yield_tons_per_ha - predicted
 
-**Question 9.1:** Where do the teal (Funded) dots pile up? What does that suggest about the 3°C gap from Lab 4?
-
-### 9.2 ✅ Compare Within Rain Bands
-**functions:**
-`case_when()`, `group_by()`, `summarize()`: Labs 2 to 4.
-
-**logic steps:**
-First, the overall gap (same as Lab 4).
-Then split every station-year into a Dry, Medium, or Wet band, and compare Funded vs. Not funded inside each band.
-
-```{r}
-# The overall gap
-station_years %>%
-  group_by(funded) %>%
-  summarize(avg_temp = mean(temp_c), n = n())
-
-# The gap inside each rain band
-station_years %>%
-  mutate(rain_band = case_when(
-    precipitation_mm < 500 ~ "1. Dry",      # under 500 mm
-    precipitation_mm < 1000 ~ "2. Medium",  # 500 to 1000 mm
-    TRUE ~ "3. Wet"                         # over 1000 mm
-  )) %>%
-  group_by(rain_band, funded) %>%
-  summarize(avg_temp = mean(temp_c), n = n(), .groups = "drop") %>%
-  pivot_wider(names_from = funded, values_from = c(avg_temp, n))
-```
-
-**Question 9.2:** What happens to the 3°C gap inside each rain band?
-
-**Question 9.3:** So, do grants cool towns down? In 2 to 3 sentences, explain what was really going on.
-
----
-
-## 10. 🆕 The Hydro Flip
-**functions:**
-`facet_wrap(~ group)`: One small chart per group (Lab 3).
-`cor()` inside `summarize()`: 🆕 One r per group.
-
-**logic steps:**
-Copy your Section 5 chart (dots + trend line). Add `facet_wrap(~ energy_source)`.
-Then calculate r for each energy source with `group_by()` + `summarize()`.
-
-```{r, message=FALSE}
-ggplot(station_years, aes(x = precipitation_mm, y = temp_c)) +
-  geom_point(alpha = 0.3, color = "#274873") +
-  geom_smooth(method = "lm", se = FALSE, color = "#B8842E", linewidth = 1.2) +
-  facet_wrap(~ energy_source) +
-  labs(
-    title = "Rain vs. Temperature, Split by Energy Source",
-    x = "Yearly rainfall (mm)",
-    y = "Temperature (°C)"
-  ) +
-  theme_minimal()
-
-station_years %>%
-  group_by(energy_source) %>%
-  summarize(r = cor(precipitation_mm, temp_c))
-```
-
-**Question 10.1:** Which panel goes the *opposite* direction from the overall chart in Section 5? Which one is basically flat?
-
-**Question 10.2:** If you had only made the Section 5 chart, what would you have wrongly concluded about Hydro stations?
-
----
-
-## 11. 🆕 Find the Twins
-**functions:**
-`select()`: Keeps only the columns you list (Lab 3).
-`cor(table)`: 🆕 Given a whole table of numbers, returns r for every pair at once (a correlation matrix).
-`as.data.frame(as.table())`: 🆕 Turns the matrix into a long table with one row per pair, so ggplot can draw it.
-`scale_fill_gradient2()`: 🆕 A color scale with a middle point: one color for negative, white for 0, another for positive.
-`ggpairs()`: 🆕 A scatterplot for every pair, plus each variable's shape, in one picture (from `GGally`).
-
-**logic steps:**
-Select the six number columns from `towns`: `avg_rain`, `avg_temp`, `avg_co2`, `storms`, `grants_millions`, `n_grants`.
-Compute the correlation matrix and reshape it to long form.
-Draw a tile heatmap with the r value written on each tile.
-Then draw `ggpairs()` on the same six columns.
-
-```{r, message=FALSE}
-town_numbers <- towns %>%
-  select(avg_rain, avg_temp, avg_co2, storms, grants_millions, n_grants)
-
-cor_matrix <- cor(town_numbers)
-cor_long <- as.data.frame(as.table(cor_matrix))
-
-ggplot(cor_long, aes(x = Var1, y = Var2, fill = Freq)) +
-  geom_tile(color = "white") +
-  geom_text(aes(label = round(Freq, 2))) +
-  scale_fill_gradient2(low = "#274873", mid = "white", high = "#B8842E", midpoint = 0, limits = c(-1, 1), name = "r") +
-  labs(title = "Correlation Heatmap (one row per town)", x = NULL, y = NULL) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggpairs(town_numbers)
-```
-
-**Question 11.1:** Which pair of variables are twins? What is their r?
-
-**Question 11.2:** Next week we'll predict things with models. If you had to keep only one of the twins, which would you keep, and why?
-
----
-
-## 12. 🆕 Bubble Chart, Then Make It Interactive
-**functions:**
-`aes(size = )`: 🆕 Sizes each dot by a number.
-`aes(text = )`: 🆕 The label that shows up when you hover. ggplot ignores it, but `ggplotly()` uses it.
-`ggplotly(chart, tooltip = "text")`: 🆕 Turns a ggplot into an interactive chart (from `plotly`).
-
-**logic steps:**
-Plot `towns`: `avg_rain` on x and `grants_millions` on y.
-Size each bubble by `storms` and color it by `risk_level`.
-Build a hover label with `paste0()`: town name, rain, grants, and storms. `"<br>"` starts a new line.
-Save the chart as `bubble`, then hand it to `ggplotly()`.
-
-```{r, warning=FALSE}
-bubble <- ggplot(towns, aes(
-  x = avg_rain,
-  y = grants_millions,
-  size = storms,
-  color = risk_level,
-  text = paste0(
-    location,
-    "<br>Rain: ", round(avg_rain), " mm",
-    "<br>Grants: $", round(grants_millions, 1), "M",
-    "<br>Storms: ", storms
+  tibble(
+    model = model_name,
+    MAE = mean(abs(miss)),
+    RMSE = sqrt(mean(miss^2)),
+    MAPE = mean(abs(miss) / test_df$yield_tons_per_ha) * 100
   )
-)) +
-  geom_point(alpha = 0.7) +
-  scale_color_manual(values = c("Low" = "#2a9d8f", "Medium" = "#B8842E", "High" = "#9b2226")) +
+}
+
+scorecard <- bind_rows(
+  score_model(model_v1, "V1: night temp only"),
+  score_model(model_v2, "V2: everything"),
+  score_model(model_v3, "V3: trimmed")
+)
+
+scorecard
+```
+
+**Question 8.1:** Which model has the lowest RMSE? Explain V3's MAE in one plain sentence, with units.
+
+### 8.2 🆕 Predicted vs. Actual
+**functions:**
+`predict(model, newdata = )`: 🆕 Predicts the outcome for new rows.
+`geom_abline(slope = 1, intercept = 0)`: 🆕 Draws the diagonal "perfect prediction" line.
+
+**logic steps:**
+Add a `predicted` column to `test_df` using `model_v3`.
+Plot `predicted` (x) against `yield_tons_per_ha` (y), with the diagonal line.
+
+```{r}
+test_df <- test_df %>%
+  mutate(predicted = predict(model_v3, newdata = test_df))
+
+ggplot(test_df, aes(x = predicted, y = yield_tons_per_ha)) +
+  geom_point(alpha = 0.5, color = "#274873") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "#B8842E", linewidth = 1) +
   labs(
-    title = "Rainier towns get more grant money",
-    x = "Average yearly rainfall (mm)",
-    y = "Total grants ($ millions)",
-    color = "Risk level",
-    size = "Storms"
+    title = "V3 on 180 vineyards it never saw",
+    x = "Predicted harvest (tons per hectare)",
+    y = "Actual harvest (tons per hectare)"
   ) +
   theme_minimal()
-
-ggplotly(bubble, tooltip = "text")
 ```
 
-**Question 12.1:** Hover around the chart. Which town surprises you the most, and why?
+**Question 8.2:** What would the chart look like if the model were perfect? Where does V3 miss the most?
 
 ---
 
-## 13. 🆕 The Interactive Map
+## 9. 🆕 What If?
 **functions:**
-`borders("state")`: 🆕 Draws US state outlines (from `maps`).
-`coord_fixed(1.3)`: 🆕 Locks the shape so the US doesn't look stretched.
-`theme_void()`: 🆕 Removes the axes and grid, which a map doesn't need.
+`tibble()`: Builds a small table by hand (Lab 4).
+`predict(model, newdata = )`: Same as Section 8.2.
 
 **logic steps:**
-Start with `ggplot()` and add the state borders.
-Add a `geom_point()` layer with `data = towns`: `longitude` on x, `latitude` on y, color by `avg_rain`, size by `grants_millions`. Add a hover label.
-Save it as `grant_map` and pass it to `ggplotly()` with `tooltip = "text"`.
+The `sussex` table below is already written: one typical Sussex Pinot Noir vineyard, in three versions. As is, with irrigation, and with frost protection that cuts 5 frost days.
+Add a `predicted` column using `model_v3`, and keep only `scenario` and `predicted`.
 
-```{r, warning=FALSE, fig.width=9, fig.height=5}
-grant_map <- ggplot() +
-  borders("state", fill = "grey95", colour = "grey70") +
-  geom_point(
-    data = towns,
-    aes(
-      x = longitude,
-      y = latitude,
-      color = avg_rain,
-      size = grants_millions,
-      text = paste0(
-        location,
-        "<br>Rain: ", round(avg_rain), " mm",
-        "<br>Grants: $", round(grants_millions, 1), "M"
-      )
-    ),
-    alpha = 0.8
-  ) +
-  scale_color_viridis_c(direction = -1) +
-  coord_fixed(1.3) +
-  labs(
-    title = "Where the Rain Falls, and Where the Money Goes",
-    color = "Rain (mm)",
-    size = "Grants ($M)"
-  ) +
-  theme_void()
+```{r}
+sussex <- tibble(
+  scenario = c("As is", "Add irrigation", "Frost protection (5 fewer frost days)"),
+  grape_variety = "Pinot Noir",
+  avg_day_temp_c = 19.3,
+  avg_night_temp_c = 8.9,
+  season_rainfall_mm = 385,
+  frost_days = c(9, 9, 4),
+  heatwave_days = 0,
+  elevation_m = 100,
+  vine_age_years = 15,
+  irrigated = c(FALSE, TRUE, FALSE),
+  vineyard_size_ha = 20,
+  organic_certified = FALSE
+)
 
-ggplotly(grant_map, tooltip = "text")
+
 ```
 
-**Question 13.1:** Where is most of the grant money going? Does it follow the rain?
+```{r}
+sussex %>%
+  mutate(predicted = predict(model_v3, newdata = sussex)) %>%
+  select(scenario, predicted)
+```
+
+**Question 9.1:** How many extra tons per hectare does each program buy? Find the coefficients in V3 that explain each gap.
+
+**Question 9.2:** Not a single Sussex vineyard in the data is irrigated, and only 3 of the 70 in Mosel are. Why does that make the irrigation prediction for Sussex shakier? Can we promise this grower the extra harvest?
 
 ---
 
-## 14. 🆕 Save Your Favorite
-**functions:**
-`ggsave("file.png", chart, width =, height =)`: 🆕 Saves a ggplot as an image file. (It saves the regular version, not the interactive one.)
+## 10. 📝 The Brief
+No new code. Look back at Sections 6, 8, and 9.
 
-**logic steps:**
-Save `bubble` as `my_favorite_chart.png`, 8 inches wide and 5 inches tall.
-
-```{r, warning=FALSE}
-ggsave("my_favorite_chart.png", bubble, width = 8, height = 5)
-```
+**Question 10.1:** In 4 to 6 sentences, write a brief to the fund director. Which program would you fund, and why? Include at least two numbers (a coefficient, a CI, or an error metric), and one caution about what this model can *not* tell us.
