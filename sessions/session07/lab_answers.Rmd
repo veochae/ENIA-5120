@@ -1,0 +1,315 @@
+---
+title: "Lab 07: Who Takes Home the Medal?"
+subtitle: "Answer Key"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## 🍇 Mission Background
+A regional wine board is building an international showcase. Before this year's competition, it can send expert **scouts** to visit vineyards and invite the likely award winners. Every scout visit costs money, and every winner the board doesn't visit is a lost spot in the showcase.
+
+Today you build the model that tells the scouts where to go. You'll start with one predictor, add more, find out what makes a winner, and then grade the model on vineyards it has never seen.
+
+* ✅ **Already written:** code you know from Labs 1 to 6. Run it, then answer the question.
+* 🆕 **Code with me:** new code. We write it together.
+
+**Your Goal:** Pick a model and a cutoff, and tell the director which vineyards the scouts should visit.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# readr: loading data.
+# dplyr: selecting, filtering, and summarizing.
+# ggplot2: every chart in this lab.
+# glm(), predict(), exp(), table(): 🆕 built into R, no package needed.
+# pROC: 🆕 ROC curves and AUC. Install once with install.packages("pROC").
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(pROC)
+
+vineyards_path <- file.path("../../data", "vineyards.csv")
+```
+
+---
+
+## 0. ✅ Meet the Vineyards Again
+Same dataset as Lab 6. This time the outcome is `won_award`: **1** if the vineyard won an award at this year's competition, **0** if it didn't. Run this chunk as is.
+
+```{r load, message=FALSE}
+vineyards <- read_csv(vineyards_path)
+
+vineyards %>%
+  count(won_award) %>%
+  mutate(share = n / sum(n))
+```
+
+**Question 0.1:** How many vineyards won an award? What share of all vineyards is that?
+
+**Question 0.2:** Why can't we use linear regression from Lab 6 to predict `won_award`? (Think back to the straight line in the lecture.)
+
+---
+
+## 1. ✅ Split Into Train and Test
+**functions:**
+`set.seed()`, `sample()`, `data[rows, ]`: The same split as Lab 6.
+
+**logic steps:**
+Set the seed to `5120`.
+Put 70% of the rows in `train_df` and the rest in `test_df`.
+Check the share of winners in each set.
+
+```{r}
+set.seed(5120)
+
+train_rows <- sample(nrow(vineyards), size = 0.7 * nrow(vineyards))
+
+train_df <- vineyards[train_rows, ]
+test_df  <- vineyards[-train_rows, ]
+
+nrow(train_df)
+nrow(test_df)
+
+mean(train_df$won_award)
+mean(test_df$won_award)
+```
+
+**Question 1.1:** How many vineyards are in each set? Is the share of winners about the same in both? Why does that matter?
+
+---
+
+## 2. 🆕 Model V1: One Predictor
+**functions:**
+`glm(outcome ~ predictor, data = , family = binomial)`: 🆕 Fits a logistic regression. `family = binomial` tells R the outcome is yes/no.
+`summary()`: Shows the estimates and p-values (Lab 6).
+`exp(coef(model))`: 🆕 Turns the raw estimates into **odds ratios**.
+
+**logic steps:**
+Fit `model_v1`: `won_award` by `avg_day_temp_c`, using `train_df`.
+Print `summary()`.
+Print the odds ratios with `exp(coef())`.
+
+```{r}
+model_v1 <- glm(won_award ~ avg_day_temp_c, data = train_df, family = binomial)
+
+summary(model_v1)
+
+exp(coef(model_v1))
+```
+
+**Question 2.1:** Is the `avg_day_temp_c` estimate positive or negative? In plain words, do hotter vineyards have a better or worse chance of winning?
+
+**Question 2.2:** What is the odds ratio for `avg_day_temp_c`? Write the "rule" sentence from the lecture: "Every 1°C hotter ______ the odds of winning."
+
+**Question 2.3:** Is the effect real? Use the p-value.
+
+---
+
+## 3. 🆕 Draw the S-Curve
+**functions:**
+`tibble()`: Builds a small table by hand (Lab 4).
+`predict(model, newdata = , type = "response")`: 🆕 Gives each row's **probability** of winning. Without `type = "response"`, R gives the hidden log-odds instead.
+`geom_jitter()`: 🆕 Like `geom_point()`, but nudges the dots a little so they don't pile on top of each other.
+
+**logic steps:**
+The `temp_grid` table below is already written: day temperatures from 15°C to 36°C.
+Add a `prob` column to `temp_grid`: the V1 probability of winning at each temperature.
+Plot the training vineyards as dots (0 or 1) and the `prob` curve on top.
+
+```{r}
+temp_grid <- tibble(avg_day_temp_c = seq(15, 36, by = 0.5))
+```
+
+```{r}
+temp_grid <- temp_grid %>%
+  mutate(prob = predict(model_v1, newdata = temp_grid, type = "response"))
+
+ggplot() +
+  geom_jitter(data = train_df, aes(x = avg_day_temp_c, y = won_award),
+              width = 0, height = 0.03, alpha = 0.3, color = "#274873") +
+  geom_line(data = temp_grid, aes(x = avg_day_temp_c, y = prob),
+            color = "#B8842E", linewidth = 1.3) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey50") +
+  labs(
+    title = "Hotter vineyards are less likely to win",
+    x = "Average daytime temperature (°C)",
+    y = "Probability of winning"
+  ) +
+  theme_minimal()
+```
+
+**Question 3.1:** Does the curve ever go below 0 or above 1? Where does it drop fastest, and where does it start to flatten out?
+
+**Question 3.2:** Around what temperature does the curve cross 50%? What does the model say about vineyards hotter than that?
+
+---
+
+## 4. 🆕 Model V2: More Predictors
+**functions:**
+`glm(outcome ~ a + b + c, data = , family = binomial)`: Same as Section 2, with more predictors joined by `+`.
+`exp(coef(model))`: Same as Section 2.
+
+**logic steps:**
+Fit `model_v2`: `won_award` by `avg_day_temp_c`, `vine_age_years`, `organic_certified`, and `yield_tons_per_ha`, using `train_df`.
+Print `summary()`.
+Print the odds ratios.
+
+```{r}
+model_v2 <- glm(
+  won_award ~ avg_day_temp_c + vine_age_years + organic_certified + yield_tons_per_ha,
+  data = train_df,
+  family = binomial
+)
+
+summary(model_v2)
+
+exp(coef(model_v2))
+```
+
+**Question 4.1:** Which predictors are real at α = 0.05? Which help a vineyard's chances, and which hurt?
+
+**Question 4.2:** Write the "rule" sentence for `organic_certifiedTRUE`. What is it being compared to?
+
+**Question 4.3:** Write the "rule" sentence for `yield_tons_per_ha`. Why might vineyards that harvest *more* grapes win *less*?
+
+**Question 4.4:** The odds ratio for `vine_age_years` looks tiny. Why can it still matter? (Hint: check the units.)
+
+---
+
+## 5. 🆕 What If?
+**functions:**
+`tibble()`: Builds a small table by hand (Lab 4).
+`predict(model, newdata = , type = "response")`: Same as Section 3.
+
+**logic steps:**
+The `estate_z` table below is already written: one typical vineyard, in three versions. As is, converted to organic, and with 1 ton less harvest per hectare.
+Add a `prob` column using `model_v2`, and keep only `scenario` and `prob`.
+
+```{r}
+estate_z <- tibble(
+  scenario = c("As is", "Go organic", "Harvest 1 ton less"),
+  avg_day_temp_c = 26,
+  vine_age_years = 35,
+  organic_certified = c(FALSE, TRUE, FALSE),
+  yield_tons_per_ha = c(5.5, 5.5, 4.5)
+)
+```
+
+```{r}
+estate_z %>%
+  mutate(prob = predict(model_v2, newdata = estate_z, type = "response")) %>%
+  select(scenario, prob)
+```
+
+**Question 5.1:** What is Estate Z's chance of winning as is? Write the "example" sentence for going organic: "For Estate Z, going organic raises its chance of winning from ___% to ___%."
+
+**Question 5.2:** A different vineyard already has a 50% chance. Would going organic move it by the same number of percentage points? Why not?
+
+---
+
+## 6. 🆕 Grade It: The Confusion Matrix
+**functions:**
+`mutate()`: Adds columns (Lab 3).
+`predict(model, newdata = , type = "response")`: Same as Section 3.
+`table()`: 🆕 Counts every combination of two columns.
+
+**logic steps:**
+Add two columns to `test_df`: `prob_v1` and `prob_v2`, each model's probability for every test vineyard.
+Add `predicted_win`: `TRUE` when `prob_v2` is at least 0.5.
+Build the confusion matrix with `table()`: `predicted_win` against `won_award`.
+
+```{r}
+test_df <- test_df %>%
+  mutate(
+    prob_v1 = predict(model_v1, newdata = test_df, type = "response"),
+    prob_v2 = predict(model_v2, newdata = test_df, type = "response"),
+    predicted_win = prob_v2 >= 0.5
+  )
+
+table(predicted = test_df$predicted_win, actual = test_df$won_award)
+```
+
+**Question 6.1:** How many false alarms (scouts visit, but the vineyard doesn't win)? How many missed winners?
+
+**Question 6.2:** For the wine board, what does each mistake cost?
+
+---
+
+## 7. ✅ Two Cutoffs
+This chunk is already written. `score_cutoff()` takes a cutoff, flags every test vineyard at or above it, and returns accuracy, precision, and recall for V2. Run it as is.
+
+```{r}
+score_cutoff <- function(cutoff) {
+  flagged <- test_df$prob_v2 >= cutoff
+  won     <- test_df$won_award == 1
+
+  tibble(
+    cutoff = cutoff,
+    vineyards_visited = sum(flagged),
+    accuracy  = mean(flagged == won),
+    precision = sum(flagged & won) / sum(flagged),
+    recall    = sum(flagged & won) / sum(won)
+  )
+}
+
+bind_rows(
+  score_cutoff(0.5),
+  score_cutoff(0.3)
+)
+```
+
+**Question 7.1:** At the 50% cutoff, explain precision and recall in one plain sentence each, using scouts and vineyards.
+
+**Question 7.2:** What changes when you lower the cutoff to 30%? Which mistake gets rarer, and which gets more common?
+
+**Question 7.3:** A lazy model that says "nobody wins" would be right about every non-winner. About 72% of the test vineyards didn't win. Why isn't accuracy enough to judge our model?
+
+---
+
+## 8. 🆕 ROC and AUC
+**functions:**
+`roc(actual, probability)`: 🆕 Tries every cutoff and builds the ROC curve (pROC).
+`auc()`: 🆕 The area under that curve (pROC).
+`ggroc(list(...), legacy.axes = TRUE)`: 🆕 Draws one or more ROC curves with ggplot (pROC).
+
+**logic steps:**
+Build `roc_v1` from `prob_v1` and `roc_v2` from `prob_v2`, both against `won_award` in `test_df`.
+Print each AUC.
+Plot both curves on one chart, with the diagonal coin-flip line.
+
+```{r, message=FALSE}
+roc_v1 <- roc(test_df$won_award, test_df$prob_v1)
+roc_v2 <- roc(test_df$won_award, test_df$prob_v2)
+
+auc(roc_v1)
+auc(roc_v2)
+
+ggroc(list("V1: day temp only" = roc_v1, "V2: four predictors" = roc_v2),
+      legacy.axes = TRUE, linewidth = 1.2) +
+  scale_color_manual(values = c("#B8842E", "#274873")) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey50") +
+  labs(
+    title = "V2 sits closer to the top-left corner",
+    x = "False alarm rate",
+    y = "Recall",
+    color = "Model"
+  ) +
+  theme_minimal()
+```
+
+**Question 8.1:** What are the two AUCs? Using the scale from the lecture, how good is each model?
+
+**Question 8.2:** In plain words, what does V2's curve sitting above V1's mean for the scouts?
+
+---
+
+## 9. 📝 The Brief
+No new code. Look back at Sections 4, 5, 7, and 8.
+
+**Question 9.1:** In 4 to 6 sentences, write a brief to the wine board director. Which model and which cutoff should the scouts use, and why? Include at least two numbers (an odds ratio, a probability, precision, recall, or AUC), and one caution about what this model can *not* tell us.
