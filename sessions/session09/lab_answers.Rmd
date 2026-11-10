@@ -1,0 +1,377 @@
+---
+title: "Lab 09: Four Kinds of Vineyard"
+subtitle: "Answer Key"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## 🍇 Mission Background
+The regional wine board is back. Last time, you built a model that told its scouts which vineyards were likely to win. This year the board wants something bigger: instead of treating 600 vineyards one at a time, it wants to sort them into a handful of **vineyard types**, so it can design one support program per type.
+
+Nobody has told the board what those types are. There is no answer column. Today the data sorts itself.
+
+* ✅ **Already written:** code you know from Labs 1 to 7. Run it, then answer the question.
+* 🆕 **Code with me:** new code. We write it together.
+
+**Your Goal:** Find the vineyard types, give each one a name, check that they're real, and tell the board which types take home the awards.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# readr: loading data.
+# dplyr: selecting, grouping, and summarizing.
+# tidyr: pivot_longer() for the fingerprint chart (Lab 3).
+# ggplot2: every chart in this lab.
+# scale(), kmeans(), dist(), hclust(), cutree(): 🆕 built into R, no package needed.
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+vineyards_path <- file.path("../../data", "vineyards.csv")
+```
+
+---
+
+## 0. ✅ Meet the Vineyards Again
+Same dataset as Labs 6 and 7. Run this chunk as is.
+
+```{r load, message=FALSE}
+vineyards <- read_csv(vineyards_path)
+
+glimpse(vineyards)
+```
+
+**Question 0.1:** In Labs 6 and 7, which column was the answer the model learned from? Why don't we have one today?
+
+---
+
+## 1. ✅ Pick the Clustering Columns
+**functions:**
+`select()`: Keeps only the columns you name (Lab 3).
+`cor()`: The correlation, r, for every pair at once (Lab 5).
+
+**logic steps:**
+Pull out the six climate columns and check them for twins with `cor()`.
+Day and night temperature are twins, so keep only `avg_day_temp_c`.
+Save the five columns we'll cluster on as `climate`.
+
+```{r}
+vineyards %>%
+  select(avg_day_temp_c, avg_night_temp_c, season_rainfall_mm,
+         frost_days, heatwave_days, elevation_m) %>%
+  cor() %>%
+  round(2)
+
+climate <- vineyards %>%
+  select(avg_day_temp_c, season_rainfall_mm, frost_days,
+         heatwave_days, elevation_m)
+```
+
+**Question 1.1:** What is r between day and night temperature? If we kept both, what would happen to temperature's "vote" when the computer decides who is similar?
+
+**Question 1.2:** Why do `won_award`, `region`, and `vineyard_name` stay out of the clustering? (Hint: we'll use two of them later to *check* the groups.)
+
+---
+
+## 2. 🆕 Scale First
+**functions:**
+`scale()`: 🆕 Rescales every column so its average is 0 and its typical spread is 1.
+`colMeans()`: 🆕 The average of every column at once.
+
+**logic steps:**
+Scale `climate` and save it as `climate_scaled`.
+Check that every column's average is now 0.
+
+```{r}
+climate_scaled <- scale(climate)
+
+round(colMeans(climate_scaled), 2)
+```
+
+**Question 2.1:** Elevation runs into the hundreds of meters, but frost days only go from 0 to 16. What would go wrong if we skipped scaling?
+
+---
+
+## 3. How Many Groups? (✅ then 🆕)
+
+### 3.1 ✅ Try K = 1 to 8
+The loop below runs K-means eight times, once for each K, and saves how spread out the groups are each time. Run it as is.
+
+```{r}
+set.seed(5120)
+
+elbow <- tibble(
+  k = 1:8,
+  spread = sapply(1:8, function(k) {
+    kmeans(climate_scaled, centers = k, nstart = 25)$tot.withinss
+  })
+)
+
+elbow
+```
+
+### 3.2 🆕 Draw the Elbow
+**functions:**
+`geom_line()` + `geom_point()`: Line chart with dots (Lab 5).
+`scale_x_continuous(breaks = )`: 🆕 Puts a tick at every K.
+
+**logic steps:**
+Plot `k` (x) against `spread` (y), with a line and a dot at every K.
+
+```{r}
+ggplot(elbow, aes(x = k, y = spread)) +
+  geom_line(color = "#274873", linewidth = 1) +
+  geom_point(color = "#B8842E", size = 3) +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    title = "Adding groups stops helping much after K = 4",
+    x = "Number of groups (K)",
+    y = "How spread out the groups are"
+  ) +
+  theme_minimal()
+```
+
+**Question 3.1:** Where is the elbow? In plain words, what happens to the spread after that point?
+
+---
+
+## 4. 🆕 Run K-Means
+**functions:**
+`kmeans(data, centers = , nstart = )`: 🆕 Runs K-means. `centers` is K, and `nstart` is how many random starts to try.
+`$cluster`: 🆕 Pulls out each vineyard's group number.
+`count()`: Counts rows per group (Lab 3).
+
+**logic steps:**
+Set the seed to `5120`, then run K-means with 4 groups and 25 starts. Save it as `km`.
+Add the group numbers to `vineyards` as a new column, `cluster`, stored as a factor.
+Count how many vineyards landed in each group.
+
+```{r}
+set.seed(5120)
+km <- kmeans(climate_scaled, centers = 4, nstart = 25)
+
+vineyards <- vineyards %>%
+  mutate(cluster = factor(km$cluster))
+
+vineyards %>% count(cluster)
+```
+
+**Question 4.1:** How many vineyards are in each group? Is any group tiny?
+
+---
+
+## 5. 🆕 See the Groups
+**functions:**
+`group_by()` + `summarize()`: One row per group (Lab 3).
+`geom_point(data = )`: 🆕 A second layer that brings its own table (Lab 5's highlight trick).
+
+**logic steps:**
+Build `centers`: the average day temperature and rainfall for each cluster.
+Scatter `avg_day_temp_c` (x) against `season_rainfall_mm` (y), colored by `cluster`.
+Add the centers on top as big black X's.
+
+```{r}
+centers <- vineyards %>%
+  group_by(cluster) %>%
+  summarize(
+    avg_day_temp_c = mean(avg_day_temp_c),
+    season_rainfall_mm = mean(season_rainfall_mm)
+  )
+
+ggplot(vineyards, aes(x = avg_day_temp_c, y = season_rainfall_mm, color = cluster)) +
+  geom_point(alpha = 0.6) +
+  geom_point(data = centers, color = "black", shape = 4, size = 6, stroke = 2) +
+  scale_color_viridis_d(end = 0.9) +
+  labs(
+    title = "Hotter vineyards get less rain, and the groups split along that line",
+    x = "Average daytime temperature (°C)",
+    y = "Season rainfall (mm)",
+    color = "Cluster"
+  ) +
+  theme_minimal()
+```
+
+**Question 5.1:** Which two groups are easiest to tell apart on this chart? Which two overlap? What column that isn't on this chart might be separating them?
+
+---
+
+## 6. What Does Each Group Look Like? (✅ then 🆕)
+
+### 6.1 ✅ The Averages Table
+Run this as is. It shows the average of each clustering column for every group, in real units.
+
+```{r}
+vineyards %>%
+  group_by(cluster) %>%
+  summarize(
+    n = n(),
+    across(c(avg_day_temp_c, season_rainfall_mm, frost_days,
+             heatwave_days, elevation_m), ~ round(mean(.x), 1))
+  )
+```
+
+### 6.2 🆕 The Fingerprint Chart
+**functions:**
+`as_tibble()`: 🆕 Turns the scaled matrix back into a table.
+`pivot_longer()`: Long format, one row per vineyard per column (Lab 3).
+`geom_col()` + `facet_wrap()`: Bars, one panel per group (Lab 3).
+`coord_flip()`: 🆕 Turns the bars sideways so the labels are easy to read.
+
+**logic steps:**
+Turn `climate_scaled` into a table and add the `cluster` column.
+Pivot it long, then average each column within each cluster.
+Draw one panel per cluster. Bars to the right are above average, bars to the left are below.
+
+```{r}
+fingerprint <- as_tibble(climate_scaled) %>%
+  mutate(cluster = vineyards$cluster) %>%
+  pivot_longer(-cluster, names_to = "variable", values_to = "scaled_value") %>%
+  group_by(cluster, variable) %>%
+  summarize(avg = mean(scaled_value), .groups = "drop")
+
+ggplot(fingerprint, aes(x = variable, y = avg, fill = avg > 0)) +
+  geom_col() +
+  geom_hline(yintercept = 0, color = "grey40") +
+  coord_flip() +
+  facet_wrap(~ cluster, labeller = label_both) +
+  scale_fill_manual(values = c("TRUE" = "#B8842E", "FALSE" = "#274873"),
+                    breaks = c(TRUE, FALSE),
+                    labels = c("Above average", "Below average"),
+                    name = NULL) +
+  labs(
+    title = "Each vineyard type has its own climate fingerprint",
+    x = NULL,
+    y = "Compared to the average vineyard (0 = average)"
+  ) +
+  theme_minimal()
+```
+
+**Question 6.1:** Pick one cluster. Describe its fingerprint in one sentence, in plain words (no numbers needed).
+
+---
+
+## 7. 🆕 Name the Groups
+**functions:**
+`case_when()`: Recodes values based on conditions (Lab 2).
+
+**logic steps:**
+Using the fingerprint chart, give each cluster number a short, plain-English name.
+Save it as a new column, `cluster_name`.
+
+```{r}
+vineyards <- vineyards %>%
+  mutate(cluster_name = case_when(
+    cluster == "1" ~ "Cool & Wet",
+    cluster == "2" ~ "Mild Maritime",
+    cluster == "3" ~ "High Altitude",
+    cluster == "4" ~ "Hot & Dry"
+  ))
+
+vineyards %>% count(cluster, cluster_name)
+```
+
+**Question 7.1:** Explain one of your names. Which bars in the fingerprint chart made you pick it?
+
+---
+
+## 8. 🆕 A Second Opinion: Hierarchical Clustering
+**functions:**
+`dist()`: 🆕 Measures the distance between every pair of vineyards.
+`hclust()`: 🆕 Builds the family tree from those distances.
+`plot()` + `rect.hclust(k = )`: 🆕 Draws the tree and boxes the groups.
+`cutree(k = )`: 🆕 Cuts the tree into K groups.
+
+**logic steps:**
+Compute distances on `climate_scaled` and build the tree. Save it as `tree`.
+Plot the tree without labels (600 names would be unreadable), and box 4 groups.
+Cut the tree into 4 groups and add them to `vineyards` as `tree_cluster`.
+
+```{r, fig.width=10, fig.height=5}
+tree <- hclust(dist(climate_scaled))
+
+plot(tree, labels = FALSE, hang = -1,
+     main = "Family tree of 600 vineyards", xlab = "", sub = "",
+     ylab = "How different (merge height)")
+rect.hclust(tree, k = 4, border = "#B8842E")
+
+vineyards <- vineyards %>%
+  mutate(tree_cluster = factor(cutree(tree, k = 4)))
+```
+
+**Question 8.1:** Where would you draw a line across the tree to get 4 groups? Are the 4 boxes about the same size?
+
+---
+
+## 9. 🆕 Do the Two Methods Agree?
+**functions:**
+`table()`: Counts every combination of two columns (Lab 7).
+
+**logic steps:**
+Cross K-means `cluster_name` against `tree_cluster`.
+
+```{r}
+table(kmeans = vineyards$cluster_name, tree = vineyards$tree_cluster)
+```
+
+**Question 9.1:** The tree's group numbers won't match K-means' numbers, and that's fine. For each K-means group, which tree group holds most of its vineyards? About how many vineyards out of 600 do the two methods disagree on?
+
+**Question 9.2:** One tree group is bigger than the K-means group it matches. Which K-means groups did its extra vineyards come from? Look back at the fingerprint chart. Why might those vineyards sit near the border between two types?
+
+---
+
+## 10. ✅ Check Against the Map
+The computer never saw `region`. If the groups are real, vineyards from the same region should land in the same group. Run this as is.
+
+```{r}
+table(region = vineyards$region, type = vineyards$cluster_name)
+```
+
+**Question 10.1:** Which regions make up each vineyard type? Does that match what you know (or can guess) about those places?
+
+---
+
+## 11. 🆕 Does It Matter? Awards by Type
+**functions:**
+`group_by()` + `summarize()`: One row per group (Lab 3).
+`reorder()`: Sorts bars by a number (Lab 5).
+`geom_col()` + `geom_text()`: Bars with labels (Lab 5).
+
+**logic steps:**
+For each `cluster_name`, compute the share of vineyards that won an award. Save it as `awards`.
+Draw a bar chart, sorted from highest to lowest, with the percentage written on each bar.
+
+```{r}
+awards <- vineyards %>%
+  group_by(cluster_name) %>%
+  summarize(award_rate = mean(won_award))
+
+ggplot(awards, aes(x = reorder(cluster_name, -award_rate), y = award_rate)) +
+  geom_col(fill = "#274873", width = 0.6) +
+  geom_text(aes(label = paste0(round(award_rate * 100), "%")),
+            vjust = -0.5, size = 5) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.65)) +
+  labs(
+    title = "Cooler vineyard types win far more often",
+    x = NULL,
+    y = "Share that won an award"
+  ) +
+  theme_minimal()
+```
+
+**Question 11.1:** Which type wins most often, and which wins least? How big is the gap?
+
+**Question 11.2:** Does this prove that moving a vineyard somewhere cooler would make it win? Why not?
+
+---
+
+## 12. 📝 The Brief
+No new code. Look back at Sections 6, 9, 10, and 11.
+
+**Question 12.1:** In 4 to 6 sentences, write a brief to the wine board. Describe the four vineyard types in plain words, give two pieces of evidence that the types are real (not just something K-means made up), say which types win the most awards, and give one caution about what clustering can *not* tell the board.
