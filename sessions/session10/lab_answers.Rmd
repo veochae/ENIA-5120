@@ -1,0 +1,375 @@
+---
+title: "Lab 10: Weather Check, Live Data with APIs"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: readable
+---
+
+## 🧭 Mission Background
+You are back at the **Global Climate Monitoring Network**. Our station file tells us *where* every station is, but it cannot tell us what the weather is doing *right now*. That file was frozen the day we got it.
+
+Today we pull live data from three places: a weather service with no key, a second weather service that needs a key (and we learn to keep that key private), and NASA's picture of the day.
+
+**Your Goal:** Run each pull, turn each answer into a table, and see how the pieces fit together. We do this together in class. There is nothing to submit.
+
+**Labels you will see:**
+
+- ✅ **Already written:** the code is given, just run it and read it.
+- 🆕 **Code with me:** we write this one together in class.
+
+**Heads up:** the temperatures inside our CSV are practice data, so they will *not* match the real weather. We only borrow each station's **location**. The weather itself is real.
+
+**Do this now:** while we get started, open **weatherapi.com** in a new tab and sign up for a free account. You will need the key in Part B. It takes a few minutes.
+
+```{r setup, message=FALSE, warning=FALSE}
+# --- UTILITY REFERENCE ---
+# library(): Loads the toolkit into your session.
+# readr: Reads the CSV file.
+# dplyr: Filters and tidies tables.
+# ggplot2: Draws charts.
+# jsonlite: Reads JSON, the format APIs use to send data back.
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(jsonlite)
+
+# Define the root path (adjust if your folder structure is different)
+climate_path <- file.path("../../data", "climate_stations_clean_lon_lat.csv")
+```
+
+---
+
+## 1. Pick the Station
+We need one station to ask about. Its latitude and longitude are what we will send to the weather services.
+
+### 1.1 Load the Station File ✅ Already written
+The first line after loading is a safety check. If it stops with a message, the station file in your data folder is missing its latitude and longitude columns.
+
+```{r}
+climate <- read_csv(climate_path)
+
+stopifnot("This file has no latitude/longitude. Did you copy the newest station file into the data folder?" = all(c("latitude", "longitude") %in% names(climate)))
+
+glimpse(climate)
+```
+
+👀 **Look at:** which columns tell us *where* a station is?
+
+### 1.2 Choose One Station 🆕 Code with me
+**functions:**
+`filter()`: Keeps only the rows that match a condition.
+`slice(1)`: Keeps just the first row.
+
+**logic steps:**
+Create an object `station_choice` and set it to `"STN-001"`.
+Filter `climate` so only that station's rows remain, then use `slice(1)` to keep one row. Store it in `station`.
+Store the station's `latitude` in an object named `lat`, and its `longitude` in an object named `lon`.
+
+```{r}
+station_choice <- "STN-001"
+
+station <- climate %>%
+  filter(station_id == station_choice) %>%
+  slice(1)
+
+lat <- station$latitude
+lon <- station$longitude
+
+station
+```
+
+👀 **Look at:** the station's `location`, `state`, `latitude`, and `longitude`.
+
+---
+
+## 2. Part A: Open-Meteo (No Key)
+This service is called Open-Meteo. It is free and needs no key. Remember the two parts of the question: **where to ask**, and **what we want**.
+
+### 2.1 Build the Web Address 🆕 Code with me
+**functions:**
+`paste0()`: Glues pieces of text together with nothing in between.
+
+**logic steps:**
+Build the address from these pieces, in this order, and store it in `weather_url`:
+
+1. `"https://api.open-meteo.com/v1/forecast?"` (where to ask)
+2. `"latitude="` then `lat`
+3. `"&longitude="` then `lon`
+4. `"&current=temperature_2m"` (the temperature right now)
+5. `"&daily=temperature_2m_max"` (each day's high)
+6. `"&timezone=auto"` (use the station's local time)
+
+```{r}
+weather_url <- paste0(
+  "https://api.open-meteo.com/v1/forecast?",
+  "latitude=", lat,
+  "&longitude=", lon,
+  "&current=temperature_2m",
+  "&daily=temperature_2m_max",
+  "&timezone=auto"
+)
+
+weather_url
+```
+
+👀 **Look at:** the address should have real numbers after `latitude=` and `longitude=`. If they are empty, go back to Section 1.
+
+### 2.2 Send the Request 🆕 Code with me
+**functions:**
+`fromJSON()`: Sends the request to the address and reads the JSON answer into R.
+`names()`: Lists the labeled boxes inside the answer.
+
+**logic steps:**
+Use `fromJSON()` on `weather_url` and store the result in `weather`.
+Use `names()` to see the boxes inside `weather`.
+Print `weather$current` to see the temperature right now.
+
+```{r}
+weather <- fromJSON(weather_url)
+
+names(weather)
+weather$current
+```
+
+👀 **Look at:** the temperature right now, in °C. Could our CSV have told us this?
+
+### 2.3 Flatten the Answer into a Table 🆕 Code with me
+**functions:**
+`as_tibble()`: Turns a list of labeled items into a table.
+`mutate()`: Changes or adds a column.
+`as.Date()`: Turns text like "2026-11-16" into a real date.
+`rename()`: Gives a column a friendlier name.
+
+**logic steps:**
+Take `weather$daily` and turn it into a table with `as_tibble()`.
+Use `mutate()` and `as.Date()` to turn the `time` column into a real date.
+Use `rename()` to call `time` by the name `date`, and `temperature_2m_max` by the name `high_c`.
+Store the result in `weather_df` and print it.
+
+```{r}
+weather_df <- as_tibble(weather$daily) %>%
+  mutate(time = as.Date(time)) %>%
+  rename(date = time, high_c = temperature_2m_max)
+
+weather_df
+```
+
+👀 **Look at:** how many days came back, and which day is the hottest.
+
+### 2.4 Chart the Week 🆕 Code with me
+**functions:**
+`ggplot()`: Starts a chart.
+`geom_line()` and `geom_point()`: Draw the line and the dots.
+`labs()`: Adds the title and axis labels.
+
+**logic steps:**
+Plot `date` on the x axis and `high_c` on the y axis from `weather_df`.
+Add a line and points.
+Add a title that includes the station's `location`, and label both axes (include the unit °C).
+
+```{r}
+ggplot(weather_df, aes(x = date, y = high_c)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = paste("Daily high temperature near", station$location),
+    x = "Date",
+    y = "Daily high (°C)"
+  )
+```
+
+### 2.5 Swap the Station ✅ Already written
+This is the "change just two numbers" idea from the slides. Go back to Task 1.2 and change `"STN-001"` to `"STN-002"`. Then run every chunk from 1.2 down to here. Nothing else changes.
+
+```{r}
+station$location
+station$state
+weather$current$temperature_2m
+```
+
+👀 **Look at:** the new location and its temperature. Then change it back to `"STN-001"` and rerun, so the rest of the lab matches.
+
+---
+
+## 3. Break It on Purpose
+Errors are normal when you work with APIs. Let's make one so it is not scary later.
+
+### 3.1 Misspell the Address 🆕 Code with me
+**functions:**
+`paste0()`: Builds the address again.
+`fromJSON()`: Sends the request.
+
+**logic steps:**
+Build a new address called `broken_url`, the same way as 2.1, but spell `forecast` as `forcast`. Include just the latitude, longitude, and `current=temperature_2m` pieces.
+Send it with `fromJSON()` and read the error message.
+
+*The chunk option `error=TRUE` lets the knit keep going even when the code fails.*
+
+```{r, error=TRUE}
+broken_url <- paste0(
+  "https://api.open-meteo.com/v1/forcast?",
+  "latitude=", lat,
+  "&longitude=", lon,
+  "&current=temperature_2m"
+)
+
+fromJSON(broken_url)
+```
+
+👀 **Look at:** the number after "HTTP error". Which row of the status code table from the slides is it?
+
+---
+
+## 4. Part B: A Service That Wants a Key
+Our second weather service, WeatherAPI.com, wants to know who is asking. It gives you a key. The key is like a library card: it tells the service it is you.
+
+### 4.1 Get Your Free Key
+If you did not sign up at the start, open **weatherapi.com** and create a free account (no credit card). Your key is on the dashboard after you log in. Copy it, but do **not** paste it anywhere in this document.
+
+### 4.2 Store the Key in a Private File 🆕 Code with me
+**functions:**
+`file.edit()`: Opens a file so you can type into it.
+`readRenviron()`: Tells R to read the file again right now, so you do not have to restart.
+
+**logic steps:**
+Run `file.edit("~/.Renviron")` in the Console. A file opens.
+Type one line: `WEATHER_API_KEY=your_key_here` (your real key instead of `your_key_here`, no quotes, no spaces).
+Press Enter so there is an empty line at the end, then save and close.
+Run `readRenviron("~/.Renviron")` in the Console.
+
+```{r, eval=FALSE}
+file.edit("~/.Renviron")
+readRenviron("~/.Renviron")
+```
+
+### 4.3 Check That R Can See the Key 🆕 Code with me
+**functions:**
+`Sys.getenv()`: Looks up something stored in your private file.
+`nzchar()`: Answers TRUE if the text is not empty.
+
+**logic steps:**
+Combine them to ask: is `WEATHER_API_KEY` not empty? Never print the key itself.
+
+```{r}
+nzchar(Sys.getenv("WEATHER_API_KEY"))
+```
+
+👀 **Look at:** TRUE means R found your key. Why do we print TRUE or FALSE instead of the key itself?
+
+### 4.4 Build the Address with Your Key 🆕 Code with me
+**functions:**
+`Sys.getenv()`: Reads your key from the private file.
+`paste0()`: Glues the address together.
+
+**logic steps:**
+Store your key in `weather_key` using `Sys.getenv("WEATHER_API_KEY")`.
+Build `weather_url2` from: `"https://api.weatherapi.com/v1/current.json?key="`, then `weather_key`, then `"&q="`, then `lat`, then `","`, then `lon`.
+**Do not print `weather_url2`.** Your key is inside it.
+
+```{r}
+weather_key <- Sys.getenv("WEATHER_API_KEY")
+
+weather_url2 <- paste0(
+  "https://api.weatherapi.com/v1/current.json?key=", weather_key,
+  "&q=", lat, ",", lon
+)
+```
+
+### 4.5 Send and Read the Answer 🆕 Code with me
+**functions:**
+`fromJSON()`: Sends the request.
+`names()`: Lists the boxes inside the answer.
+
+**logic steps:**
+Send `weather_url2` with `fromJSON()` and store the answer in `weather2`.
+Look at the boxes with `names()`, then print the place name (`weather2$location$name`) and the temperature (`weather2$current$temp_c`).
+
+```{r}
+weather2 <- fromJSON(weather_url2)
+
+names(weather2)
+weather2$location$name
+weather2$current$temp_c
+```
+
+👀 **Look at:** the boxes are named differently than Open-Meteo's (`location` and `current` here, `current` and `daily` there). Every service has its own layout.
+
+### 4.6 Compare the Two Services 🆕 Code with me
+**functions:**
+`tibble()`: Builds a small table by hand.
+`c()`: Combines values into a list.
+
+**logic steps:**
+Build a table called `compare_df` with two columns: `service` (`"Open-Meteo"` and `"WeatherAPI.com"`) and `temp_c` (the temperature from Part A, then from Part B).
+
+```{r}
+compare_df <- tibble(
+  service = c("Open-Meteo", "WeatherAPI.com"),
+  temp_c = c(weather$current$temperature_2m, weather2$current$temp_c)
+)
+
+compare_df
+```
+
+👀 **Look at:** are the two temperatures close? They come from different weather models and different moments in time, so a small gap is normal.
+
+---
+
+## 5. Part C: NASA's Pictures
+Last one. NASA publishes an "Astronomy Picture of the Day." The address we use needs no key, and the answer comes back already shaped like a table.
+
+### 5.1 Build the Address 🆕 Code with me
+**functions:**
+`paste0()`: Glues the address together.
+
+**logic steps:**
+Set `n_pics` to `5`.
+Build `pics_url` from `"https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page="` and `n_pics`.
+
+```{r}
+n_pics <- 5
+
+pics_url <- paste0(
+  "https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=", n_pics
+)
+```
+
+### 5.2 Send and Tidy 🆕 Code with me
+**functions:**
+`fromJSON()`: Sends the request.
+`select()`: Keeps only the columns you name.
+
+**logic steps:**
+Send `pics_url` with `fromJSON()` and store the answer in `pics_raw`.
+Use `select()` to keep just `title` and `hdurl` (the link to the full-size picture). Store the result in `pics_df` and print it.
+
+```{r}
+pics_raw <- fromJSON(pics_url)
+
+pics_df <- pics_raw %>%
+  select(title, hdurl)
+
+pics_df
+```
+
+👀 **Look at:** the answer arrived already shaped like a table, one row per picture. The weather answers needed flattening first.
+
+### 5.3 Look at a Picture 🆕 Code with me
+**functions:**
+`knitr::include_graphics()`: Shows a picture from a file or a web link.
+
+**logic steps:**
+Pull the first link out of `pics_df$hdurl` (use `[1]`) and show it.
+
+```{r}
+knitr::include_graphics(pics_df$hdurl[1])
+```
+
+👀 **Look at:** the picture, and its `title` in the table above. Try `[2]`, `[3]` for the others. If one does not show, it may be a video day with no image link.
+
